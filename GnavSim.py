@@ -14,14 +14,14 @@ class Player(object):
 		if not silent: print (self.name + " now has: " + self.heldCard.name)
 	
 	def requestSwap(self, toPlayer):
-		print (self.name + " asks " + toPlayer.name + ": 'Jeg vil gjerne bytte med deg.'")
+		print (self.sayTo(toPlayer, 0) + quote("Jeg vil gjerne bytte med deg."))
 
 	def answerSwap(self, fromPlayer):
 		val = fromPlayer.heldCard.value
 		if not val > 16:
-			print (self.name + " answers " + fromPlayer.name + ": 'Jada, her er kortet mitt.'")
+			print (self.sayTo(fromPlayer, 1) + quote("Jada, her er kortet mitt."))
 		else:
-			print (self.name + " answers " + fromPlayer.name + ": '" + Card.statements[val]) + "'"
+			print (self.sayTo(fromPlayer, 1) + quote(Card.statements[val]))
 
 	def draw(self):
 		pass
@@ -29,6 +29,11 @@ class Player(object):
 	def addToScore(self, value):
 		self.score += value
 		print (self.name + " added " + str(value) + " to score.")
+
+	def sayTo(self, toPlayer, typ):
+		verb = ' asks ' if typ == 0 else ' answers '
+		return self.name + verb + toPlayer.name + ": "
+
 
 class Card(object):
 	
@@ -109,6 +114,7 @@ def playGame():
 	round = 1
 
 	while not round > 5:
+		print ("Round: " + str(round))
 		#Draw cards for each player
 		for player in players:
 			card = deck.draw()
@@ -118,7 +124,7 @@ def playGame():
 
 		#Play round
 		for nbr, player in enumerate(players, 0):
-			print (player.name + "'s card: " + str(player.heldCard.name))
+			#print (player.name + "'s card: " + str(player.heldCard.name))
 
 			if not nbr == len(players)-1:
 				if not players[nbr+1].heldCard.value == 4:
@@ -141,5 +147,9 @@ def playGame():
 		print (scoreLine[:-2])
 
 		round += 1
+		print
+
+def quote(text):
+	return "'" + text + "'"
 
 playGame()
