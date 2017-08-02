@@ -1,13 +1,18 @@
 import random
 
+PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel"]
+MAX_ROUNDS = 5
+
 class Player(object):
 
+	pid = 0
 	name = ""
 	score = 5
 	heldCard = None
 
-	def __init__(self, name):
+	def __init__(self, name, pid):
 		self.name = name
+		self.pid = pid
 
 	def setHeldCard(self, card, silent = False):
 		self.heldCard = card
@@ -17,14 +22,22 @@ class Player(object):
 		print (self.sayTo(toPlayer, 0) + quote("Jeg vil gjerne bytte med deg."))
 
 	def answerSwap(self, fromPlayer):
-		val = fromPlayer.heldCard.value
-		if not val > 16:
+		val = self.heldCard.value
+		if not (val > 16):
 			print (self.sayTo(fromPlayer, 1) + quote("Jada, her er kortet mitt."))
 		else:
-			print (self.sayTo(fromPlayer, 1) + quote(Card.statements[val]))
+			reply = Card.statements[val] if val < 21 else Card.statements[val].upper() 
+			print (self.sayTo(fromPlayer, 1) + quote(reply))
+		return val
 
-	def draw(self):
-		pass
+	def processAnswer(self, returnedCardValue):
+		if (returnedCardValue > 16):
+			if (returnedCardValue > 16 and returnedCardValue < 21): #huset, hesten, katten & dragonen
+				return 1 #Loses 1 score and must ask next player.
+			elif (returnedCardValue == 21): #gjoken
+				return 2 #All other players than the one with Gjoken loses 1 score and turn is over.
+		else:
+			return 0 #Nothing happens.
 
 	def addToScore(self, value):
 		self.score += value
@@ -34,15 +47,17 @@ class Player(object):
 		verb = ' asks ' if typ == 0 else ' answers '
 		return self.name + verb + toPlayer.name + ": "
 
+	def sayPass(self):
+		return self.name + " says 'Jeg staar'"
 
 class Card(object):
 	
 	types = {
 		'Gjoken': 21,
 		'Dragonen': 20,
-		'Hesten': 19,
-		'Huset': 18,
-		'Katten': 17,
+		'Katten': 19,
+		'Hesten': 18,
+		'Huset': 17,
 		'12': 16,
 		'11': 15,
 		'10': 14,
@@ -56,7 +71,7 @@ class Card(object):
 		'2': 6,
 		'1': 5,
 		'Narren': 4,
-		'Pottem': 3,
+		'Potten': 3,
 		'Uglen': 2,
 		'0': 1
 	}
@@ -64,9 +79,9 @@ class Card(object):
 	statements = {
 		21: 'Staa for gjok!',
 		20: 'Hogg av!',
-		19: 'Hest forbi!',
-		18: 'Hus forbi!',
-		17: 'Kiss!'
+		19: 'Kiss!',
+		18: 'Hest forbi!',
+		17: 'Hus forbi!'
 	}
 
 	name = ""
@@ -104,17 +119,15 @@ class Deck(object):
 
 def playGame():
 	players = []
-	players.append(Player("Kristoffer"))
-	players.append(Player("Matias"))
-	players.append(Player("Johannes"))
-	players.append(Player("Miriam"))
-	players.append(Player("Mikkel"))
+	for index, name in enumerate(PLAYERS):
+		players.append(Player(name, index))
 
 	deck = Deck()
 	round = 1
 
-	while not round > 5:
+	while not round > MAX_ROUNDS:
 		print ("Round: " + str(round))
+
 		#Draw cards for each player
 		for player in players:
 			card = deck.draw()
@@ -128,10 +141,13 @@ def playGame():
 
 			if not nbr == len(players)-1:
 				if not players[nbr+1].heldCard.value == 4:
-					player.requestSwap(players[nbr+1])
+					if not player.heldCard.value > 8: #Only ask to swap if card is 4 or less.
+						if not (askPlayers(nbr, player, players)):
+							break
+					else:
+						print (player.sayPass())
 				else:
-					print (player.name + " says 'Pass' and thinks ''Aldri i livet, " + players[nbr+1].name + " har jo narren!''")
-				players[nbr+1].answerSwap(player)
+					print (player.sayPass() + " and thinks ''Aldri i livet, " + players[nbr+1].name + " har jo narren!''")		
 			else:
 				player.setHeldCard(deck.draw(), True)
 
@@ -148,6 +164,25 @@ def playGame():
 
 		round += 1
 		print
+
+def askPlayers(nbr, player, players):
+	nextAdd = 1
+	hasSwapped = False
+	while not hasSwapped and (nbr + nextAdd) < len(players):
+		player.requestSwap(players[nbr + nextAdd])
+		returnedCardValue = players[nbr + nextAdd].answerSwap(player)
+		result = player.processAnswer(returnedCardValue)
+		if (result == 1):
+			player.addToScore(-1)
+			nextAdd += 1
+		elif (result == 2):
+			for ply in players:
+				if not (ply.pid == players[nbr + nextAdd].pid):
+					ply.addToScore(-1) #All other players loses 1 score.
+			return False
+		else:
+			hasSwapped = True
+	return True
 
 def quote(text):
 	return "'" + text + "'"
