@@ -1,7 +1,9 @@
 import random
 
 PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel"]
-MAX_ROUNDS = 5
+MAX_ROUNDS = 10
+SWAP_THRESHOLDNUMBER = 4
+SWAP_FUZZINESS = 0.0
 
 class Player(object):
 
@@ -141,7 +143,7 @@ def playGame():
 
 			if not nbr == len(players)-1:
 				if not players[nbr+1].heldCard.value == 4:
-					if not player.heldCard.value > 8: #Only ask to swap if card is 4 or less.
+					if not testForSwap(player.heldCard.value): #Only ask to swap if card is 4 or less.
 						if not (askPlayers(nbr, player, players)):
 							break
 					else:
@@ -164,6 +166,19 @@ def playGame():
 
 		round += 1
 		print
+
+def testForSwap(value):
+	swap = SWAP_THRESHOLDNUMBER + 4
+	chance = random.uniform(0.0, 1.0)
+	if (chance < SWAP_FUZZINESS):
+		swap -= 1
+	elif (chance > 1 - SWAP_FUZZINESS):
+		swap += 1
+
+	if (value > swap):
+		return True
+	else:
+		return False
 
 def askPlayers(nbr, player, players):
 	nextAdd = 1
