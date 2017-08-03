@@ -1,8 +1,8 @@
 import random
 
 PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel"]
-MAX_ROUNDS = 10
-SWAP_THRESHOLDNUMBER = 4
+MAX_ROUNDS = 1000
+SWAP_THRESHOLDNUMBER = 3
 SWAP_FUZZINESS = 0.0
 
 class Player(object):
@@ -136,6 +136,7 @@ def playGame():
 			player.setHeldCard(card, True)
 			if card.value == 4:
 				print (player.name + " knocks three times on the table.")
+				player.addToScore(1)
 
 		#Play round
 		for nbr, player in enumerate(players, 0):
