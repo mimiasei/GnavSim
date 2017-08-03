@@ -108,7 +108,7 @@ class Deck(object):
 
 	def shuffleDeck(self):
 		print ("******INFO: The deck is shuffled.")
-		cards = []
+		self.cards = []
 		for key, val in Card.types.items():
 			card = Card(key, val)
 			self.cards.append(card)
@@ -136,7 +136,7 @@ def playGame():
 	round = 1
 
 	while not round > MAX_ROUNDS:
-		print ("Round: " + str(round) + " ======================================")
+		print ("Round: " + str(round) + " ===> Current deck card: " + str(deck.current) + " =========================")
 
 		#Draw cards for each player
 		for player in players:
