@@ -1,9 +1,9 @@
 import random
 
-PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel"]
-MAX_ROUNDS = 1000
-SWAP_THRESHOLDNUMBER = 3
-SWAP_FUZZINESS = 0.0
+PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam"]
+MAX_ROUNDS = 100
+SWAP_THRESHOLDNUMBER = 4
+SWAP_FUZZINESS = 0.1
 
 class Player(object):
 
@@ -11,6 +11,8 @@ class Player(object):
 	name = ""
 	score = 5
 	heldCard = None
+	wins = 0
+	losses = 0
 
 	def __init__(self, name, pid):
 		self.name = name
@@ -128,7 +130,7 @@ def playGame():
 	round = 1
 
 	while not round > MAX_ROUNDS:
-		print ("Round: " + str(round))
+		print ("Round: " + str(round) + " ======================================")
 
 		#Draw cards for each player
 		for player in players:
@@ -145,7 +147,7 @@ def playGame():
 			if not nbr == len(players)-1:
 				if not players[nbr+1].heldCard.value == 4:
 					if not testForSwap(player.heldCard.value): #Only ask to swap if card is 4 or less.
-						if not (askPlayers(nbr, player, players)):
+						if not (askPlayers(nbr, player, players, deck)):
 							break
 					else:
 						print (player.sayPass())
@@ -154,16 +156,37 @@ def playGame():
 			else:
 				player.setHeldCard(deck.draw(), True)
 
+		#End of round
+
+		print ("End of round " + str(round) + " ======================================")
 		sortedPlayers = sorted(players, key=lambda p: p.heldCard.value, reverse=True)
 		winner = sortedPlayers[0]
+		winner.wins += 1
 		loser = sortedPlayers[len(sortedPlayers)-1]
+		loser.losses += 1
+		print ("Winner of this round is " + winner.name + " with the card " + winner.heldCard.name)
 		winner.addToScore(1)
+		print ("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name)
 		loser.addToScore(-1)
+		#Search for Narren among players
+		for player in players:
+			if (player.heldCard.value == 4):
+				print ("Unfortunately, " + player.name + "'s card at end of round is Narren.")
+				player.addToScore(-1)
+
+		mostWins = sorted(players, key=lambda p: p.wins, reverse=True)
+		mostLosses = sorted(players, key=lambda p: p.losses, reverse=True)
+		highestScore = sorted(players, key=lambda p: p.score, reverse=True)
 
 		scoreLine = "--> Score: "
+
 		for player in players:
-			scoreLine += player.name + ": " + str(player.score) + ", "
+			thisPly = player.name
+			if (player.pid == highestScore[0].pid):
+				thisPly = "**" + thisPly.upper() + "**"
+			scoreLine += thisPly + ": " + str(player.score) + ", "
 		print (scoreLine[:-2])
+		print ("STATS: Most wins -> " + mostWins[0].name + ": " + str(mostWins[0].wins) + ", most losses -> " + mostLosses[0].name + ": " + str(mostLosses[0].losses))
 
 		round += 1
 		print
@@ -181,7 +204,7 @@ def testForSwap(value):
 	else:
 		return False
 
-def askPlayers(nbr, player, players):
+def askPlayers(nbr, player, players, deck):
 	nextAdd = 1
 	hasSwapped = False
 	while not hasSwapped and (nbr + nextAdd) < len(players):
@@ -198,6 +221,10 @@ def askPlayers(nbr, player, players):
 			return False
 		else:
 			hasSwapped = True
+		if not hasSwapped: #If player stilled hasn't swapped after being last in round
+			#print ("stilled hasn't swapped........")
+			player.setHeldCard(deck.draw(), True)
+
 	return True
 
 def quote(text):
