@@ -1,9 +1,9 @@
 import random
 
-PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam"]
-MAX_ROUNDS = 100
+PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam"] #, "Mikkel", "Emil", "Oivind", "Ask"
+MAX_ROUNDS = 500
 SWAP_THRESHOLDNUMBER = 4
-SWAP_FUZZINESS = 0.1
+SWAP_FUZZINESS = 0.0 #Simulates human error. 0.1 = 10% chance of making a mistake.
 
 class Player(object):
 
@@ -20,7 +20,7 @@ class Player(object):
 
 	def setHeldCard(self, card, silent = False):
 		self.heldCard = card
-		if not silent: print (self.name + " now has: " + self.heldCard.name)
+		if not silent: print ("INFO: " + self.name + " now has: " + self.heldCard.name)
 	
 	def requestSwap(self, toPlayer):
 		print (self.sayTo(toPlayer, 0) + quote("Jeg vil gjerne bytte med deg."))
@@ -52,32 +52,32 @@ class Player(object):
 		return self.name + verb + toPlayer.name + ": "
 
 	def sayPass(self):
-		return self.name + " says 'Jeg staar'"
+		return self.name + " says 'Jeg staar.'"
 
 class Card(object):
 	
 	types = {
-		'Gjoken': 21,
+		'Gjoeken': 21,
 		'Dragonen': 20,
 		'Katten': 19,
 		'Hesten': 18,
 		'Huset': 17,
-		'12': 16,
-		'11': 15,
-		'10': 14,
-		'9': 13,
-		'8': 12,
-		'7': 11,
-		'6': 10,
-		'5': 9,
-		'4': 8,
-		'3': 7,
-		'2': 6,
-		'1': 5,
+		'(12)': 16,
+		'(11)': 15,
+		'(10)': 14,
+		'(9)': 13,
+		'(8)': 12,
+		'(7)': 11,
+		'(6)': 10,
+		'(5)': 9,
+		'(4)': 8,
+		'(3)': 7,
+		'(2)': 6,
+		'(1)': 5,
 		'Narren': 4,
 		'Potten': 3,
 		'Uglen': 2,
-		'0': 1
+		'(0)': 1
 	}
 
 	statements = {
@@ -107,6 +107,8 @@ class Deck(object):
 		self.shuffleDeck()
 
 	def shuffleDeck(self):
+		print ("******INFO: The deck is shuffled.")
+		cards = []
 		for key, val in Card.types.items():
 			card = Card(key, val)
 			self.cards.append(card)
@@ -121,9 +123,13 @@ class Deck(object):
 			self.shuffleDeck()
 		return card
 
+# ------------- End of classes ---------------		
+
 def playGame():
 	players = []
-	for index, name in enumerate(PLAYERS):
+	allPlayers = PLAYERS
+	random.shuffle(allPlayers)
+	for index, name in enumerate(allPlayers):
 		players.append(Player(name, index))
 
 	deck = Deck()
@@ -136,25 +142,36 @@ def playGame():
 		for player in players:
 			card = deck.draw()
 			player.setHeldCard(card, True)
-			if card.value == 4:
-				print (player.name + " knocks three times on the table.")
+			if card.value == 4: #If player receives Narren
+				print (player.name + " knocks three times on the table. <BANK, BANK, BANK>")
 				player.addToScore(1)
 
 		#Play round
 		for nbr, player in enumerate(players, 0):
 			#print (player.name + "'s card: " + str(player.heldCard.name))
-
-			if not nbr == len(players)-1:
-				if not players[nbr+1].heldCard.value == 4:
-					if not testForSwap(player.heldCard.value): #Only ask to swap if card is 4 or less.
-						if not (askPlayers(nbr, player, players, deck)):
-							break
+			wantsToSwap = False
+			sayPass = player.sayPass()
+			if not nbr == len(players) - 1:
+				if players[nbr + 1].heldCard.value == 4: #If the other player has Narren...
+					if not testForSwap(player.heldCard.value): #Do small chance check if player has forgotten someone knocked 3 times.
+						sayPass += " and thinks ''Aldri i livet, " + players[nbr + 1].name + " har jo narren!''"
 					else:
-						print (player.sayPass())
+						wantsToSwap = True
 				else:
-					print (player.sayPass() + " and thinks ''Aldri i livet, " + players[nbr+1].name + " har jo narren!''")		
+					if testForSwap(player.heldCard.value): #Only ask to swap if card is 4 or less.
+						wantsToSwap = True
+
+				if wantsToSwap:
+					if not (askPlayers(nbr, player, players, deck)): #Check if Staa for gjok! is called.
+						break
+				else:
+					print (sayPass)
 			else:
-				player.setHeldCard(deck.draw(), True)
+				if testForSwap(player.heldCard.value): #Only swap if card is 4 or less.
+					print (player.name + " draws from the deck.")
+					player.setHeldCard(deck.draw()) #Draw from deck if noone else to swap with.
+				else:
+					print (sayPass)
 
 		#End of round
 
@@ -200,9 +217,9 @@ def testForSwap(value):
 		swap += 1
 
 	if (value > swap):
-		return True
+		return False #Player doesn't want to swap and will say pass.
 	else:
-		return False
+		return True #Player wants to swap.
 
 def askPlayers(nbr, player, players, deck):
 	nextAdd = 1
@@ -210,6 +227,8 @@ def askPlayers(nbr, player, players, deck):
 	while not hasSwapped and (nbr + nextAdd) < len(players):
 		player.requestSwap(players[nbr + nextAdd])
 		returnedCardValue = players[nbr + nextAdd].answerSwap(player)
+		if returnedCardValue == 4:
+			print (":-) Everybody starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'")
 		result = player.processAnswer(returnedCardValue)
 		if (result == 1):
 			player.addToScore(-1)
@@ -219,11 +238,15 @@ def askPlayers(nbr, player, players, deck):
 				if not (ply.pid == players[nbr + nextAdd].pid):
 					ply.addToScore(-1) #All other players loses 1 score.
 			return False
-		else:
+		else: #The two players Swap cards
+			card = player.heldCard
+			player.setHeldCard(players[nbr + nextAdd].heldCard)
+			players[nbr + nextAdd].setHeldCard(card)
 			hasSwapped = True
 		if not hasSwapped: #If player stilled hasn't swapped after being last in round
 			#print ("stilled hasn't swapped........")
-			player.setHeldCard(deck.draw(), True)
+			print (player.name + " draws from the deck.")
+			player.setHeldCard(deck.draw())
 
 	return True
 
