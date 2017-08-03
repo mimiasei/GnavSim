@@ -1,7 +1,7 @@
 import random
 
-PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam"] #, "Mikkel", "Emil", "Oivind", "Ask"
-MAX_ROUNDS = 500
+PLAYERS = ["Kristoffer", "Matias", "Johannes"] #, "Miriam", "Mikkel", "Emil", "Oivind", "Ask"
+MAX_ROUNDS = 10
 SWAP_THRESHOLDNUMBER = 4
 SWAP_FUZZINESS = 0.0 #Simulates human error. 0.1 = 10% chance of making a mistake.
 
@@ -53,6 +53,9 @@ class Player(object):
 
 	def sayPass(self):
 		return self.name + " says 'Jeg staar.'"
+
+	def knockOnTable(self):
+		return True
 
 class Card(object):
 	
@@ -123,14 +126,31 @@ class Deck(object):
 			self.shuffleDeck()
 		return card
 
+class Human(Player):
+
+	human = True
+
+	def __init__(self, name, pid):
+		Player.__init__(self, name, pid)
+
+	def knockOnTable(self):
+		choice = raw_input("Knock on table (y/n)? ")
+		return choice.upper() == 'Y'
+
 # ------------- End of classes ---------------		
 
 def playGame():
 	players = []
-	allPlayers = PLAYERS
-	random.shuffle(allPlayers)
-	for index, name in enumerate(allPlayers):
+
+	humanName = enterHumanPlayer()
+	human = Human(humanName, len(PLAYERS) + 1)
+
+	for index, name in enumerate(PLAYERS):
 		players.append(Player(name, index))
+
+	players.append(human)
+
+	random.shuffle(players)
 
 	deck = Deck()
 	round = 1
@@ -142,13 +162,21 @@ def playGame():
 		for player in players:
 			card = deck.draw()
 			player.setHeldCard(card, True)
+			if (hasattr(player, 'human')):
+				print ("You got " + player.heldCard.name)
+
 			if card.value == 4: #If player receives Narren
-				print (player.name + " knocks three times on the table. <BANK, BANK, BANK>")
-				player.addToScore(1)
+				knock = player.knockOnTable()
+				if knock:
+					print (player.name + " knocks three times on the table. <BANK, BANK, BANK>")
+					player.addToScore(1)
 
 		#Play round
 		for nbr, player in enumerate(players, 0):
-			#print (player.name + "'s card: " + str(player.heldCard.name))
+			
+			if (hasattr(player, 'human')):
+				print ("Hello " + player.name + ". You are a human and cannot play with the AI yet.")
+
 			wantsToSwap = False
 			sayPass = player.sayPass()
 			if not nbr == len(players) - 1:
@@ -249,6 +277,10 @@ def askPlayers(nbr, player, players, deck):
 			player.setHeldCard(deck.draw())
 
 	return True
+
+def enterHumanPlayer():
+	print ("<<< Welcome to Gnav The Card Game >>>")
+	return raw_input("Please enter your name: ")
 
 def quote(text):
 	return "'" + text + "'"
