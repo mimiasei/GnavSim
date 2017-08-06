@@ -30,12 +30,12 @@ class Player(object):
 		#if not silent: print ("INFO: " + self.name + " now has: " + self.heldCard.name)
 
 	def drawFromDeck(self, deck):
-		if not (self.heldCard == None):
-			deck.discard(self.heldCard)
+		self.discard(deck)
 		self.setHeldCard(deck.draw())
 
 	def discard(self, deck):
-		deck.discard(self.heldCard)
+		if not (self.heldCard == None):
+			deck.discard(self.heldCard)
 		self.heldCard = None
 	
 	def requestSwap(self, toPlayer):
@@ -85,7 +85,7 @@ class Player(object):
 		print (self.name + self.TXT_KNOCK)
 		return True
 
-	def testForSwap(self):
+	def testForSwap(self, toPlayer = None):
 		value = self.heldCard.value
 		swap = SWAP_THRESHOLDNUMBER + 4
 		chance = random.uniform(0.0, 1.0)
@@ -229,8 +229,13 @@ class Human(Player):
 		choice = input("%s (y/n)? " % (question))
 		return choice.upper() == 'Y'
 
-	def testForSwap(self):
-		return True
+	def testForSwap(self, toPlayer):
+		text = "Do you want to "
+		if (toPlayer == "deck"):
+			text += "draw from the deck"
+		else:
+			text += "swap cards with %s" % (toPlayer.name)
+		result = self.inputYesNo(text)
 
 # ------------- End of classes ---------------		
 
@@ -278,9 +283,9 @@ def playGame():
 				else:
 					print (sayPass)
 			else:
-				if player.testForSwap(): #Only swap if card is 4 or less.
+				if player.testForSwap("deck"): #Only swap if card is 4 or less.
 					print (player.name + " draws from the deck.")
-					player.setHeldCard(deck.draw()) #Draw from deck if noone else to swap with.
+					player.drawFromDeck(deck) #Draw from deck if noone else to swap with.
 				else:
 					print (sayPass)
 
