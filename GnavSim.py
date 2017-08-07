@@ -5,7 +5,7 @@ import random
 import time
 
 PLAYERS = ["Kristoffer", "Matias", "Johannes"] #, "Miriam", "Mikkel", "Emil", "Oivind", "Ask"
-MAX_ROUNDS = 10
+MAX_ROUNDS = 1
 SWAP_THRESHOLDNUMBER = 4
 SWAP_FUZZINESS = 0.0 #Simulates human error. 0.1 = 10% chance of making a mistake.
 
@@ -53,11 +53,11 @@ class Player(object):
 			print (self.sayTo(fromPlayer, 1) + quote(reply))
 		return val
 
-	def swapWithPlayer(self, fromPlayer, hasStarted = True):
+	def swapWithPlayer(self, fromPlayer):
 		print ("INFO: %s swaps cards with %s." % (self.name, fromPlayer.name))
+		card = self.heldCard
 		self.setHeldCard(fromPlayer.heldCard)
-		if hasStarted:
-			fromPlayer.swapWithPlayer(self, not hasStarted)
+		fromPlayer.setHeldCard(card)
 
 	def processAnswer(self, returnedCardValue):
 		if (returnedCardValue > 16):
@@ -156,7 +156,7 @@ class Deck(object):
 			card = Card(key, val)
 			self.cards.append(card)
 			self.cards.append(card)
-		self.printCards()
+		#self.printCards()
 		self.shuffleDeck()
 
 	def shuffleDeck(self):
@@ -184,7 +184,8 @@ class Deck(object):
 
 	def testLengthSum(self):
 		if (len(self.cards) + len(self.discardPile) == 42):
-			print ("All good, sum of piles piles is 42.")
+			#print ("All good, sum of piles piles is 42.")
+			1 == 1
 		else:
 			print ("Warning! Sum of piles is not 42.")
 			self.printCards()
@@ -206,8 +207,8 @@ class Human(Player):
 		Player.__init__(self, name, pid)
 
 	def setHeldCard(self, card, silent = False):
+		self.printGotCard(card.name)
 		super(Human, self).setHeldCard(card, silent)
-		self.printGotCard()
 
 	def knockOnTable(self):
 		result = self.inputYesNo("Knock on the table")
@@ -219,17 +220,17 @@ class Human(Player):
 		super(Human, self).drawFromDeck(deck)
 
 	def requestSwap(self, toPlayer):
-		result = self.inputYesNo("Do you want to swap cards with %s" % (toPlayer.name))
-		if (result):
-			print (self.sayTo(toPlayer, 0) + quote(self.TXT_WANT_TO_SWAP))
-		return result
+		#result = self.inputYesNo("Do you want to swap cards with %s" % (toPlayer.name))
+		#if (result):
+		print (self.sayTo(toPlayer, 0) + quote(self.TXT_WANT_TO_SWAP))
+		#return result
 
-	def swapWithPlayer(self, fromPlayer, hasStarted = True):
-		if hasStarted:
-			super(Human, self).swapWithPlayer(fromPlayer, not hasStarted)
+	def swapWithPlayer(self, fromPlayer):
+		super(Human, self).swapWithPlayer(fromPlayer)
 
-	def printGotCard(self, addText = ""):
-		print ("Player %s, you got the card %s. %s" % (self.name, self.heldCard.name, addText))
+	def printGotCard(self, cardName = ""):
+		card = self.heldCard.name if cardName == "" else cardName
+		print ("Player %s, you got the card %s." % (self.name, card))
 
 	def inputYesNo(self, question):
 		choice = input("%s (y/n)? " % (question))
@@ -241,7 +242,7 @@ class Human(Player):
 			text += "draw from the deck"
 		else:
 			text += "swap cards with %s" % (toPlayer.name)
-		result = self.inputYesNo(text)
+		return self.inputYesNo(text)
 
 # ------------- End of classes ---------------		
 
@@ -324,33 +325,39 @@ def playGame():
 		mostLosses = sorted(players, key=lambda p: p.losses, reverse=True)
 		highestScore = sorted(players, key=lambda p: p.score, reverse=True)
 
-		scoreLine = "--> Score: "
+		scoreLine = "-------> Scores: "
 
 		for player in players:
 			thisPly = player.name
 			if (player.pid == highestScore[0].pid):
 				thisPly = "**" + thisPly.upper() + "**"
 			scoreLine += thisPly + ": " + str(player.score) + ", "
+		print ("")
 		print (scoreLine[:-2])
-		print ("STATS: Most wins -> " + mostWins[0].name + ": " + str(mostWins[0].wins) + ", most losses -> " + mostLosses[0].name + ": " + str(mostLosses[0].losses))
+		print ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + str(mostWins[0].wins) + ", most losses -> " + mostLosses[0].name + ": " + str(mostLosses[0].losses))
 
 		round += 1
 		print ("")
-		time.sleep(0.5) #Pause 1/2 second
+		Human("dummy", 666).inputYesNo("Press any key to continue, okay")
+		print ("")
+
+	proclaimWinner(highestScore[0])
 
 def askPlayers(nbr, player, players, deck):
 	nextAdd = 1
 	hasSwapped = False
+
 	while not hasSwapped and (nbr + nextAdd) < len(players):
+		print ("%s is now about to ask the next player, %s, if he wants to swap..." % (player.name, players[nbr + nextAdd].name))
 		player.requestSwap(players[nbr + nextAdd])
 		returnedCardValue = players[nbr + nextAdd].answerSwap(player)
 		if returnedCardValue == 4:
 			print (":-) Everybody starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'")
 		result = player.processAnswer(returnedCardValue)
-		if (result == 1):
+		if (result == 1): #Dragonen, katten, hesten or huset
 			player.addToScore(-1)
 			nextAdd += 1
-		elif (result == 2):
+		elif (result == 2): #Gjøken
 			for ply in players:
 				if not (ply.pid == players[nbr + nextAdd].pid):
 					ply.addToScore(-1) #All other players loses 1 score.
@@ -361,8 +368,17 @@ def askPlayers(nbr, player, players, deck):
 		if not hasSwapped: #If player still hasn't swapped after being last in round
 			print (player.name + " draws from the deck.")
 			player.drawFromDeck(deck)
-
 	return True
+
+def proclaimWinner(player):
+	print ("")
+	text = "<<<<<<<<<<<<<<<<<< The winner of %d rounds of GNAV is... >>>>>>>>>>>>>>>>>>" % (MAX_ROUNDS)
+	print (text)
+	print ("<<" + int(len(text) - 4) * " " + ">>")
+	spaces = int((len(text) - 2) / 2) - int(len(player.name) / 2)
+	print ("<<" + (" " * spaces) + player.name + (" " * (spaces - 2)) + ">>")
+	print ("<<" + int(len(text) - 4) * " " + ">>")
+	print ("<" * int(len(text) / 2) + ">" * int(len(text) / 2))
 
 def enterHumanPlayer():
 	print ("<<< Welcome to Gnav The Card Game >>>")
