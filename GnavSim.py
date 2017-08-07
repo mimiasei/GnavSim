@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import os, sys
 import random
 import time
 
@@ -50,11 +53,11 @@ class Player(object):
 			print (self.sayTo(fromPlayer, 1) + quote(reply))
 		return val
 
-	def swapWithPlayer(self, fromPlayer):
+	def swapWithPlayer(self, fromPlayer, hasStarted = True):
 		print ("INFO: %s swaps cards with %s." % (self.name, fromPlayer.name))
-		card = self.heldCard
 		self.setHeldCard(fromPlayer.heldCard)
-		fromPlayer.setHeldCard(card)
+		if hasStarted:
+			fromPlayer.swapWithPlayer(self, not hasStarted)
 
 	def processAnswer(self, returnedCardValue):
 		if (returnedCardValue > 16):
@@ -202,6 +205,10 @@ class Human(Player):
 	def __init__(self, name, pid):
 		Player.__init__(self, name, pid)
 
+	def setHeldCard(self, card, silent = False):
+		super(Human, self).setHeldCard(card, silent)
+		self.printGotCard()
+
 	def knockOnTable(self):
 		result = self.inputYesNo("Knock on the table")
 		if (result):
@@ -210,7 +217,6 @@ class Human(Player):
 
 	def drawFromDeck(self, deck):
 		super(Human, self).drawFromDeck(deck)
-		self.printGotCard()
 
 	def requestSwap(self, toPlayer):
 		result = self.inputYesNo("Do you want to swap cards with %s" % (toPlayer.name))
@@ -218,12 +224,12 @@ class Human(Player):
 			print (self.sayTo(toPlayer, 0) + quote(self.TXT_WANT_TO_SWAP))
 		return result
 
-	def swapWithPlayer(self, fromPlayer):
-		super(Human, self).swapWithPlayer(fromPlayer)
-		self.printGotCard()
+	def swapWithPlayer(self, fromPlayer, hasStarted = True):
+		if hasStarted:
+			super(Human, self).swapWithPlayer(fromPlayer, not hasStarted)
 
-	def printGotCard(self):
-		print ("Player %s, you got the card %s." % (self.name, self.heldCard.name))
+	def printGotCard(self, addText = ""):
+		print ("Player %s, you got the card %s. %s" % (self.name, self.heldCard.name, addText))
 
 	def inputYesNo(self, question):
 		choice = input("%s (y/n)? " % (question))
@@ -269,12 +275,12 @@ def playGame():
 			sayPass = player.sayPass()
 			if not nbr == len(players) - 1:
 				if players[nbr + 1].heldCard.value == 4: #If the other player has Narren...
-					if not player.testForSwap(): #Do small chance check if player has forgotten someone knocked 3 times.
+					if not player.testForSwap(players[nbr + 1]): #Do small chance check if player has forgotten someone knocked 3 times.
 						sayPass += player.sayNoFool(players[nbr + 1])
 					else:
 						wantsToSwap = True
 				else:
-					if player.testForSwap(): #Only ask to swap if card is 4 or less.
+					if player.testForSwap(players[nbr + 1]): #Only ask to swap if card is 4 or less.
 						wantsToSwap = True
 
 				if wantsToSwap:
@@ -360,6 +366,7 @@ def askPlayers(nbr, player, players, deck):
 
 def enterHumanPlayer():
 	print ("<<< Welcome to Gnav The Card Game >>>")
+	print (sys.version)
 	return input("Please enter your name: ")
 
 def quote(text):
