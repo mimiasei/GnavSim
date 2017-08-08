@@ -3,11 +3,150 @@
 import os, sys
 import random
 import time
+import PodSixNet.Channel
+import PodSixNet.Server
+from PodSixNet.Connection import ConnectionListener, connection
 
 PLAYERS = ["Kristoffer", "Matias", "Johannes"] #, "Miriam", "Mikkel", "Emil", "Oivind", "Ask"
 MAX_ROUNDS = 1
 SWAP_THRESHOLDNUMBER = 4
 SWAP_FUZZINESS = 0.0 #Simulates human error. 0.1 = 10% chance of making a mistake.
+
+# Multiplayer stuff -----------------
+
+class ClientChannel(PodSixNet.Channel.Channel):
+
+	gameId = 0
+
+	def Network(self, data):
+		print (data)
+
+	def Network_myaction(self, data):
+		print ("myaction: ", data)
+
+	def Network_place(self, data):
+		#player number (0 or 1)
+		num = data["num"]
+
+		#id of game given by server at start
+		self.gameId = data["gameId"]
+
+		#tells server to print something
+		self._server.PrintMessage
+
+class MyServer(PodSixNet.Server.Server):
+
+	channelClass = ClientChannel
+	games = []
+	queue = []
+	currentIndex = 0
+	channels = []
+
+	def __init__(self):
+		self.games = []
+		self.currentIndex = 0
+
+	def Connected(self, channel, addr):
+		print ("new connection: ", channel)
+
+		if self.queue == None:
+			self.currentIndex += 1
+			channel.gameId = self.currentIndex
+			self.queue = Game(channel, self.currentIndex)
+		else:
+			channel.gameId = self.currentIndex
+			self.queue.player1 = channel
+			self.queue.player0.Send({"action": "startGame", "player":0, "gameId": self.queue.gameId})
+			self.queue.player1.Send({"action": "startGame", "player":1, "gameId": self.queue.gameId})
+			self.games.append(self.queue)
+			self.queue = None
+
+	def PrintMessage(self, data, gameId, num):
+		game = [a for a in self.games if a.gameId == gameId ]
+		if len(game) == 1:
+			game[0].PrintMessage(data, num)
+
+class GnavGame(ConnectionListener):
+
+	num = 0
+	turn = False
+	gameId = 0
+	running = False
+	address = 'localhost:111'
+
+	def __init__(self):
+		self.connectToServer()
+		self.running = False
+
+		while not self.running:
+		    self.Pump()
+		    connection.Pump()
+		    time.sleep(0.01)
+
+		#determine attributes from player #
+		if self.num == 0:
+			self.turn = True
+		else:
+			self.turn = False
+
+	def connectToServer(self):
+		self.address = input("Address of Server: ")
+		try:
+			if not self.address:
+				host, port = "localhost", 111
+			else:
+				host,port = self.address.split(":")
+				self.Connect((host, int(port)))
+		except:
+			print ("Didn't work! Error Connecting to Server")
+			print ("Usage:", "host:port")
+			print ("e.g.", "localhost:111")
+			exit()
+		print ("Wohoo! Boxes client started!")
+
+	def update(self):
+		time.sleep(0.01)		
+		connection.Pump()
+		self.Pump()
+
+	def Network_startgame(self, data):
+		self.running = True
+		self.num = data["player"]
+		self.gameid = data["gameId"]
+
+class Game():
+
+	turn = 0
+	player0 = 0
+	player1 = 0
+	gameId = 0
+
+	def __init__(self, player0, currentIndex):
+		self.turn = 0
+		self.player0 = player0
+		self.player1 = None
+		self.gameId = currentIndex
+
+	def PrintMessage(self, data, gameId, num):
+		print (data)
+		data["hasBeenOnServer"] = True
+		data["message"] = "Hello!"
+		self.player0.Send(data)
+		self.player1.Send(data)
+
+def StartOrMPGame():
+	choice = Human('', 666).inputYesNo("Is this going to be the multiplayer server")
+	if choice:
+		myServer = MyServer()
+		while True:
+			myServer.Pump()
+			time.sleep(0.0001)
+	else:
+		gg = GnavGame()
+		while True:
+			gg.update()
+
+# End multiplayer stuff -------------
 
 class Player(object):
 
@@ -388,4 +527,5 @@ def enterHumanPlayer():
 def quote(text):
 	return "'" + text + "'"
 
+StartOrMPGame()
 playGame()
