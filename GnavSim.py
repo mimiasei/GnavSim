@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os, sys
+from sys import stdin, exit
 import random
-import time
-import PodSixNet.Channel
-import PodSixNet.Server
+from time import sleep, localtime
+from weakref import WeakKeyDictionary
+from PodSixNet.Channel import Channel
+from PodSixNet.Server import Server
 from PodSixNet.Connection import ConnectionListener, connection
 
 PLAYERS = ["Kristoffer", "Matias", "Johannes"] #, "Miriam", "Mikkel", "Emil", "Oivind", "Ask"
@@ -13,138 +15,139 @@ SWAP_THRESHOLDNUMBER = 4
 SWAP_FUZZINESS = 0.0 #Simulates human error. 0.1 = 10% chance of making a mistake.
 
 # Multiplayer stuff -----------------
+HOST = "localhost"
+PORT = 111
 
-class ClientChannel(PodSixNet.Channel.Channel):
+# Server --------------------------------------
+class ClientChannel(Channel):
+	"""
+	This is the server representation of a single connected client.
+	"""
+	def __init__(self, *args, **kwargs):
+		self.nickname = "anonymous"
+		Channel.__init__(self, *args, **kwargs)
+	
+	def Close(self):
+		self._server.DelPlayer(self)
+	
+	##################################
+	### Network specific callbacks ###
+	##################################
+	
+	def Network_message(self, data):
+		self._server.SendToAll({"action": "message", "message": data['message'], "who": self.nickname})
+	
+	def Network_nickname(self, data):
+		self.nickname = data['nickname']
+		self._server.SendPlayers()
 
-	gameId = 0
-
-	def Network(self, data):
-		print (data)
-
-	def Network_myaction(self, data):
-		print ("myaction: ", data)
-
-	def Network_place(self, data):
-		#player number (0 or 1)
-		num = data["num"]
-
-		#id of game given by server at start
-		self.gameId = data["gameId"]
-
-		#tells server to print something
-		self._server.PrintMessage
-
-class MyServer(PodSixNet.Server.Server):
-
+class ChatServer(Server):
 	channelClass = ClientChannel
-	games = []
-	queue = []
-	currentIndex = 0
-	channels = []
-
-	def __init__(self):
-		self.games = []
-		self.currentIndex = 0
-
+	
+	def __init__(self, *args, **kwargs):
+		Server.__init__(self, *args, **kwargs)
+		self.players = WeakKeyDictionary()
+		print('Server launched')
+	
 	def Connected(self, channel, addr):
-		print ("new connection: ", channel)
+		self.AddPlayer(channel)
+	
+	def AddPlayer(self, player):
+		print("New Player" + str(player.addr))
+		self.players[player] = True
+		self.SendPlayers()
+		print("players", [p for p in self.players])
+	
+	def DelPlayer(self, player):
+		print("Deleting Player" + str(player.addr))
+		del self.players[player]
+		self.SendPlayers()
+	
+	def SendPlayers(self):
+		self.SendToAll({"action": "players", "players": [p.nickname for p in self.players]})
+	
+	def SendToAll(self, data):
+		[p.Send(data) for p in self.players]
+	
+	def Launch(self):
+		while True:
+			self.Pump()
+			sleep(0.0001)
 
-		if self.queue == None:
-			self.currentIndex += 1
-			channel.gameId = self.currentIndex
-			self.queue = Game(channel, self.currentIndex)
-		else:
-			channel.gameId = self.currentIndex
-			self.queue.player1 = channel
-			self.queue.player0.Send({"action": "startGame", "player":0, "gameId": self.queue.gameId})
-			self.queue.player1.Send({"action": "startGame", "player":1, "gameId": self.queue.gameId})
-			self.games.append(self.queue)
-			self.queue = None
+# Client ------------------------------------------
 
-	def PrintMessage(self, data, gameId, num):
-		game = [a for a in self.games if a.gameId == gameId ]
-		if len(game) == 1:
-			game[0].PrintMessage(data, num)
+# This example uses Python threads to manage async input from sys.stdin.
+# This is so that I can receive input from the console whilst running the server.
+# Don't ever do this - it's slow and ugly. (I'm doing it for simplicity's sake)
+from _thread import *
 
-class GnavGame(ConnectionListener):
-
-	num = 0
-	turn = False
-	gameId = 0
-	running = False
-	address = 'localhost:111'
-
-	def __init__(self):
-		self.connectToServer()
-		self.running = False
-
-		while not self.running:
-		    self.Pump()
-		    connection.Pump()
-		    time.sleep(0.01)
-
-		#determine attributes from player #
-		if self.num == 0:
-			self.turn = True
-		else:
-			self.turn = False
-
-	def connectToServer(self):
-		self.address = input("Address of Server: ")
-		try:
-			if not self.address:
-				host, port = "localhost", 111
-			else:
-				host,port = self.address.split(":")
-				self.Connect((host, int(port)))
-		except:
-			print ("Didn't work! Error Connecting to Server")
-			print ("Usage:", "host:port")
-			print ("e.g.", "localhost:111")
-			exit()
-		print ("Wohoo! Boxes client started!")
-
-	def update(self):
-		time.sleep(0.01)		
+class Client(ConnectionListener):
+	def __init__(self, host, port):
+		self.Connect((host, port))
+		print("Chat client started")
+		print("Ctrl-C to exit")
+		# get a nickname from the user before starting
+		print("Enter your nickname: ")
+		connection.Send({"action": "nickname", "nickname": stdin.readline().rstrip("\n")})
+		# launch our threaded input loop
+		t = start_new_thread(self.InputLoop, ())
+	
+	def Loop(self):
 		connection.Pump()
 		self.Pump()
+	
+	def InputLoop(self):
+		# horrid threaded input loop
+		# continually reads from stdin and sends whatever is typed to the server
+		while 1:
+			connection.Send({"action": "message", "message": stdin.readline().rstrip("\n")})
+	
+	#######################################
+	### Network event/message callbacks ###
+	#######################################
+	
+	def Network_players(self, data):
+		print("*** players: " + ", ".join([p for p in data['players']]))
+	
+	def Network_message(self, data):
+		print(data['who'] + ": " + data['message'])
+	
+	# built in stuff
 
-	def Network_startgame(self, data):
-		self.running = True
-		self.num = data["player"]
-		self.gameid = data["gameId"]
+	def Network_connected(self, data):
+		print("You are now connected to the server")
+	
+	def Network_error(self, data):
+		print('error:', data['error'][1])
+		connection.Close()
+	
+	def Network_disconnected(self, data):
+		print('Server disconnected')
+		exit()
 
-class Game():
 
-	turn = 0
-	player0 = 0
-	player1 = 0
-	gameId = 0
-
-	def __init__(self, player0, currentIndex):
-		self.turn = 0
-		self.player0 = player0
-		self.player1 = None
-		self.gameId = currentIndex
-
-	def PrintMessage(self, data, gameId, num):
-		print (data)
-		data["hasBeenOnServer"] = True
-		data["message"] = "Hello!"
-		self.player0.Send(data)
-		self.player1.Send(data)
-
+#Starts multiplayer networking
 def StartOrMPGame():
-	choice = Human('', 666).inputYesNo("Is this going to be the multiplayer server")
-	if choice:
-		myServer = MyServer()
-		while True:
-			myServer.Pump()
-			time.sleep(0.0001)
+	if len(sys.argv) != 2:
+		host = HOST
+		port = PORT
 	else:
-		gg = GnavGame()
+		host, port = sys.argv[1].split(":")
+		port = int(port)
+
+	choice = ask("Select Server, Client or Not multiplayer", ['s', 'c', 'n'])
+	if choice == 0:
+		print ("Starting server on %s and port %d..." % (host, port))
+		server = ChatServer(localaddr=(host, port))
+		server.Launch()
+	elif choice == 1:
+		print ("Starting client listening on %s and port %d..." % (host, port))
+		client = Client(host, port)
 		while True:
-			gg.update()
+			client.Loop()
+			sleep(0.001)
+	else:
+		pass
 
 # End multiplayer stuff -------------
 
@@ -523,6 +526,24 @@ def enterHumanPlayer():
 	print ("<<< Welcome to Gnav The Card Game >>>")
 	print (sys.version)
 	return input("Please enter your name: ")
+
+def ask(question, answers = []):
+	if not answers:
+		answers = ['y', 'n']
+	possibleAnswers = ""
+	for answer in answers:
+		possibleAnswers += answer + '/'
+	value = -1
+	error = True
+	while error:
+		try:
+			choice = input("%s (%s)? " % (question, possibleAnswers[:-1]))
+			value = answers.index(choice)
+			error = False
+		except ValueError:
+			value = -1
+			print("Please select either of (%s)" % (possibleAnswers[:-1]))
+	return value
 
 def quote(text):
 	return "'" + text + "'"
