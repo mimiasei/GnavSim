@@ -392,10 +392,10 @@ def proclaimWinner(player):
 
 print ("<<< Welcome to Gnav The Card Game >>>")
 print (sys.version)
-choice = ask("Play multiplayer game")
+choice = ask("Play multiplayer game", 0)
 if choice == 0:
 	speaker = gnavChat.ChatSpeaker()
-	gnavChat.StartOrMPGame()
+	gnavChat.StartClient()
 else:
 	speaker = Speaker()
 	playGame()

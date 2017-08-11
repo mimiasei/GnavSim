@@ -18,7 +18,7 @@ def ask(question, answers = []):
 			possibleAnswers += answer + '/'
 	value = -1
 	error = True
-	text = "%s (%s)? " % (question, possibleAnswers[:-1]) if noChoice else question
+	text = ("%s (%s)? " % (question, possibleAnswers[:-1])) if not noChoice else question
 	while error:
 		try:
 			choice = input(text)
