@@ -3,7 +3,9 @@
 import os, sys
 import random
 import time
-import gnavtools
+from gnavtools import ask
+from gnavtools import quote
+from gnavtools import Speaker
 import gnavChat
 
 PLAYERS = ["Kristoffer", "Matias", "Johannes"] #, "Miriam", "Mikkel", "Emil", "Oivind", "Ask"
@@ -251,11 +253,11 @@ class Human(Player):
 # ------------- End of classes ---------------		
 
 def playGame():
-	speaker = gnavtools.Speaker()
+	speaker = Speaker()
 
 	players = []
 
-	humanName = enterHumanPlayer()
+	humanName = input("Please enter your name: ")
 	human = Human(humanName, len(PLAYERS) + 1, speaker)
 
 	for index, name in enumerate(PLAYERS):
@@ -344,7 +346,7 @@ def playGame():
 
 		round += 1
 		speaker.say ("")
-		Human("dummy", 666).inputYesNo("Press any key to continue, okay")
+		ask("Press any key to continue", -1)
 		speaker.say ("")
 
 	proclaimWinner(highestScore[0])
@@ -386,10 +388,14 @@ def proclaimWinner(player):
 	speaker.say ("<<" + int(len(text) - 4) * " " + ">>")
 	speaker.say ("<" * int(len(text) / 2) + ">" * int(len(text) / 2))
 
-def enterHumanPlayer():
-	speaker.say ("<<< Welcome to Gnav The Card Game >>>")
-	speaker.say (sys.version)
-	return input("Please enter your name: ")
+# --------------------------------------------------------------------------
 
-StartOrMPGame()
-playGame()
+print ("<<< Welcome to Gnav The Card Game >>>")
+print (sys.version)
+choice = ask("Play multiplayer game")
+if choice == 0:
+	speaker = gnavChat.ChatSpeaker()
+	gnavChat.StartOrMPGame()
+else:
+	speaker = Speaker()
+	playGame()

@@ -5,7 +5,8 @@ from weakref import WeakKeyDictionary
 from PodSixNet.Channel import Channel
 from PodSixNet.Server import Server
 from PodSixNet.Connection import ConnectionListener, connection
-import gnavtools
+from gnavtools import ask
+from gnavtools import Speaker
 
 # Multiplayer stuff -----------------
 HOST = "localhost"
@@ -130,30 +131,31 @@ def StartOrMPGame():
 		host, port = sys.argv[1].split(":")
 		port = int(port)
 
-	choice = ask("Select Server, Client or Not multiplayer", ['s', 'c', 'n'])
-	if choice == 0:
-		print ("Starting server on %s and port %d..." % (host, port))
-		server = ChatServer(localaddr=(host, port))
-		server.Launch()
-	elif choice == 1:
-		print ("Starting client listening on %s and port %d..." % (host, port))
-		client = Client(host, port)
-		while True:
-			client.Loop()
-			sleep(0.001)
-	else:
-		pass
+	choice = -1
+	while choice < 0 or choice > 1:
+		choice = ask("Select Server or Client", ['s', 'c'])
+		if choice == 0:
+			print ("Starting server on %s and port %d..." % (host, port))
+			server = ChatServer(localaddr=(host, port))
+			server.Launch()
+		elif choice == 1:
+			print ("Starting client listening on %s and port %d..." % (host, port))
+			client = Client(host, port)
+			while True:
+				client.Loop()
+				sleep(0.001)
+	return choice
 
-class ChatSpeaker(gnavtools.Speaker):
+class ChatSpeaker(Speaker):
 
 	host = ""
 	port = 0
 	client = None
 
-	def initChat(client, host = Host, port = PORT):
+	def initChat(client, host = HOST, port = PORT):
+		self.client = client
 		self.host = host
 		self.port = port
-		self.client = client
 
 	def say(self, what):
 		self.client.send({"action": "message", "message": what.rstrip("\n")})
