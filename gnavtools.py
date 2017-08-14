@@ -7,6 +7,10 @@ class Speaker(object):
 		print (what)
 
 def ask(question, answers = []):
+	"""
+	answers = -1 : auto press any key (i.e. no questions, all answers accepted)
+	answers = 0 : auto y/n answers
+	"""
 	noChoice = False
 	if answers == -1:
 		noChoice = True

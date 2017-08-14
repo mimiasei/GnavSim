@@ -1,13 +1,9 @@
 import sys
-from sys import stdin, exit
 from time import sleep, localtime
 from weakref import WeakKeyDictionary
-from PodSixNet.Channel import Channel
-from PodSixNet.Server import Server
 
-# Multiplayer stuff -----------------
-HOST = "localhost"
-PORT = 112
+from PodSixNet.Server import Server
+from PodSixNet.Channel import Channel
 
 class ClientChannel(Channel):
 	"""
@@ -30,23 +26,6 @@ class ClientChannel(Channel):
 	def Network_nickname(self, data):
 		self.nickname = data['nickname']
 		self._server.SendPlayers()
-
-	def Network_command(self, data):
-		"""
-		Command types:
-		0 : swap with player
-		1 : draw drom deck
-		2 : knock on table (when being handed the Narren card at start)
-		"""
-		cmd = data['command']
-		if command == 'swap':
-			return (0, data['player']) #tuple: (cmd type, data: player swapping with)
-		elif command == 'draw':
-			return 1 #cmd type
-		elif command == 'knock':
-			return 2 #cmd type
-		else:
-			return -1 #do nothing
 
 class ChatServer(Server):
 	channelClass = ClientChannel
@@ -81,13 +60,12 @@ class ChatServer(Server):
 			self.Pump()
 			sleep(0.0001)
 
-# ----------------------------------------------------------------
+# get command line argument of server, port
 if len(sys.argv) != 2:
-	host = HOST
-	port = PORT
+	print("Usage:", sys.argv[0], "host:port")
+	print("e.g.", sys.argv[0], "localhost:31425")
 else:
 	host, port = sys.argv[1].split(":")
-	port = int(port)
-print ("Starting gnav server on %s and port %d..." % (host, port))
-server = ChatServer(localaddr=(host, port))
-server.Launch()
+	s = ChatServer(localaddr=(host, int(port)))
+	s.Launch()
+

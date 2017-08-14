@@ -189,10 +189,7 @@ class Deck(object):
 		print ("INFO: A %s card was discarded." % (card.name))
 
 	def testLengthSum(self):
-		if (len(self.cards) + len(self.discardPile) == 42):
-			#print ("All good, sum of piles piles is 42.")
-			1 == 1
-		else:
+		if (len(self.cards) + len(self.discardPile) !== 42):
 			print ("INFO: Warning! Sum of piles is not 42.")
 			self.printCards()
 			self.printCards(True)
@@ -209,38 +206,22 @@ class Human(Player):
 
 	human = True
 
-	# def __init__(self, name, pid, speaker = None):
-	# 	super(Human, self).__init__(self, name, pid, speaker)
-
 	def setHeldCard(self, card, silent = False):
 		self.printGotCard(card.name)
 		super(Human, self).setHeldCard(card, silent)
 
 	def knockOnTable(self):
-		result = self.inputYesNo("Knock on the table")
+		result = ask("Knock on the table", 0) == 0
 		if (result):
 			speaker.say (self.name + self.TXT_KNOCK)
 		return result
 
-	# def drawFromDeck(self, deck):
-	# 	super(Human, self).drawFromDeck(deck)
-
 	def requestSwap(self, toPlayer):
-		#result = self.inputYesNo("Do you want to swap cards with %s" % (toPlayer.name))
-		#if (result):
 		speaker.say (self.sayTo(toPlayer, 0) + quote(self.TXT_WANT_TO_SWAP))
-		#return result
-
-	# def swapWithPlayer(self, fromPlayer):
-	# 	super(Human, self).swapWithPlayer(fromPlayer)
 
 	def printGotCard(self, cardName = ""):
 		card = self.heldCard.name if cardName == "" else cardName
 		speaker.say ("Player %s, you got the card %s." % (self.name, card))
-
-	def inputYesNo(self, question):
-		choice = input("%s (y/n)? " % (question))
-		return choice.upper() == 'Y'
 
 	def testForSwap(self, toPlayer):
 		text = "Do you want to "
@@ -248,17 +229,45 @@ class Human(Player):
 			text += "draw from the deck"
 		else:
 			text += "swap cards with %s" % (toPlayer.name)
-		return self.inputYesNo(text)
+		return ask(text, 0) == 0			
+
+class PlayType(object):
+	
+	playType = 0 # 0 = max rounds, 1 = reach score
+	value = 0 # current value, either round or highest score
+	maxValue = 0 # value to reach, either rounds or score
+
+	def __init__(self, playType, maxValue):
+		self.playType = playType
+		self.maxValue = maxValue
+
+	def isGameOver(self):
+		return self.value >= self.maxValue
+
+	def incValue(self):
+		self.value += 1
+
+	def setValue(self, value):
+		self.value = value
+
 
 # ------------- End of classes ---------------		
 
 def playGame():
+	#max_rounds = MAX_ROUNDS
 	speaker = Speaker()
-
 	players = []
-
 	humanName = input("Please enter your name: ")
 	human = Human(humanName, len(PLAYERS) + 1, speaker)
+	choice = ask("Play X rounds or first to reach Score", ["x", "s"])
+	if (choice == 0):
+		maxValue = int(input("Enter number of rounds to play: "))
+	elif (choice == 1):
+		maxValue = int(input("Enter score to reach: "))
+	else:
+		choice = 0
+		maxValue = 5
+	playType = PlayType(choice, maxValue)
 
 	for index, name in enumerate(PLAYERS):
 		players.append(Player(name, index, speaker))
@@ -268,7 +277,7 @@ def playGame():
 	deck = Deck()
 	round = 1
 
-	while not round > MAX_ROUNDS:
+	while not playType.isGameOver():
 		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)))
 
 		#Draw cards for each player
@@ -345,9 +354,15 @@ def playGame():
 		speaker.say ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + str(mostWins[0].wins) + ", most losses -> " + mostLosses[0].name + ": " + str(mostLosses[0].losses))
 
 		round += 1
+		if (playType.playType == 0):
+			playType.incValue
+		else:
+			playType.setValue(highestScore[0].score)
+
 		speaker.say ("")
 		ask("Press any key to continue", -1)
 		speaker.say ("")
+	#End of game loop while
 
 	proclaimWinner(highestScore[0])
 
@@ -394,8 +409,14 @@ print ("<<< Welcome to Gnav The Card Game >>>")
 print (sys.version)
 choice = ask("Play multiplayer game", 0)
 if choice == 0:
+	if len(sys.argv) != 2:
+		host = HOST
+		port = PORT
+	else:
+		host, port = sys.argv[1].split(":")
+		port = int(port)
 	speaker = gnavChat.ChatSpeaker()
-	gnavChat.StartClient()
+	gnavChat.StartClient(host, port)
 else:
 	speaker = Speaker()
 	playGame()

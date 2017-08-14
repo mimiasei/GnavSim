@@ -1,16 +1,8 @@
 import sys
+from time import sleep
 from sys import stdin, exit
-from time import sleep, localtime
-from PodSixNet.Channel import Channel
-from PodSixNet.Connection import ConnectionListener, connection
-from gnavtools import ask
-from gnavtools import Speaker
 
-# Multiplayer stuff -----------------
-# HOST = "localhost"
-# PORT = 112
-
-# Client ------------------------------------------
+from PodSixNet.Connection import connection, ConnectionListener
 
 # This example uses Python threads to manage async input from sys.stdin.
 # This is so that I can receive input from the console whilst running the server.
@@ -37,9 +29,6 @@ class Client(ConnectionListener):
 		# continually reads from stdin and sends whatever is typed to the server
 		while 1:
 			connection.Send({"action": "message", "message": stdin.readline().rstrip("\n")})
-
-	def send(self, message):
-		connection.Send({"action": "message", "message": message.rstrip("\n")})
 	
 	#######################################
 	### Network event/message callbacks ###
@@ -64,31 +53,12 @@ class Client(ConnectionListener):
 		print('Server disconnected')
 		exit()
 
-class NetworkClient(object):
-
-	speaker = None
-
-	def __init__(self, speaker):
-		self.speaker = speaker
-		print ("Starting client listening on %s and port %d..." % (self.speaker.host, self.speaker.port))
-		client = Client(self.speaker.host, self.speaker.port)
-
-	def loop(self):
-		while True:
-			client.Loop()
-			sleep(0.001)
-
-class ChatSpeaker(Speaker):
-
-	host = ""
-	port = 0
-	client = None
-
-	def initChat(client, host, port):
-		self.client = client
-		self.host = host
-		self.port = port
-
-	def say(self, what):
-		self.client.send({"action": "message", "message": what.rstrip("\n")})
-		print ("Message: %s sent to server %s:%d." % (what, self.host, self.port))
+if len(sys.argv) != 2:
+	print("Usage:", sys.argv[0], "host:port")
+	print("e.g.", sys.argv[0], "localhost:31425")
+else:
+	host, port = sys.argv[1].split(":")
+	c = Client(host, int(port))
+	while 1:
+		c.Loop()
+		sleep(0.001)
