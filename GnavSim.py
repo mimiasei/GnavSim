@@ -231,7 +231,7 @@ class Human(Player):
 			text += "swap cards with %s" % (toPlayer.name)
 		return ask(text, 0) == 0			
 
-class PlayType(object):
+class GnavGame(object):
 	
 	playType = 0 # 0 = max rounds, 1 = reach score
 	value = 0 # current value, either round or highest score
@@ -267,7 +267,7 @@ def playGame():
 	else:
 		choice = 0
 		maxValue = 5
-	playType = PlayType(choice, maxValue)
+	game = GnavGame(choice, maxValue)
 
 	for index, name in enumerate(PLAYERS):
 		players.append(Player(name, index, speaker))
@@ -277,7 +277,7 @@ def playGame():
 	deck = Deck()
 	round = 1
 
-	while not playType.isGameOver():
+	while not game.isGameOver():
 		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)))
 
 		#Draw cards for each player
@@ -354,10 +354,10 @@ def playGame():
 		speaker.say ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + str(mostWins[0].wins) + ", most losses -> " + mostLosses[0].name + ": " + str(mostLosses[0].losses))
 
 		round += 1
-		if (playType.playType == 0):
-			playType.incValue
+		if (game.playType == 0):
+			game.incValue
 		else:
-			playType.setValue(highestScore[0].score)
+			game.setValue(highestScore[0].score)
 
 		speaker.say ("")
 		ask("Press any key to continue", -1)
