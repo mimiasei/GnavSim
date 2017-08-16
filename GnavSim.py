@@ -3,6 +3,7 @@
 import os, sys
 import random
 import time
+import threading
 from gnavtools import ask
 from gnavtools import quote
 from gnavtools import Speaker
@@ -66,11 +67,15 @@ class Player(object):
 		fromPlayer.setHeldCard(card)
 
 	def processAnswer(self, returnedCardValue):
-		if (returnedCardValue > 16):
-			if (returnedCardValue > 16 and returnedCardValue < 21): #huset, hesten, katten & dragonen
-				return 1 #Loses 1 score and must ask next player.
-			elif (returnedCardValue == 21): #gjoken
-				return 2 #All other players than the one with Gjoken loses 1 score and turn is over.
+		if (returnedCardValue > 16): #If one of the matador cards (better than (12))
+			if (returnedCardValue > 16 and returnedCardValue < 19): #huset, hesten
+				return 1 #must ask next player.
+			elif (returnedCardValue == 19): #katten
+				return 2 #Loses 1 score and must ask next player.
+			elif (returnedCardValue == 20): #dragonen
+				return 3 #Loses 1 score.
+			elif (returnedCardValue == 21): #gjoeken
+				return 4 #Turn is over for all players.
 		else:
 			return 0 #Nothing happens.
 
@@ -162,7 +167,6 @@ class Deck(object):
 			card = Card(key, val)
 			self.cards.append(card)
 			self.cards.append(card)
-		#self.printCards()
 		self.shuffleDeck()
 
 	def shuffleDeck(self):
@@ -186,10 +190,10 @@ class Deck(object):
 
 	def discard(self, card):
 		self.discardPile.append(card)
-		print ("INFO: A %s card was discarded." % (card.name))
+		#print ("INFO: A %s card was discarded." % (card.name))
 
 	def testLengthSum(self):
-		if (len(self.cards) + len(self.discardPile) !== 42):
+		if not (len(self.cards) + len(self.discardPile) == 42):
 			print ("INFO: Warning! Sum of piles is not 42.")
 			self.printCards()
 			self.printCards(True)
@@ -236,13 +240,15 @@ class GnavGame(object):
 	playType = 0 # 0 = max rounds, 1 = reach score
 	value = 0 # current value, either round or highest score
 	maxValue = 0 # value to reach, either rounds or score
+	isHuman = False
 
-	def __init__(self, playType, maxValue):
+	def __init__(self, playType, maxValue, isHuman):
 		self.playType = playType
 		self.maxValue = maxValue
+		self.isHuman = isHuman
 
 	def isGameOver(self):
-		return self.value >= self.maxValue
+		return (self.value >= self.maxValue)
 
 	def incValue(self):
 		self.value += 1
@@ -257,8 +263,7 @@ def playGame():
 	#max_rounds = MAX_ROUNDS
 	speaker = Speaker()
 	players = []
-	humanName = input("Please enter your name: ")
-	human = Human(humanName, len(PLAYERS) + 1, speaker)
+
 	choice = ask("Play X rounds or first to reach Score", ["x", "s"])
 	if (choice == 0):
 		maxValue = int(input("Enter number of rounds to play: "))
@@ -267,12 +272,18 @@ def playGame():
 	else:
 		choice = 0
 		maxValue = 5
-	game = GnavGame(choice, maxValue)
+	isHuman = False
+	if (ask("Play against computer", 0) == 0):
+		humanName = input("Please enter your name: ")
+		human = Human(humanName, len(PLAYERS) + 1, speaker)
+		players.append(human)
+		isHuman = True
+
+	game = GnavGame(choice, maxValue, isHuman)
 
 	for index, name in enumerate(PLAYERS):
 		players.append(Player(name, index, speaker))
 
-	players.append(human)
 	random.shuffle(players)
 	deck = Deck()
 	round = 1
@@ -355,35 +366,38 @@ def playGame():
 
 		round += 1
 		if (game.playType == 0):
-			game.incValue
+			game.incValue()
 		else:
 			game.setValue(highestScore[0].score)
 
 		speaker.say ("")
-		ask("Press any key to continue", -1)
-		speaker.say ("")
+		if (game.isHuman):
+			ask("Press ENTER to continue", -1)
+			speaker.say ("")
 	#End of game loop while
 
-	proclaimWinner(highestScore[0])
+	proclaimWinner(highestScore[0], game, round)
 
 def askPlayers(nbr, player, players, deck):
 	nextAdd = 1
 	hasSwapped = False
 
 	while not hasSwapped and (nbr + nextAdd) < len(players):
-		speaker.say ("%s is now about to ask the next player, %s, if he wants to swap..." % (player.name, players[nbr + nextAdd].name))
+		#speaker.say ("%s is now about to ask the next player, %s, if he wants to swap..." % (player.name, players[nbr + nextAdd].name))
 		player.requestSwap(players[nbr + nextAdd])
 		returnedCardValue = players[nbr + nextAdd].answerSwap(player)
 		if returnedCardValue == 4:
 			speaker.say (":-) Everybody starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'")
+
 		result = player.processAnswer(returnedCardValue)
-		if (result == 1): #Dragonen, katten, hesten or huset
+		if (result == 1): #Hesten or huset
+			nextAdd += 1
+		elif (result == 2): #katten
 			player.addToScore(-1)
 			nextAdd += 1
-		elif (result == 2): #Gjøken
-			for ply in players:
-				if not (ply.pid == players[nbr + nextAdd].pid):
-					ply.addToScore(-1) #All other players loses 1 score.
+		elif (result == 3): #dragonen
+			player.addToScore(-1)
+		elif (result == 4): #gjoeken
 			return False
 		else: #The two players Swap cards
 			player.swapWithPlayer(players[nbr + nextAdd])
@@ -393,9 +407,14 @@ def askPlayers(nbr, player, players, deck):
 			player.drawFromDeck(deck)
 	return True
 
-def proclaimWinner(player):
+def proclaimWinner(player, game, round):
 	speaker.say ("")
-	text = "<<<<<<<<<<<<<<<<<< The winner of %d rounds of GNAV is... >>>>>>>>>>>>>>>>>>" % (MAX_ROUNDS)
+	text = "<<<<<<<<<<<<<<<<<< "
+	if (game.playType == 0):
+		text += "The winner of %d rounds of GNAV is..." % (game.maxValue)
+	else:
+		text += "The winner after %d rounds reaching score %d is..." % (round, game.maxValue)
+	text += " >>>>>>>>>>>>>>>>>>"
 	speaker.say (text)
 	speaker.say ("<<" + int(len(text) - 4) * " " + ">>")
 	spaces = int((len(text) - 2) / 2) - int(len(player.name) / 2)
@@ -419,4 +438,4 @@ if choice == 0:
 	gnavChat.StartClient(host, port)
 else:
 	speaker = Speaker()
-	playGame()
+	threading.Thread(target = playGame).start()
