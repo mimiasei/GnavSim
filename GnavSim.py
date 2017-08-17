@@ -14,6 +14,10 @@ MAX_ROUNDS = 1
 SWAP_THRESHOLDNUMBER = 4
 SWAP_FUZZINESS = 0.0 #Simulates human error. 0.1 = 10% chance of making a mistake.
 
+# Multiplayer stuff -----------------
+HOST = "localhost"
+PORT = 112
+
 class Player(object):
 
 	pid = 0
@@ -435,7 +439,18 @@ if choice == 0:
 		host, port = sys.argv[1].split(":")
 		port = int(port)
 	speaker = gnavChat.ChatSpeaker()
-	gnavChat.StartClient(host, port)
+	clientThreads = []
+	choice = 0
+	while (choice == 0):
+		networkClient = gnavChat.NetworkClient(speaker, host, port)
+		clientThread = threading.Thread(target = networkClient.loop)
+		clientThreads.append(clientThread)
+		print ("Client thread %d added to list." % len(clientThreads))
+		choice = ask("Create new client", 0)
+
+	print("Starting all %d threads..." % len(clientThreads))
+	for thread in clientThreads:
+		thread.start()
 else:
 	speaker = Speaker()
 	threading.Thread(target = playGame).start()

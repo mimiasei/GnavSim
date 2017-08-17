@@ -3,6 +3,7 @@ from sys import stdin, exit
 from time import sleep, localtime
 from PodSixNet.Channel import Channel
 from PodSixNet.Connection import ConnectionListener, connection
+import _thread
 from gnavtools import ask
 from gnavtools import Speaker
 
@@ -26,19 +27,19 @@ class Client(ConnectionListener):
 		print("Enter your nickname: ")
 		connection.Send({"action": "nickname", "nickname": stdin.readline().rstrip("\n")})
 		# launch our threaded input loop
-		t = start_new_thread(self.InputLoop, ())
+		#t = _thread.start_new_thread(self.InputLoop, ())
 	
 	def Loop(self):
 		connection.Pump()
 		self.Pump()
 	
-	def InputLoop(self):
+	#def InputLoop(self):
 		# horrid threaded input loop
 		# continually reads from stdin and sends whatever is typed to the server
-		while 1:
-			connection.Send({"action": "message", "message": stdin.readline().rstrip("\n")})
+		#while 1:
+		#	connection.Send({"action": "message", "message": stdin.readline().rstrip("\n")})
 
-	def send(self, message):
+	def Send(self, message):
 		connection.Send({"action": "message", "message": message.rstrip("\n")})
 	
 	#######################################
@@ -67,28 +68,29 @@ class Client(ConnectionListener):
 class NetworkClient(object):
 
 	speaker = None
+	client = None
 
-	def __init__(self, speaker):
+	def __init__(self, speaker, host, port):
+		print ("Starting client listening on %s and port %d..." % (host, port))
+		self.client = Client(host, port)
+		speaker.setClient(self.client)
 		self.speaker = speaker
-		print ("Starting client listening on %s and port %d..." % (self.speaker.host, self.speaker.port))
-		client = Client(self.speaker.host, self.speaker.port)
 
 	def loop(self):
 		while True:
-			client.Loop()
+			self.client.Loop()
 			sleep(0.001)
 
 class ChatSpeaker(Speaker):
 
-	host = ""
-	port = 0
 	client = None
 
-	def initChat(client, host, port):
+	def setClient(self, client):
 		self.client = client
-		self.host = host
-		self.port = port
 
 	def say(self, what):
-		self.client.send({"action": "message", "message": what.rstrip("\n")})
-		print ("Message: %s sent to server %s:%d." % (what, self.host, self.port))
+		if not (client == None):
+			self.client.Send({ "action": "message", "message": what })
+			print ("Message: %s sent to server %s:%d." % (what, self.client.host, self.client.port))
+		else:
+			print ("Error: Client not set, unable to say message over network.")
