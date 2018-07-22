@@ -12,7 +12,7 @@ import gnavChat
 PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Oivind", "Ask"]
 MAX_ROUNDS = 1
 SWAP_THRESHOLDNUMBER = 4
-SWAP_FUZZINESS = 0.1 #Simulates human error. 0.1 = 10% chance of making a mistake.
+SWAP_FUZZINESS = 0.03 #Simulates human error. 0.1 = 10% chance of making a mistake.
 
 # Multiplayer stuff -----------------
 HOST = "localhost"
@@ -27,6 +27,8 @@ class Player(object):
 	wins = 0
 	losses = 0
 	speaker = None
+
+	neverSwapsWithDeck = False
 
 	TXT_WANT_TO_SWAP = "Jeg vil gjerne bytte med deg."
 	TXT_ACCEPT_SWAP = "Jada, her er kortet mitt."
@@ -153,6 +155,12 @@ class Card(object):
 
 	name = ""
 	value = 0
+	statement = ""
+	isMatador = False
+	causeNoMoreSwap = False
+	causeLosePoint = False
+	causeAllLosePointAndStopGame = False
+	isFool = False
 
 	def __init__(self, name, value):
 		self.name = name
@@ -160,6 +168,47 @@ class Card(object):
 
 	def __repr__(self):
 		return '%s: %d' % (self.name, self.value)
+
+class Cuckoo(Card):
+	name = "Gjøken"
+	value = 21
+	statement = "Stå for gjøk!"
+	isMatador = True
+	causeAllLosePointAndStopGame = True
+
+class Dragoon(Card):
+	name = "Dragonen"
+	value = 20
+	statement = "Hogg av!"
+	isMatador = True
+	causeNoMoreSwap = True
+	causeLosePoint = True
+
+class Cat(Card):
+	name = "Katten"
+	value = 19
+	statement = "Kiss!"
+	isMatador = True
+	causeLosePoint = True
+
+class Horse(Card):
+	name = "Hesten"
+	value = 18
+	statement = "Hest forbi!"
+	isMatador = True
+
+class House(Card):
+	name = "Huset"
+	value = 17
+	statement = "Hus forbi!"
+	isMatador = True
+
+class Fool(Card):
+	name = "Narren"
+	value = 4
+	statement = "<Bank bank bank>!"
+	isFool = True
+
 
 class Deck(object):
 
@@ -286,7 +335,10 @@ def playGame():
 	game = GnavGame(choice, maxValue, isHuman)
 
 	for index, name in enumerate(PLAYERS):
-		players.append(Player(name, index, speaker))
+		newPlayer = Player(name, index, speaker)
+		if (index == 2):
+			newPlayer.neverSwapsWithDeck = True
+		players.append(newPlayer)
 
 	random.shuffle(players)
 	deck = Deck()
@@ -313,8 +365,13 @@ def playGame():
 					else:
 						wantsToSwap = True
 				else:
-					if player.testForSwap(players[nbr + 1]): #Only ask to swap if card is 4 or less.
+					#speaker.say ("PS! " + player.name + "  never swaps is: " + str(player.neverSwapsWithDeck))
+
+					if not player.neverSwapsWithDeck and player.testForSwap(players[nbr + 1]): #Only ask to swap if card is 4 or less.
 						wantsToSwap = True
+					else:
+						if player.neverSwapsWithDeck:
+							speaker.say (player.name + " never swaps!")
 
 				if wantsToSwap:
 					if not (askPlayers(nbr, player, players, deck)): #Check if Staa for gjok! is called.
