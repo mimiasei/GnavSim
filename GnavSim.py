@@ -336,7 +336,7 @@ def playGame():
 
 	for index, name in enumerate(PLAYERS):
 		newPlayer = Player(name, index, speaker)
-		if (index == 2):
+		if (index == 2): #Test, make Johannes a player that never swaps with anyone nor the deck
 			newPlayer.neverSwapsWithDeck = True
 		players.append(newPlayer)
 
@@ -346,6 +346,11 @@ def playGame():
 
 	while not game.isGameOver():
 		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)))
+		speaker.say("Current dealer is: " + players[0].name)
+
+		#Pop out top player as dealer and insert at end
+		oldDealer = players.pop(0) #Pop out first player in list, to act as dealer
+		players.append(oldDealer) #Reinsert the dealer at the end of list
 
 		#Draw cards for each player
 		for player in players:
@@ -365,8 +370,6 @@ def playGame():
 					else:
 						wantsToSwap = True
 				else:
-					#speaker.say ("PS! " + player.name + "  never swaps is: " + str(player.neverSwapsWithDeck))
-
 					if not player.neverSwapsWithDeck and player.testForSwap(players[nbr + 1]): #Only ask to swap if card is 4 or less.
 						wantsToSwap = True
 					else:
@@ -429,6 +432,7 @@ def playGame():
 		if (game.playType == 0):
 			game.incValue()
 		else:
+			speaker.say("INFO: Setting " + str(highestScore[0].score) + " as new best score value for game.")
 			game.setValue(highestScore[0].score)
 
 		speaker.say ("")
@@ -437,6 +441,7 @@ def playGame():
 			speaker.say ("")
 		#else:
 			#time.sleep(1)
+
 	#End of game loop while
 
 	proclaimWinner(highestScore[0], game, round)
