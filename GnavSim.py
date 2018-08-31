@@ -9,10 +9,10 @@ from gnavtools import quote
 from gnavtools import Speaker
 import gnavChat
 
-PLAYERS = ["Kristoffer", "Matias", "Johannes"] #, "Miriam", "Mikkel", "Emil", "Oivind", "Ask"
+PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Oivind", "Ask"]
 MAX_ROUNDS = 1
 SWAP_THRESHOLDNUMBER = 4
-SWAP_FUZZINESS = 0.0 #Simulates human error. 0.1 = 10% chance of making a mistake.
+SWAP_FUZZINESS = 0.03 #Simulates human error. 0.1 = 10% chance of making a mistake.
 
 # Multiplayer stuff -----------------
 HOST = "localhost"
@@ -27,6 +27,8 @@ class Player(object):
 	wins = 0
 	losses = 0
 	speaker = None
+
+	neverSwapsWithDeck = False
 
 	TXT_WANT_TO_SWAP = "Jeg vil gjerne bytte med deg."
 	TXT_ACCEPT_SWAP = "Jada, her er kortet mitt."
@@ -72,7 +74,7 @@ class Player(object):
 
 	def processAnswer(self, returnedCardValue):
 		if (returnedCardValue > 16): #If one of the matador cards (better than (12))
-			if (returnedCardValue > 16 and returnedCardValue < 19): #huset, hesten
+			if (returnedCardValue == 17 or returnedCardValue == 18): #huset, hesten
 				return 1 #must ask next player.
 			elif (returnedCardValue == 19): #katten
 				return 2 #Loses 1 score and must ask next player.
@@ -153,6 +155,12 @@ class Card(object):
 
 	name = ""
 	value = 0
+	statement = ""
+	isMatador = False
+	causeNoMoreSwap = False
+	causeLosePoint = False
+	causeAllLosePointAndStopGame = False
+	isFool = False
 
 	def __init__(self, name, value):
 		self.name = name
@@ -160,6 +168,47 @@ class Card(object):
 
 	def __repr__(self):
 		return '%s: %d' % (self.name, self.value)
+
+class Cuckoo(Card):
+	name = "Gjøken"
+	value = 21
+	statement = "Stå for gjøk!"
+	isMatador = True
+	causeAllLosePointAndStopGame = True
+
+class Dragoon(Card):
+	name = "Dragonen"
+	value = 20
+	statement = "Hogg av!"
+	isMatador = True
+	causeNoMoreSwap = True
+	causeLosePoint = True
+
+class Cat(Card):
+	name = "Katten"
+	value = 19
+	statement = "Kiss!"
+	isMatador = True
+	causeLosePoint = True
+
+class Horse(Card):
+	name = "Hesten"
+	value = 18
+	statement = "Hest forbi!"
+	isMatador = True
+
+class House(Card):
+	name = "Huset"
+	value = 17
+	statement = "Hus forbi!"
+	isMatador = True
+
+class Fool(Card):
+	name = "Narren"
+	value = 4
+	statement = "<Bank bank bank>!"
+	isFool = True
+
 
 class Deck(object):
 
@@ -286,7 +335,10 @@ def playGame():
 	game = GnavGame(choice, maxValue, isHuman)
 
 	for index, name in enumerate(PLAYERS):
-		players.append(Player(name, index, speaker))
+		newPlayer = Player(name, index, speaker)
+		if (index == 2): #Test, make Johannes a player that never swaps with anyone nor the deck
+			newPlayer.neverSwapsWithDeck = True
+		players.append(newPlayer)
 
 	random.shuffle(players)
 	deck = Deck()
@@ -294,6 +346,11 @@ def playGame():
 
 	while not game.isGameOver():
 		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)))
+		speaker.say("Current dealer is: " + players[0].name)
+
+		#Pop out top player as dealer and insert at end
+		oldDealer = players.pop(0) #Pop out first player in list, to act as dealer
+		players.append(oldDealer) #Reinsert the dealer at the end of list
 
 		#Draw cards for each player
 		for player in players:
@@ -313,8 +370,11 @@ def playGame():
 					else:
 						wantsToSwap = True
 				else:
-					if player.testForSwap(players[nbr + 1]): #Only ask to swap if card is 4 or less.
+					if not player.neverSwapsWithDeck and player.testForSwap(players[nbr + 1]): #Only ask to swap if card is 4 or less.
 						wantsToSwap = True
+					else:
+						if player.neverSwapsWithDeck:
+							speaker.say (player.name + " never swaps!")
 
 				if wantsToSwap:
 					if not (askPlayers(nbr, player, players, deck)): #Check if Staa for gjok! is called.
@@ -372,12 +432,16 @@ def playGame():
 		if (game.playType == 0):
 			game.incValue()
 		else:
+			speaker.say("INFO: Setting " + str(highestScore[0].score) + " as new best score value for game.")
 			game.setValue(highestScore[0].score)
 
 		speaker.say ("")
 		if (game.isHuman):
 			ask("Press ENTER to continue", -1)
 			speaker.say ("")
+		#else:
+			#time.sleep(1)
+
 	#End of game loop while
 
 	proclaimWinner(highestScore[0], game, round)
@@ -385,8 +449,9 @@ def playGame():
 def askPlayers(nbr, player, players, deck):
 	nextAdd = 1
 	hasSwapped = False
+	dragonen = False
 
-	while not hasSwapped and (nbr + nextAdd) < len(players):
+	while not hasSwapped and not dragonen and (nbr + nextAdd) < len(players):
 		#speaker.say ("%s is now about to ask the next player, %s, if he wants to swap..." % (player.name, players[nbr + nextAdd].name))
 		player.requestSwap(players[nbr + nextAdd])
 		returnedCardValue = players[nbr + nextAdd].answerSwap(player)
@@ -400,8 +465,10 @@ def askPlayers(nbr, player, players, deck):
 			player.addToScore(-1)
 			nextAdd += 1
 		elif (result == 3): #dragonen
+			dragonen = True
 			player.addToScore(-1)
 		elif (result == 4): #gjoeken
+			subractFromAllPlayers(players[nbr + nextAdd], players)
 			return False
 		else: #The two players Swap cards
 			player.swapWithPlayer(players[nbr + nextAdd])
@@ -410,6 +477,11 @@ def askPlayers(nbr, player, players, deck):
 			speaker.say (player.name + " draws from the deck.")
 			player.drawFromDeck(deck)
 	return True
+
+def subractFromAllPlayers(player, players):
+	for ply in players:
+		if not ply.pid == player.pid: #Subtract 1 score one from all players except current
+			ply.addToScore(-1)
 
 def proclaimWinner(player, game, round):
 	speaker.say ("")
@@ -453,4 +525,5 @@ if choice == 0:
 		thread.start()
 else:
 	speaker = Speaker()
-	threading.Thread(target = playGame).start()
+	#threading.Thread(target = playGame).start()
+	playGame()
