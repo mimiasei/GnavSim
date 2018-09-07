@@ -39,28 +39,28 @@ class Player {
 		this.neverSwapsWithDeck = false;
 	}
 
-	function setHeldCard(card, silent = False) {
+	setHeldCard(card, silent = False) {
 		this.heldCard = card;
 		//if not silent: speaker.say ("INFO: " + this.name + " now has: " + this.heldCard.name)
 	}
 
-	function drawFromDeck(deck) {
+	drawFromDeck(deck) {
 		this.discard(deck);
 		this.setHeldCard(deck.draw());
 	}
 
-	function discard(deck) {
+	discard(deck) {
 		if not (this.heldCard == None) {
 			deck.discard(this.heldCard);
 		}
 		this.heldCard = null;
 	}
 	
-	function requestSwap(toPlayer) {
+	requestSwap(toPlayer) {
 		speaker.say (this.sayTo(toPlayer, 0) + quote(this.TXT_WANT_TO_SWAP));
 	}
 
-	function answerSwap(fromPlayer) {
+	answerSwap(fromPlayer) {
 		let val = this.heldCard.value;
 		if (val <= 16) {
 			speaker.say (this.sayTo(fromPlayer, 1) + quote(this.TXT_ACCEPT_SWAP));
@@ -72,14 +72,14 @@ class Player {
 		return val;
 	}
 
-	function swapWithPlayer(fromPlayer) {
+	swapWithPlayer(fromPlayer) {
 		speaker.say ("INFO: %s swaps cards with %s." % (this.name, fromPlayer.name));
 		let card = this.heldCard;
 		this.setHeldCard(fromPlayer.heldCard);
 		fromPlayer.setHeldCard(card);
 	}
 
-	function processAnswer(returnedCardValue) {
+	processAnswer(returnedCardValue) {
 		if (returnedCardValue > 16) { //If one of the matador cards (better than (12))
 			if (returnedCardValue == 17 || returnedCardValue == 18) { //huset, hesten
 				return 1; //must ask next player.
@@ -95,32 +95,32 @@ class Player {
 		}
 	}
 
-	function addToScore(value) {
+	addToScore(value) {
 		this.score += value;
 		let verb = value > 0 ? "added" : "subtracted";
 		let prepos = value > 0 ? "to" : "from";
 		speaker.say ("${this.name} ${verb} ${Math.abs(value)} ${prepos} score.");
 	}
 
-	function sayTo(toPlayer, typ) {
+	sayTo(toPlayer, typ) {
 		let verb = typ == 0 ? ' asks ' : ' answers ';
 		return this.name + verb + toPlayer.name + ": ";
 	}
 
-	function sayPass() {
+	sayPass() {
 		return this.name + this.TXT_PASSES
 	}
 
-	function sayNoFool(player) {
+	sayNoFool(player) {
 		return this.TXT_NO_WAY_FOOL % (player.name)
 	}
 
-	function knockOnTable() {
+	knockOnTable() {
 		speaker.say (this.name + this.TXT_KNOCK)
 		return True
 	}
 
-	function testForSwap(toPlayer = null) {
+	testForSwap(toPlayer = null) {
 		let value = this.heldCard.value;
 		let swap = SWAP_THRESHOLDNUMBER + 4;
 		let chance = Math.random();
@@ -257,12 +257,12 @@ class Deck {
 		this.shuffleDeck();
 	}
 
-	function shuffleDeck() {
+	shuffleDeck() {
 		console.log ("*** INFO: The deck is shuffled.");
 		shuffle(this.cards);
 	}
 
-	function draw() {
+	draw() {
 		let card = null;
 		if (this.isDeckEmpty()) {
 			this.useDiscardPile();
@@ -270,23 +270,23 @@ class Deck {
 		return this.cards.pop();
 	}
 
-	function useDiscardPile() {
+	useDiscardPile() {
 		console.log("**** INFO: The discard deck is used.");
 		this.cards = this.discardPile;
 		this.shuffleDeck();
 		this.discardPile = [];
 	}
 
-	function isDeckEmpty() {
+	isDeckEmpty() {
 		return len(this.cards) === 0;
 	}
 
-	function discard(card) {
+	discard(card) {
 		this.discardPile.append(card);
 		//console.log ("INFO: A %s card was discarded." % (card.name));
 	}
 
-	function testLengthSum() {
+	testLengthSum() {
 		if (len(this.cards) + len(this.discardPile) !== 42) {
 			console.log ("INFO: Warning! Sum of piles is not 42.");
 			this.printCards();
@@ -294,7 +294,7 @@ class Deck {
 		}
 	}
 
-	function printCards(discarded = false) {
+	printCards(discarded = false) {
 		let cardsLine = discarded ? "Discarded: " : "Cards: ";
 		let cardList = discarded ? this.discardPile : this.cards;
 		for (card in cardList) {
@@ -311,12 +311,12 @@ class Human extends Player {
 		this.human = true;
 	}
 
-	function setHeldCard(card, silent = false) {
+	setHeldCard(card, silent = false) {
 		this.printGotCard(card.name);
 		super.setHeldCard(card, silent);
 	}
 
-	function knockOnTable() {
+	knockOnTable() {
 		result = ask("Knock on the table", 0) === 0;
 		if (result) {
 			speaker.say (this.name + this.TXT_KNOCK);
@@ -324,16 +324,16 @@ class Human extends Player {
 		return result
 	}
 
-	function requestSwap(toPlayer) {
+	requestSwap(toPlayer) {
 		speaker.say (this.sayTo(toPlayer, 0) + quote(this.TXT_WANT_TO_SWAP));
 	}
 
-	function printGotCard(cardName = "") {
+	printGotCard(cardName = "") {
 		card = cardName === "" ? this.heldCard.name : cardName;
 		speaker.say ("Player ${his.name}, you got the card ${card}.");
 	}
 
-	function testForSwap(toPlayer) {
+	testForSwap(toPlayer) {
 		let text = "Do you want to ";
 		if (toPlayer == "deck") {
 			text += "draw from the deck";
@@ -353,15 +353,15 @@ class GnavGame {
 		this.isHuman = isHuman;
 	}
 
-	function isGameOver() {
+	isGameOver() {
 		return (this.value >= this.maxValue);
 	}
 
-	function incValue() {
+	incValue() {
 		this.value++;
 	}
 
-	function setValue(value) {
+	setValue(value) {
 		this.value = value;
 	}
 }
