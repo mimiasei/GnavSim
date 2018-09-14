@@ -39,28 +39,28 @@ class Player {
 		this.neverSwapsWithDeck = false;
 	}
 
-	function setHeldCard(card, silent = False) {
+	setHeldCard(card, silent = false) {
 		this.heldCard = card;
 		//if not silent: speaker.say ("INFO: " + this.name + " now has: " + this.heldCard.name)
 	}
 
-	function drawFromDeck(deck) {
+	drawFromDeck(deck) {
 		this.discard(deck);
 		this.setHeldCard(deck.draw());
 	}
 
-	function discard(deck) {
+	discard(deck) {
 		if not (this.heldCard == None) {
 			deck.discard(this.heldCard);
 		}
 		this.heldCard = null;
 	}
 	
-	function requestSwap(toPlayer) {
+	requestSwap(toPlayer) {
 		speaker.say (this.sayTo(toPlayer, 0) + quote(this.TXT_WANT_TO_SWAP));
 	}
 
-	function answerSwap(fromPlayer) {
+	answerSwap(fromPlayer) {
 		let val = this.heldCard.value;
 		if (val <= 16) {
 			speaker.say (this.sayTo(fromPlayer, 1) + quote(this.TXT_ACCEPT_SWAP));
@@ -72,14 +72,14 @@ class Player {
 		return val;
 	}
 
-	function swapWithPlayer(fromPlayer) {
+	swapWithPlayer(fromPlayer) {
 		speaker.say ("INFO: %s swaps cards with %s." % (this.name, fromPlayer.name));
 		let card = this.heldCard;
 		this.setHeldCard(fromPlayer.heldCard);
 		fromPlayer.setHeldCard(card);
 	}
 
-	function processAnswer(returnedCardValue) {
+	processAnswer(returnedCardValue) {
 		if (returnedCardValue > 16) { //If one of the matador cards (better than (12))
 			if (returnedCardValue == 17 || returnedCardValue == 18) { //huset, hesten
 				return 1; //must ask next player.
@@ -95,32 +95,32 @@ class Player {
 		}
 	}
 
-	function addToScore(value) {
+	addToScore(value) {
 		this.score += value;
 		let verb = value > 0 ? "added" : "subtracted";
 		let prepos = value > 0 ? "to" : "from";
 		speaker.say ("${this.name} ${verb} ${Math.abs(value)} ${prepos} score.");
 	}
 
-	function sayTo(toPlayer, typ) {
+	sayTo(toPlayer, typ) {
 		let verb = typ == 0 ? ' asks ' : ' answers ';
 		return this.name + verb + toPlayer.name + ": ";
 	}
 
-	function sayPass() {
+	sayPass() {
 		return this.name + this.TXT_PASSES
 	}
 
-	function sayNoFool(player) {
+	sayNoFool(player) {
 		return this.TXT_NO_WAY_FOOL % (player.name)
 	}
 
-	function knockOnTable() {
+	knockOnTable() {
 		speaker.say (this.name + this.TXT_KNOCK)
-		return True
+		return true
 	}
 
-	function testForSwap(toPlayer = null) {
+	testForSwap(toPlayer = null) {
 		let value = this.heldCard.value;
 		let swap = SWAP_THRESHOLDNUMBER + 4;
 		let chance = Math.random();
@@ -257,12 +257,12 @@ class Deck {
 		this.shuffleDeck();
 	}
 
-	function shuffleDeck() {
+	shuffleDeck() {
 		console.log ("*** INFO: The deck is shuffled.");
 		shuffle(this.cards);
 	}
 
-	function draw() {
+	draw() {
 		let card = null;
 		if (this.isDeckEmpty()) {
 			this.useDiscardPile();
@@ -270,23 +270,23 @@ class Deck {
 		return this.cards.pop();
 	}
 
-	function useDiscardPile() {
+	useDiscardPile() {
 		console.log("**** INFO: The discard deck is used.");
 		this.cards = this.discardPile;
 		this.shuffleDeck();
 		this.discardPile = [];
 	}
 
-	function isDeckEmpty() {
+	isDeckEmpty() {
 		return len(this.cards) === 0;
 	}
 
-	function discard(card) {
+	discard(card) {
 		this.discardPile.append(card);
 		//console.log ("INFO: A %s card was discarded." % (card.name));
 	}
 
-	function testLengthSum() {
+	testLengthSum() {
 		if (len(this.cards) + len(this.discardPile) !== 42) {
 			console.log ("INFO: Warning! Sum of piles is not 42.");
 			this.printCards();
@@ -294,7 +294,7 @@ class Deck {
 		}
 	}
 
-	function printCards(discarded = false) {
+	printCards(discarded = false) {
 		let cardsLine = discarded ? "Discarded: " : "Cards: ";
 		let cardList = discarded ? this.discardPile : this.cards;
 		for (card in cardList) {
@@ -311,12 +311,12 @@ class Human extends Player {
 		this.human = true;
 	}
 
-	function setHeldCard(card, silent = false) {
+	setHeldCard(card, silent = false) {
 		this.printGotCard(card.name);
 		super.setHeldCard(card, silent);
 	}
 
-	function knockOnTable() {
+	knockOnTable() {
 		result = ask("Knock on the table", 0) === 0;
 		if (result) {
 			speaker.say (this.name + this.TXT_KNOCK);
@@ -324,16 +324,16 @@ class Human extends Player {
 		return result
 	}
 
-	function requestSwap(toPlayer) {
+	requestSwap(toPlayer) {
 		speaker.say (this.sayTo(toPlayer, 0) + quote(this.TXT_WANT_TO_SWAP));
 	}
 
-	function printGotCard(cardName = "") {
+	printGotCard(cardName = "") {
 		card = cardName === "" ? this.heldCard.name : cardName;
 		speaker.say ("Player ${his.name}, you got the card ${card}.");
 	}
 
-	function testForSwap(toPlayer) {
+	testForSwap(toPlayer) {
 		let text = "Do you want to ";
 		if (toPlayer == "deck") {
 			text += "draw from the deck";
@@ -353,47 +353,50 @@ class GnavGame {
 		this.isHuman = isHuman;
 	}
 
-	function isGameOver() {
+	isGameOver() {
 		return (this.value >= this.maxValue);
 	}
 
-	function incValue() {
+	incValue() {
 		this.value++;
 	}
 
-	function setValue(value) {
+	setValue(value) {
 		this.value = value;
 	}
 }
 
-# ------------- End of classes ---------------		
+// ------------- End of classes ---------------		
 
-function playGame():
-	#max_rounds = MAX_ROUNDS
-	speaker = Speaker()
-	players = []
+function playGame() {
+	//max_rounds = MAX_ROUNDS
+	let speaker = Speaker();
+	let players = [];
 
-	choice = ask("Play X rounds or first to reach Score", ["x", "s"])
-	if (choice == 0):
-		maxValue = int(input("Enter number of rounds to play: "))
-	elif (choice == 1):
-		maxValue = int(input("Enter score to reach: "))
-	else:
-		choice = 0
-		maxValue = 5
-	isHuman = False
+	let choice = ask("Play X rounds or first to reach Score", ["x", "s"]);
+	if (choice == 0) {
+		maxValue = parseInt(input("Enter number of rounds to play: "));
+	}
+	else if (choice == 1) {
+		maxValue = parseInt(input("Enter score to reach: "));
+	}
+	else {
+		choice = 0;
+		maxValue = 5;
+	}
+	let isHuman = false;
 	if (ask("Play against computer", 0) == 0):
-		humanName = input("Please enter your name: ")
-		human = Human(humanName, len(PLAYERS) + 1, speaker)
-		players.append(human)
-		isHuman = True
+		let humanName = input("Please enter your name: ");
+		human = Human(humanName, len(PLAYERS) + 1, speaker);
+		players.append(human);
+		isHuman = true;
 
 	game = GnavGame(choice, maxValue, isHuman)
 
 	for index, name in enumerate(PLAYERS):
 		newPlayer = Player(name, index, speaker)
-		if (index == 2): #Test, make Johannes a player that never swaps with anyone nor the deck
-			newPlayer.neverSwapsWithDeck = True
+		if (index == 2): //Test, make Johannes a player that never swaps with anyone nor the deck
+			newPlayer.neverSwapsWithDeck = true
 		players.append(newPlayer)
 
 	shuffle(players)
@@ -404,51 +407,51 @@ function playGame():
 		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)))
 		speaker.say("Current dealer is: " + players[0].name)
 
-		#Pop out top player as dealer and insert at end
-		oldDealer = players.pop(0) #Pop out first player in list, to act as dealer
-		players.append(oldDealer) #Reinsert the dealer at the end of list
+		//Pop out top player as dealer and insert at end
+		oldDealer = players.pop(0) //Pop out first player in list, to act as dealer
+		players.append(oldDealer) //Reinsert the dealer at the end of list
 
-		#Draw cards for each player
+		//Draw cards for each player
 		for player in players:
 			player.drawFromDeck(deck)
-			if player.heldCard.value == 4: #If player receives Narren
+			if player.heldCard.value == 4: //If player receives Narren
 				if player.knockOnTable():
 					player.addToScore(1)
 
-		#Play round
+		//Play round
 		for nbr, player in enumerate(players, 0):
-			wantsToSwap = False
+			wantsToSwap = false
 			sayPass = player.sayPass()
 			if not nbr == len(players) - 1:
-				if players[nbr + 1].heldCard.value == 4: #If the other player has Narren...
-					if not player.testForSwap(players[nbr + 1]): #Do small chance check if player has forgotten someone knocked 3 times.
+				if players[nbr + 1].heldCard.value == 4: //If the other player has Narren...
+					if not player.testForSwap(players[nbr + 1]): //Do small chance check if player has forgotten someone knocked 3 times.
 						sayPass += player.sayNoFool(players[nbr + 1])
 					else:
-						wantsToSwap = True
+						wantsToSwap = true
 				else:
-					if not player.neverSwapsWithDeck and player.testForSwap(players[nbr + 1]): #Only ask to swap if card is 4 or less.
-						wantsToSwap = True
+					if not player.neverSwapsWithDeck and player.testForSwap(players[nbr + 1]): //Only ask to swap if card is 4 or less.
+						wantsToSwap = true
 					else:
 						if player.neverSwapsWithDeck:
 							speaker.say (player.name + " never swaps!")
 
 				if wantsToSwap:
-					if not (askPlayers(nbr, player, players, deck)): #Check if Staa for gjok! is called.
+					if not (askPlayers(nbr, player, players, deck)): //Check if Staa for gjok! is called.
 						break
 				else:
 					speaker.say (sayPass)
 			else:
-				if player.testForSwap("deck"): #Only swap if card is 4 or less.
+				if player.testForSwap("deck"): //Only swap if card is 4 or less.
 					speaker.say (player.name + " draws from the deck.")
-					player.drawFromDeck(deck) #Draw from deck if noone else to swap with.
+					player.drawFromDeck(deck) //Draw from deck if noone else to swap with.
 				else:
 					speaker.say (sayPass)
 
 		speaker.say ("End of round " + str(round) + " ======================================")
-		#End of round
+		//End of round
 
-		#Calculate scores and stats
-		sortedPlayers = sorted(players, key=lambda p: p.heldCard.value, reverse=True)
+		//Calculate scores and stats
+		sortedPlayers = sorted(players, key=lambda p: p.heldCard.value, reverse=true)
 		winner = sortedPlayers[0]
 		winner.wins += 1
 		loser = sortedPlayers[len(sortedPlayers)-1]
@@ -457,21 +460,21 @@ function playGame():
 		winner.addToScore(1)
 		speaker.say ("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name)
 		loser.addToScore(-1)
-		#Search for Narren among players
+		//Search for Narren among players
 		for player in players:
 			if (player.heldCard.value == 4):
 				speaker.say ("Unfortunately, " + player.name + "'s card at end of round is Narren.")
 				player.addToScore(-1)
 
-		#All players toss their cards in the discard pile
+		//All players toss their cards in the discard pile
 		for player in players:
 			player.discard(deck)
 
 		deck.testLengthSum()
 
-		mostWins = sorted(players, key=lambda p: p.wins, reverse=True)
-		mostLosses = sorted(players, key=lambda p: p.losses, reverse=True)
-		highestScore = sorted(players, key=lambda p: p.score, reverse=True)
+		mostWins = sorted(players, key=lambda p: p.wins, reverse=true)
+		mostLosses = sorted(players, key=lambda p: p.losses, reverse=true)
+		highestScore = sorted(players, key=lambda p: p.score, reverse=true)
 
 		scoreLine = "-------> Scores: "
 
@@ -495,51 +498,56 @@ function playGame():
 		if (game.isHuman):
 			ask("Press ENTER to continue", -1)
 			speaker.say ("")
-		#else:
-			#time.sleep(1)
+		//else:
+			//time.sleep(1)
 
-	#End of game loop while
+	//End of game loop while
 
-	proclaimWinner(highestScore[0], game, round)
+	proclaimWinner(highestScore[0], game, round);
+}
 
-function askPlayers(nbr, player, players, deck):
+function askPlayers(nbr, player, players, deck) {
 	nextAdd = 1
-	hasSwapped = False
-	dragonen = False
+	hasSwapped = false
+	dragonen = false
 
 	while not hasSwapped and not dragonen and (nbr + nextAdd) < len(players):
-		#speaker.say ("%s is now about to ask the next player, %s, if he wants to swap..." % (player.name, players[nbr + nextAdd].name))
+		//speaker.say ("%s is now about to ask the next player, %s, if he wants to swap..." % (player.name, players[nbr + nextAdd].name))
 		player.requestSwap(players[nbr + nextAdd])
 		returnedCardValue = players[nbr + nextAdd].answerSwap(player)
 		if returnedCardValue == 4:
 			speaker.say (":-) Everybody starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'")
 
 		result = player.processAnswer(returnedCardValue)
-		if (result == 1): #Hesten or huset
+		if (result == 1): //Hesten or huset
 			nextAdd += 1
-		elif (result == 2): #katten
+		elif (result == 2): //katten
 			player.addToScore(-1)
 			nextAdd += 1
-		elif (result == 3): #dragonen
-			dragonen = True
+		elif (result == 3): //dragonen
+			dragonen = true
 			player.addToScore(-1)
-		elif (result == 4): #gjoeken
+		elif (result == 4): //gjoeken
 			subractFromAllPlayers(players[nbr + nextAdd], players)
-			return False
-		else: #The two players Swap cards
+			return false
+		else: //The two players Swap cards
 			player.swapWithPlayer(players[nbr + nextAdd])
-			hasSwapped = True
-		if not hasSwapped: #If player still hasn't swapped after being last in round
+			hasSwapped = true
+		if not hasSwapped: //If player still hasn't swapped after being last in round
 			speaker.say (player.name + " draws from the deck.")
 			player.drawFromDeck(deck)
-	return True
+	return true;
+}
 
-function subractFromAllPlayers(player, players):
-	for ply in players:
-		if not ply.pid == player.pid: #Subtract 1 score one from all players except current
+function subractFromAllPlayers(player, players) {
+	for (let ply in players) {
+		if not ply.pid == player.pid { //Subtract 1 score one from all players except current
 			ply.addToScore(-1)
+		}
+	}
+}
 
-function proclaimWinner(player, game, round):
+function proclaimWinner(player, game, round) {
 	speaker.say ("")
 	text = "<<<<<<<<<<<<<<<<<< "
 	if (game.playType == 0):
@@ -552,14 +560,14 @@ function proclaimWinner(player, game, round):
 	spaces = int((len(text) - 2) / 2) - int(len(player.name) / 2)
 	speaker.say ("<<" + (" " * spaces) + player.name + (" " * (spaces - 2)) + ">>")
 	speaker.say ("<<" + int(len(text) - 4) * " " + ">>")
-	speaker.say ("<" * int(len(text) / 2) + ">" * int(len(text) / 2))
+	speaker.say ("<" * int(len(text) / 2) + ">" * int(len(text) / 2));
+}
 
-# --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
-console.log ("<<< Welcome to Gnav The Card Game >>>")
-console.log (sys.version)
-choice = ask("Play multiplayer game", 0)
-if choice == 0:
+console.log ("<<< Welcome to Gnav The Card Game >>>");
+let choice = ask("Play multiplayer game", 0);
+if (choice == 0) {
 	if len(sys.argv) != 2:
 		host = HOST
 		port = PORT
@@ -577,9 +585,11 @@ if choice == 0:
 		choice = ask("Create new client", 0)
 
 	console.log("Starting all %d threads..." % len(clientThreads))
-	for thread in clientThreads:
-		thread.start()
+	for (thread in clientThreads) {
+		thread.start();
+	}
+}
 else:
 	speaker = Speaker()
-	#threading.Thread(target = playGame).start()
+	//threading.Thread(target = playGame).start()
 	playGame()
