@@ -391,21 +391,24 @@ function playGame() {
 		players.append(human);
 		isHuman = true;
 
-	game = GnavGame(choice, maxValue, isHuman)
+	let game = GnavGame(choice, maxValue, isHuman);
 
-	for index, name in enumerate(PLAYERS):
-		newPlayer = Player(name, index, speaker)
-		if (index == 2): //Test, make Johannes a player that never swaps with anyone nor the deck
-			newPlayer.neverSwapsWithDeck = true
-		players.append(newPlayer)
+	PLAYERS.forEach(function (name, index) {
+		newPlayer = new Player(name, index, speaker);
+		//Test, make Johannes a player that never swaps with anyone nor the deck
+		if (index == 2) {
+			newPlayer.neverSwapsWithDeck = true;
+		}
+		players.push(newPlayer);
+	}
 
-	shuffle(players)
-	deck = Deck()
-	round = 1
+	shuffle(players);
+	let deck = new Deck()
+	let round = 1;
 
-	while not game.isGameOver():
-		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)))
-		speaker.say("Current dealer is: " + players[0].name)
+	while (!game.isGameOver()) {
+		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)));
+		speaker.say("Current dealer is: " + players[0].name);
 
 		//Pop out top player as dealer and insert at end
 		oldDealer = players.pop(0) //Pop out first player in list, to act as dealer
@@ -500,7 +503,7 @@ function playGame() {
 			speaker.say ("")
 		//else:
 			//time.sleep(1)
-
+	}
 	//End of game loop while
 
 	proclaimWinner(highestScore[0], game, round);
