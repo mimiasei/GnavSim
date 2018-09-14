@@ -49,7 +49,7 @@ function quote(text) {
 }
 
 /**
- * Shuffles array in place. ES6 version
+ * Shuffles array in place. Fisher-Yates algorithm. ES6 version
  * @param {Array} a items An array containing the items.
  */
 function shuffle(a) {

@@ -368,39 +368,46 @@ class GnavGame {
 
 # ------------- End of classes ---------------		
 
-function playGame():
-	#max_rounds = MAX_ROUNDS
-	speaker = Speaker()
-	players = []
+function playGame() {
+	//max_rounds = MAX_ROUNDS
+	let speaker = new Speaker();
+	let players = [];
 
-	choice = ask("Play X rounds or first to reach Score", ["x", "s"])
-	if (choice == 0):
-		maxValue = int(input("Enter number of rounds to play: "))
-	elif (choice == 1):
-		maxValue = int(input("Enter score to reach: "))
-	else:
-		choice = 0
-		maxValue = 5
-	isHuman = False
-	if (ask("Play against computer", 0) == 0):
-		humanName = input("Please enter your name: ")
-		human = Human(humanName, len(PLAYERS) + 1, speaker)
-		players.append(human)
-		isHuman = True
+	let choice = ask("Play X rounds or first to reach Score", ["x", "s"]);
+	if (choice == 0) {
+		maxValue = (int)input("Enter number of rounds to play: ");
+	} else if (choice == 1) {
+		maxValue = (int)input("Enter score to reach: ");
+	} else {
+		choice = 0;
+		maxValue = 5;
+	}
+	let isHuman = false;
+	if (ask("Play against computer", 0) == 0) {
+		let humanName = input("Please enter your name: ");
+		let human = new Human(humanName, len(PLAYERS) + 1, speaker);
+		players.push(human);
+		isHuman = true;
+	}
 
-	game = GnavGame(choice, maxValue, isHuman)
+	let game = new GnavGame(choice, maxValue, isHuman);
 
-	for index, name in enumerate(PLAYERS):
-		newPlayer = Player(name, index, speaker)
-		if (index == 2): #Test, make Johannes a player that never swaps with anyone nor the deck
-			newPlayer.neverSwapsWithDeck = True
-		players.append(newPlayer)
+	let name = '';
+	for (let index = 0; index < PLAYERS.length; index++) {
+		name = PLAYERS[index];
+		let newPlayer = new Player(name, index, speaker);
+		if (index == 2) { //Test, make Johannes a player that never swaps with anyone nor the deck
+			newPlayer.neverSwapsWithDeck = true;
+		}
+		players.push(newPlayer);
+	}
 
-	shuffle(players)
-	deck = Deck()
-	round = 1
+	shuffle(players);
+	let deck = new Deck();
+	let round = 1;
 
-	while not game.isGameOver():
+	//Main game loop
+	while (!game.isGameOver()) {
 		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)))
 		speaker.say("Current dealer is: " + players[0].name)
 
@@ -497,10 +504,11 @@ function playGame():
 			speaker.say ("")
 		#else:
 			#time.sleep(1)
-
-	#End of game loop while
+	}
+	//End of game loop while
 
 	proclaimWinner(highestScore[0], game, round)
+}
 
 function askPlayers(nbr, player, players, deck):
 	nextAdd = 1
