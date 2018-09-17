@@ -73,7 +73,7 @@ class Player {
 	}
 
 	swapWithPlayer(fromPlayer) {
-		speaker.say ("INFO: %s swaps cards with %s." % (this.name, fromPlayer.name));
+		speaker.say ("INFO: ${this.name} swaps cards with ${fromPlayer.name}.");
 		let card = this.heldCard;
 		this.setHeldCard(fromPlayer.heldCard);
 		fromPlayer.setHeldCard(card);
@@ -566,9 +566,9 @@ function proclaimWinner(player, game, round) {
 	speaker.say ("")
 	text = "<<<<<<<<<<<<<<<<<< "
 	if (game.playType == 0):
-		text += "The winner of %d rounds of GNAV is..." % (game.maxValue)
+		text += "The winner of ${game.maxValue} rounds of GNAV is...";
 	else:
-		text += "The winner after %d rounds reaching score %d is..." % (round, game.maxValue)
+		text += "The winner after ${round} rounds reaching score ${game.maxValue} is...";
 	text += " >>>>>>>>>>>>>>>>>>"
 	speaker.say (text)
 	speaker.say ("<<" + int(len(text) - 4) * " " + ">>")
