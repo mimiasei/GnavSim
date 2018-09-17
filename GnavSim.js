@@ -403,54 +403,66 @@ function playGame() {
 	}
 
 	shuffle(players);
-	let deck = new Deck()
+	let deck = new Deck();
 	let round = 1;
 
 	while (!game.isGameOver()) {
-		speaker.say ("Round: %d ===> Card pile length: %d -----------------------" % (round, len(deck.cards)));
+		speaker.say("Round: ${round} ===> Card pile length: ${deck.cards.length} -----------------------");
 		speaker.say("Current dealer is: " + players[0].name);
 
 		//Pop out top player as dealer and insert at end
-		oldDealer = players.pop(0) //Pop out first player in list, to act as dealer
-		players.append(oldDealer) //Reinsert the dealer at the end of list
+		let oldDealer = players.shift(); //Pop out first player in list, to act as dealer
+		players.append(oldDealer); //Reinsert the dealer at the end of list
 
 		//Draw cards for each player
-		for player in players:
-			player.drawFromDeck(deck)
-			if player.heldCard.value == 4: //If player receives Narren
-				if player.knockOnTable():
-					player.addToScore(1)
+		for (player in players) {
+			player.drawFromDeck(deck);
+			if (player.heldCard.value === 4) { //If player receives Narren
+				if (player.knockOnTable()) {
+					player.addToScore(1);
+				}
+			}
+			}
 
 		//Play round
-		for nbr, player in enumerate(players, 0):
-			wantsToSwap = false
-			sayPass = player.sayPass()
-			if not nbr == len(players) - 1:
-				if players[nbr + 1].heldCard.value == 4: //If the other player has Narren...
-					if not player.testForSwap(players[nbr + 1]): //Do small chance check if player has forgotten someone knocked 3 times.
-						sayPass += player.sayNoFool(players[nbr + 1])
-					else:
-						wantsToSwap = true
-				else:
-					if not player.neverSwapsWithDeck and player.testForSwap(players[nbr + 1]): //Only ask to swap if card is 4 or less.
-						wantsToSwap = true
-					else:
-						if player.neverSwapsWithDeck:
-							speaker.say (player.name + " never swaps!")
+		players.forEach(function (name, index) {
+		//for nbr, player in enumerate(players, 0):
+			let wantsToSwap = false;
+			let sayPass = player.sayPass();
+			if (nbr !== len(players) - 1) {
+				if( players[nbr + 1].heldCard.value === 4) { //If the other player has Narren...
+					if (!player.testForSwap(players[nbr + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
+						sayPass += player.sayNoFool(players[nbr + 1]);
+					} else {
+						wantsToSwap = true;
+					}
+				} else {
+					if (!player.neverSwapsWithDeck && player.testForSwap(players[nbr + 1])) { //Only ask to swap if card is 4 or less.
+						wantsToSwap = true;
+					} else {
+						if player.neverSwapsWithDeck {
+							speaker.say (player.name + " never swaps!");
+						}
+					}
+				}
+				if (wantsToSwap) {
+					if (!askPlayers(nbr, player, players, deck)) { //Check if Staa for gjok! is called.
+						break;
+					}
+				} else {
+					speaker.say (sayPass);
+				}
+			} else {
+				if (player.testForSwap("deck")) { //Only swap if card is 4 or less.
+					speaker.say (player.name + " draws from the deck.");
+					player.drawFromDeck(deck); //Draw from deck if noone else to swap with.
+				} else {
+					speaker.say (sayPass);
+				}
+			}
+		}
 
-				if wantsToSwap:
-					if not (askPlayers(nbr, player, players, deck)): //Check if Staa for gjok! is called.
-						break
-				else:
-					speaker.say (sayPass)
-			else:
-				if player.testForSwap("deck"): //Only swap if card is 4 or less.
-					speaker.say (player.name + " draws from the deck.")
-					player.drawFromDeck(deck) //Draw from deck if noone else to swap with.
-				else:
-					speaker.say (sayPass)
-
-		speaker.say ("End of round " + str(round) + " ======================================")
+		speaker.say ("End of round " + str(round) + " ======================================");
 		//End of round
 
 		//Calculate scores and stats
