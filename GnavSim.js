@@ -259,7 +259,7 @@ class Deck {
 
 	shuffleDeck() {
 		console.log ("*** INFO: The deck is shuffled.");
-		shuffle(this.cards);
+		this.cards = shuffle(this.cards);
 	}
 
 	draw() {
@@ -388,7 +388,7 @@ function playGame() {
 	if (ask("Play against computer", 0) === 0) {
 		let humanName = input("Please enter your name: ");
 		human = new Human(humanName, len(PLAYERS) + 1, speaker);
-		players.append(human);
+		players.push(human);
 		isHuman = true;
 	}
 
@@ -401,7 +401,7 @@ function playGame() {
 			newPlayer.neverSwapsWithDeck = true;
 		}
 		players.push(newPlayer);
-	}
+	});
 
 	players = shuffle(players);
 	let deck = new Deck();
@@ -427,7 +427,6 @@ function playGame() {
 
 		//Play round
 		players.forEach(function (name, index) {
-		//for nbr, player in enumerate(players, 0):
 			let wantsToSwap = false;
 			let sayPass = player.sayPass();
 			if (nbr !== len(players) - 1) {
@@ -441,7 +440,7 @@ function playGame() {
 					if (!player.neverSwapsWithDeck && player.testForSwap(players[nbr + 1])) { //Only ask to swap if card is 4 or less.
 						wantsToSwap = true;
 					} else {
-						if player.neverSwapsWithDeck {
+						if (player.neverSwapsWithDeck) {
 							speaker.say (player.name + " never swaps!");
 						}
 					}
@@ -461,59 +460,68 @@ function playGame() {
 					speaker.say (sayPass);
 				}
 			}
-		}
+		});
 
 		speaker.say ("End of round " + str(round) + " ======================================");
 		//End of round
 
 		//Calculate scores and stats
-		sortedPlayers = sorted(players, key=lambda p: p.heldCard.value, reverse=true)
-		winner = sortedPlayers[0]
-		winner.wins += 1
-		loser = sortedPlayers[len(sortedPlayers)-1]
-		loser.losses += 1
-		speaker.say ("Winner of this round is " + winner.name + " with the card " + winner.heldCard.name)
-		winner.addToScore(1)
-		speaker.say ("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name)
-		loser.addToScore(-1)
+		sortedPlayers = players.sort((a, b) => a.heldCard.value > b.heldCard.value);
+		winner = sortedPlayers[0];
+		winner.wins++;
+		loser = sortedPlayers[len(sortedPlayers) - 1];
+		loser.losses++;
+		speaker.say ("Winner of this round is " + winner.name + " with the card " + winner.heldCard.name);
+		winner.addToScore(1);
+		speaker.say ("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name);
+		loser.addToScore(-1);
 		//Search for Narren among players
-		for player in players:
-			if (player.heldCard.value == 4):
-				speaker.say ("Unfortunately, " + player.name + "'s card at end of round is Narren.")
-				player.addToScore(-1)
+		for (player in players) {
+			if (player.heldCard.value === 4) {
+				speaker.say ("Unfortunately, " + player.name + "'s card at end of round is Narren.");
+				player.addToScore(-1);
+			}
+		}
 
 		//All players toss their cards in the discard pile
-		for player in players:
-			player.discard(deck)
+		for (player in players) {
+			player.discard(deck);
+		}
 
-		deck.testLengthSum()
+		deck.testLengthSum();
 
-		mostWins = sorted(players, key=lambda p: p.wins, reverse=true)
-		mostLosses = sorted(players, key=lambda p: p.losses, reverse=true)
-		highestScore = sorted(players, key=lambda p: p.score, reverse=true)
+		mostWins = players.sort((a, b) => a.wins > b.wins);
+		mostWins = players.sort((a, b) => a.losses > b.losses);
+		mostWins = players.sort((a, b) => a.score > b.score);
 
 		scoreLine = "-------> Scores: "
 
-		for player in players:
-			thisPly = player.name
-			if (player.pid == highestScore[0].pid):
-				thisPly = "**" + thisPly.upper() + "**"
-			scoreLine += thisPly + ": " + str(player.score) + ", "
-		speaker.say ("")
-		speaker.say (scoreLine[:-2])
-		speaker.say ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + str(mostWins[0].wins) + ", most losses -> " + mostLosses[0].name + ": " + str(mostLosses[0].losses))
+		for (player in players) {
+			thisPly = player.name;
+			if (player.pid == highestScore[0].pid) {
+				thisPly = "**" + thisPly.upper() + "**";
+			}
+			scoreLine += thisPly + ": " + str(player.score) + ", ";
+		}
+		speaker.say ("");
+		speaker.say (scoreLine.slice(0, scoreLine.len - 2));
+		speaker.say ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + str(mostWins[0].wins) + ", most losses -> " + mostLosses[0].name + ": " + str(mostLosses[0].losses));
 
-		round += 1
-		if (game.playType == 0):
-			game.incValue()
-		else:
-			speaker.say("INFO: Setting " + str(highestScore[0].score) + " as new best score value for game.")
-			game.setValue(highestScore[0].score)
+		round++;
 
-		speaker.say ("")
-		if (game.isHuman):
-			ask("Press ENTER to continue", -1)
-			speaker.say ("")
+		if (game.playType === 0) {
+			game.incValue();
+		} else {
+			speaker.say("INFO: Setting " + str(highestScore[0].score) + " as new best score value for game.");
+			game.setValue(highestScore[0].score);
+		}
+
+		speaker.say ("");
+
+		if (game.isHuman) {
+			ask("Press ENTER to continue", -1);
+			speaker.say ("");
+		}
 		//else:
 			//time.sleep(1)
 	}
@@ -523,35 +531,40 @@ function playGame() {
 }
 
 function askPlayers(nbr, player, players, deck) {
-	nextAdd = 1
-	hasSwapped = false
-	dragonen = false
+	let nextAdd = 1;
+	let hasSwapped = false;
+	let dragonen = false;
 
-	while not hasSwapped and not dragonen and (nbr + nextAdd) < len(players):
+	while (!hasSwapped && !dragonen && (nbr + nextAdd) < players.len) {
 		//speaker.say ("%s is now about to ask the next player, %s, if he wants to swap..." % (player.name, players[nbr + nextAdd].name))
-		player.requestSwap(players[nbr + nextAdd])
-		returnedCardValue = players[nbr + nextAdd].answerSwap(player)
-		if returnedCardValue == 4:
-			speaker.say (":-) Everybody starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'")
+		player.requestSwap(players[nbr + nextAdd]);
+		returnedCardValue = players[nbr + nextAdd].answerSwap(player);
+		if (returnedCardValue === 4) {
+			speaker.say (":-) Everybody starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'");
+		}
 
-		result = player.processAnswer(returnedCardValue)
-		if (result == 1): //Hesten or huset
-			nextAdd += 1
-		elif (result == 2): //katten
-			player.addToScore(-1)
-			nextAdd += 1
-		elif (result == 3): //dragonen
-			dragonen = true
-			player.addToScore(-1)
-		elif (result == 4): //gjoeken
-			subractFromAllPlayers(players[nbr + nextAdd], players)
-			return false
-		else: //The two players Swap cards
-			player.swapWithPlayer(players[nbr + nextAdd])
-			hasSwapped = true
-		if not hasSwapped: //If player still hasn't swapped after being last in round
-			speaker.say (player.name + " draws from the deck.")
-			player.drawFromDeck(deck)
+		result = player.processAnswer(returnedCardValue);
+		if (result === 1) { //Hesten or huset
+			nextAdd++;
+		} else if (result === 2) { //katten
+			player.addToScore(-1);
+			nextAdd++;
+		} else if (result === 3) { //dragonen
+			dragonen = true;
+			player.addToScore(-1);
+		} else if (result === 4) { //gjoeken
+			subractFromAllPlayers(players[nbr + nextAdd], players);
+			return false;
+		} else { //The two players Swap cards
+			player.swapWithPlayer(players[nbr + nextAdd]);
+			hasSwapped = true;
+		}
+
+		if (!hasSwapped) { //If player still hasn't swapped after being last in round
+			speaker.say (player.name + " draws from the deck.");
+			player.drawFromDeck(deck);
+		}
+	}
 	return true;
 }
 
