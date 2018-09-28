@@ -9,7 +9,7 @@
 // import gnavChat
 
 //import Math;
-import gnavtools;
+import './gnavtools.js';
 
 const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Oivind", "Ask"];
 const MAX_ROUNDS = 1;
@@ -50,7 +50,7 @@ class Player {
 	}
 
 	discard(deck) {
-		if not (this.heldCard == None) {
+		if (this.heldCard !== null) {
 			deck.discard(this.heldCard);
 		}
 		this.heldCard = null;
@@ -300,7 +300,7 @@ class Deck {
 		for (card in cardList) {
 			cardsLine += card.name + ", ";
 		}
-		cardsLine = cardsLine[:-2];
+		cardsLine = cardsLine.slice(0, cardsLine.length - 2);
 		console.log (cardsLine);
 	}
 }
@@ -370,14 +370,14 @@ class GnavGame {
 
 function playGame() {
 	//max_rounds = MAX_ROUNDS
-	let speaker = Speaker();
+	let speaker = new Speaker();
 	let players = [];
 
 	let choice = ask("Play X rounds or first to reach Score", ["x", "s"]);
-	if (choice == 0) {
+	if (choice === 0) {
 		maxValue = parseInt(input("Enter number of rounds to play: "));
 	}
-	else if (choice == 1) {
+	else if (choice === 1) {
 		maxValue = parseInt(input("Enter score to reach: "));
 	}
 	else {
@@ -385,24 +385,25 @@ function playGame() {
 		maxValue = 5;
 	}
 	let isHuman = false;
-	if (ask("Play against computer", 0) == 0):
+	if (ask("Play against computer", 0) === 0) {
 		let humanName = input("Please enter your name: ");
-		human = Human(humanName, len(PLAYERS) + 1, speaker);
+		human = new Human(humanName, len(PLAYERS) + 1, speaker);
 		players.append(human);
 		isHuman = true;
+	}
 
-	let game = GnavGame(choice, maxValue, isHuman);
+	let game = new GnavGame(choice, maxValue, isHuman);
 
 	PLAYERS.forEach(function (name, index) {
 		newPlayer = new Player(name, index, speaker);
 		//Test, make Johannes a player that never swaps with anyone nor the deck
-		if (index == 2) {
+		if (index === 2) {
 			newPlayer.neverSwapsWithDeck = true;
 		}
 		players.push(newPlayer);
 	}
 
-	shuffle(players);
+	players = shuffle(players);
 	let deck = new Deck();
 	let round = 1;
 
@@ -422,7 +423,7 @@ function playGame() {
 					player.addToScore(1);
 				}
 			}
-			}
+		}
 
 		//Play round
 		players.forEach(function (name, index) {

@@ -1,7 +1,10 @@
+/**
+ * Class for general speaker object.
+ */
 class Speaker {
 	constructor() {}
 
-	function say(what) {
+	say(what) {
 		console.log(what);
 	}
 }
@@ -22,7 +25,7 @@ function ask(question, answers = []) {
 	} else if (answers == 0) {
 		answers = ['y', 'n'];
 	}
-	if !(noChoice) {
+	if (!noChoice) {
 		for (answer in answers) {
 			possibleAnswers += answer + '/';
 		}
@@ -31,7 +34,7 @@ function ask(question, answers = []) {
 	while (error) {
 		try {
 			choice = input(text);
-			if !(noChoice) {
+			if (!noChoice) {
 				value = answers.index(choice);
 			}
 			error = false;
@@ -49,7 +52,7 @@ function quote(text) {
 }
 
 /**
- * Shuffles array in place. ES6 version
+ * Shuffles array in placey placey. ES6 version
  * @param {Array} a items An array containing the items.
  */
 function shuffle(a) {
