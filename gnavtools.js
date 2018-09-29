@@ -20,9 +20,9 @@ function ask(question, answers = []) {
 	let error = true;
 	let text = !noChoice ? "${question} ${possibleAnswers[:-1]}? " : question;
 
-	if (answers == -1) {
+	if (answers === -1) {
 		noChoice = true;
-	} else if (answers == 0) {
+	} else if (answers === 0) {
 		answers = ['y', 'n'];
 	}
 	if (!noChoice) {
@@ -41,7 +41,7 @@ function ask(question, answers = []) {
 		}
 		catch (ValueError) {
 			value = -1;
-			console.log("Please select either of (${possibleAnswers[:-1]})");
+			console.log("Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})");
 		}
 	}
 	return value;

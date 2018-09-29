@@ -569,56 +569,61 @@ function askPlayers(nbr, player, players, deck) {
 }
 
 function subractFromAllPlayers(player, players) {
-	for (let ply in players) {
-		if not ply.pid == player.pid { //Subtract 1 score one from all players except current
-			ply.addToScore(-1)
+	for (ply in players) {
+		if (ply.pid !== player.pid) { //Subtract 1 score one from all players except current
+			ply.addToScore(-1);
 		}
 	}
 }
 
 function proclaimWinner(player, game, round) {
-	speaker.say ("")
-	text = "<<<<<<<<<<<<<<<<<< "
-	if (game.playType == 0):
+	speaker.say ("");
+	let text = "<<<<<<<<<<<<<<<<<< ";
+	if (game.playType === 0) {
 		text += "The winner of ${game.maxValue} rounds of GNAV is...";
-	else:
+	} else {
 		text += "The winner after ${round} rounds reaching score ${game.maxValue} is...";
-	text += " >>>>>>>>>>>>>>>>>>"
-	speaker.say (text)
-	speaker.say ("<<" + int(len(text) - 4) * " " + ">>")
-	spaces = int((len(text) - 2) / 2) - int(len(player.name) / 2)
-	speaker.say ("<<" + (" " * spaces) + player.name + (" " * (spaces - 2)) + ">>")
-	speaker.say ("<<" + int(len(text) - 4) * " " + ">>")
-	speaker.say ("<" * int(len(text) / 2) + ">" * int(len(text) / 2));
+	}
+	text += " >>>>>>>>>>>>>>>>>>";
+	speaker.say (text);
+	speaker.say ("<<" + (text.len - 4) * " " + ">>");
+	spaces = ((text.len - 2) / 2) - (player.name.len / 2);
+	speaker.say ("<<" + (" " * spaces) + player.name + (" " * (spaces - 2)) + ">>");
+	speaker.say ("<<" + (text.len - 4) * " " + ">>");
+	speaker.say ("<" * (text.len / 2) + ">" * (text.len) / 2);
 }
 
 // --------------------------------------------------------------------------
 
 console.log ("<<< Welcome to Gnav The Card Game >>>");
 let choice = ask("Play multiplayer game", 0);
-if (choice == 0) {
-	if len(sys.argv) != 2:
-		host = HOST
-		port = PORT
-	else:
-		host, port = sys.argv[1].split(":")
-		port = int(port)
-	speaker = gnavChat.ChatSpeaker()
-	clientThreads = []
-	choice = 0
-	while (choice == 0):
-		networkClient = gnavChat.NetworkClient(speaker, host, port)
-		clientThread = threading.Thread(target = networkClient.loop)
-		clientThreads.append(clientThread)
-		console.log ("Client thread %d added to list." % len(clientThreads))
-		choice = ask("Create new client", 0)
 
-	console.log("Starting all %d threads..." % len(clientThreads))
-	for (thread in clientThreads) {
-		thread.start();
+let speaker = null;
+
+if (choice == 0) {
+	if (sys.argv.len !== 2) {
+		// host = HOST;
+		// port = PORT;
+	} else {
+		// host, port = sys.argv[1].split(":");
+		// port = int(port);
 	}
+	speaker = gnavChat.ChatSpeaker()
+	let clientThreads = [];
+	let choice = 0;
+	while (choice === 0) {
+		// networkClient = gnavChat.NetworkClient(speaker, host, port)
+		// clientThread = threading.Thread(target = networkClient.loop)
+		// clientThreads.append(clientThread)
+		// console.log ("Client thread %d added to list." % len(clientThreads))
+		// choice = ask("Create new client", 0);
+	}
+
+	// console.log("Starting all %d threads..." % len(clientThreads))
+	// for (thread in clientThreads) {
+	// 	thread.start();
+	// }
+} else {
+	speaker = new Speaker();
+	playGame();
 }
-else:
-	speaker = Speaker()
-	//threading.Thread(target = playGame).start()
-	playGame()
