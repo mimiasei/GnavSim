@@ -1,7 +1,9 @@
+'use strict';
+
 /**
  * Class for general speaker object.
  */
-class Speaker {
+export class Speaker {
 	constructor() {}
 
 	say(what) {
@@ -9,7 +11,7 @@ class Speaker {
 	}
 }
 
-function ask(question, answers = []) {
+export function ask(question, answers = []) {
 	/*
 	answers = -1 : auto press any key (i.e. no questions, all answers accepted)
 	answers = 0 : auto y/n answers
@@ -47,7 +49,7 @@ function ask(question, answers = []) {
 	return value;
 }
 
-function quote(text) {
+export function quote(text) {
 	return "'" + text + "'";
 }
 
@@ -55,7 +57,7 @@ function quote(text) {
  * Shuffles array in placey placey. ES6 version
  * @param {Array} a items An array containing the items.
  */
-function shuffle(a) {
+export function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [a[i], a[j]] = [a[j], a[i]];

@@ -1,15 +1,5 @@
 
-// import os, sys
-// import random
-// import time
-// import threading
-// from gnavtools import ask
-// from gnavtools import quote
-// from gnavtools import Speaker
-// import gnavChat
-
-//import Math;
-import './gnavtools.js';
+// import * as gnavtools from 'gnavtools';
 
 const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Oivind", "Ask"];
 const MAX_ROUNDS = 1;
@@ -368,9 +358,8 @@ class GnavGame {
 
 // ------------- End of classes ---------------		
 
-function playGame() {
+function playGame(speaker) {
 	//max_rounds = MAX_ROUNDS
-	let speaker = new Speaker();
 	let players = [];
 
 	let choice = ask("Play X rounds or first to reach Score", ["x", "s"]);
@@ -595,35 +584,104 @@ function proclaimWinner(player, game, round) {
 
 // --------------------------------------------------------------------------
 
-console.log ("<<< Welcome to Gnav The Card Game >>>");
-let choice = ask("Play multiplayer game", 0);
-
-let speaker = null;
-
-if (choice == 0) {
-	if (sys.argv.len !== 2) {
-		// host = HOST;
-		// port = PORT;
-	} else {
-		// host, port = sys.argv[1].split(":");
-		// port = int(port);
+function startGame() {
+	console.log("<<< Welcome to Gnav The Card Game >>>");
+	let choice = ask("Play multiplayer game", 0);
+	let speaker = null;
+	if (choice == 0) {
+		if (sys.argv.len !== 2) {
+			// host = HOST;
+			// port = PORT;
+		}
+		else {
+			// host, port = sys.argv[1].split(":");
+			// port = int(port);
+		}
+		speaker = gnavChat.ChatSpeaker();
+		let clientThreads = [];
+		let choice = 0;
+		while (choice === 0) {
+			// networkClient = gnavChat.NetworkClient(speaker, host, port)
+			// clientThread = threading.Thread(target = networkClient.loop)
+			// clientThreads.append(clientThread)
+			// console.log ("Client thread %d added to list." % len(clientThreads))
+			// choice = ask("Create new client", 0);
+		}
+		// console.log("Starting all %d threads..." % len(clientThreads))
+		// for (thread in clientThreads) {
+		// 	thread.start();
+		// }
 	}
-	speaker = gnavChat.ChatSpeaker()
-	let clientThreads = [];
-	let choice = 0;
-	while (choice === 0) {
-		// networkClient = gnavChat.NetworkClient(speaker, host, port)
-		// clientThread = threading.Thread(target = networkClient.loop)
-		// clientThreads.append(clientThread)
-		// console.log ("Client thread %d added to list." % len(clientThreads))
-		// choice = ask("Create new client", 0);
+	else {
+		speaker = new Speaker();
+		playGame(speaker);
 	}
 
-	// console.log("Starting all %d threads..." % len(clientThreads))
-	// for (thread in clientThreads) {
-	// 	thread.start();
-	// }
-} else {
-	speaker = new Speaker();
-	playGame();
+}
+
+	// ----------------------------------------------------------------------
+
+/**
+ * Class for general speaker object.
+ */
+class Speaker {
+	constructor() {}
+
+	say(what) {
+		console.log(what);
+	}
+}
+
+function ask(question, answers = []) {
+	/*
+	answers = -1 : auto press any key (i.e. no questions, all answers accepted)
+	answers = 0 : auto y/n answers
+	*/
+	let noChoice = false;
+	let possibleAnswers = "";
+	let value = -1;
+	let error = true;
+	let text = !noChoice ? "${question} ${possibleAnswers[:-1]}? " : question;
+
+	if (answers === -1) {
+		noChoice = true;
+	} else if (answers === 0) {
+		answers = ['y', 'n'];
+	}
+	if (!noChoice) {
+		for (answer in answers) {
+			possibleAnswers += answer + '/';
+		}
+	}
+
+	while (error) {
+		try {
+			choice = input(text);
+			if (!noChoice) {
+				value = answers.index(choice);
+			}
+			error = false;
+		}
+		catch (ValueError) {
+			value = -1;
+			console.log("Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})");
+		}
+	}
+	return value;
+}
+
+function quote(text) {
+	return "'" + text + "'";
+}
+
+/**
+ * Shuffles array in placey placey. ES6 version
+ * @param {Array} a items An array containing the items.
+ */
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
 }
