@@ -587,7 +587,9 @@ function proclaimWinner(player, game, round) {
 function startGame() {
 	let speaker = new Speaker();
 	speaker.say("<<< Welcome to Gnav The Card Game >>>");
+	console.log("before choice");
 	let choice = speaker.ask("Play multiplayer game", 0);
+	console.log("choice: ", choice);
 	if (choice == 0) {
 		if (sys.argv.len !== 2) {
 			// host = HOST;
@@ -652,20 +654,25 @@ class Speaker {
 			}
 		}
 	
-		while (error) {
-			try {
-				choice = input(text);
+		// while (error) {
+			// try {
+				// choice = input(text);
+				let element = document.createElement("button");
+     			element.appendChild(document.createTextNode("Click Me!"));
+     			let page = document.getElementById("outputWin");
+     			page.appendChild(element);
+     			console.log(element);
 				if (!noChoice) {
 					value = answers.index(choice);
 				}
 				error = false;
-			}
-			catch (ValueError) {
-				value = -1;
-				let outputText = "Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})";
-				$("#outputWin").text(outputText);
-			}
-		}
+		// 	}
+		// 	catch (ValueError) {
+		// 		value = -1;
+		// 		let outputText = "Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})";
+		// 		$("#outputWin").text(outputText);
+		// 	}
+		// }
 		return value;
 	}
 }
