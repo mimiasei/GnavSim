@@ -240,7 +240,7 @@ class Deck {
 	constructor() {
 		this.cards = [];
 		this.discardPile = [];
-		for(card in Card.types.items()) {
+		for(let card of Card.types.items()) {
 			this.cards.append(card);
 			this.cards.append(card);
 		}
@@ -287,7 +287,7 @@ class Deck {
 	printCards(discarded = false) {
 		let cardsLine = discarded ? "Discarded: " : "Cards: ";
 		let cardList = discarded ? this.discardPile : this.cards;
-		for (card in cardList) {
+		for (let card of cardList) {
 			cardsLine += card.name + ", ";
 		}
 		cardsLine = cardsLine.slice(0, cardsLine.length - 2);
@@ -405,7 +405,7 @@ function playGame(speaker) {
 		players.append(oldDealer); //Reinsert the dealer at the end of list
 
 		//Draw cards for each player
-		for (player in players) {
+		for (let player of players) {
 			player.drawFromDeck(deck);
 			if (player.heldCard.value === 4) { //If player receives Narren
 				if (player.knockOnTable()) {
@@ -465,7 +465,7 @@ function playGame(speaker) {
 		speaker.say ("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name);
 		loser.addToScore(-1);
 		//Search for Narren among players
-		for (player in players) {
+		for (let player of players) {
 			if (player.heldCard.value === 4) {
 				speaker.say ("Unfortunately, " + player.name + "'s card at end of round is Narren.");
 				player.addToScore(-1);
@@ -473,7 +473,7 @@ function playGame(speaker) {
 		}
 
 		//All players toss their cards in the discard pile
-		for (player in players) {
+		for (let player of players) {
 			player.discard(deck);
 		}
 
@@ -485,8 +485,8 @@ function playGame(speaker) {
 
 		scoreLine = "-------> Scores: "
 
-		for (player in players) {
-			thisPly = player.name;
+		for (let player of players) {
+			let thisPly = player.name;
 			if (player.pid == highestScore[0].pid) {
 				thisPly = "**" + thisPly.upper() + "**";
 			}
@@ -558,7 +558,7 @@ function askPlayers(nbr, player, players, deck) {
 }
 
 function subractFromAllPlayers(player, players) {
-	for (ply in players) {
+	for (let ply of players) {
 		if (ply.pid !== player.pid) { //Subtract 1 score one from all players except current
 			ply.addToScore(-1);
 		}
@@ -639,7 +639,7 @@ class Speaker {
 		let possibleAnswers = "";
 		let value = -1;
 		let error = true;
-		let text = !noChoice ? "${question} ${possibleAnswers[:-1]}? " : question;
+		let text = !noChoice ? "${question} ${possibleAnswers.splice(0, possibleAnswers.len - 1)}? " : question;
 	
 		if (answers === -1) {
 			noChoice = true;
@@ -647,9 +647,9 @@ class Speaker {
 			answers = ['y', 'n'];
 		}
 		if (!noChoice) {
-			answers.forEach ((answer) => {
+			for (let answer of answers) {
 				possibleAnswers += answer + '/';
-			});
+			}
 		}
 	
 		while (error) {
