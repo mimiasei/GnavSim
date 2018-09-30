@@ -307,7 +307,7 @@ class Human extends Player {
 	}
 
 	knockOnTable() {
-		result = ask("Knock on the table", 0) === 0;
+		result = speaker.ask("Knock on the table", 0) === 0;
 		if (result) {
 			speaker.say (this.name + this.TXT_KNOCK);
 		}
@@ -330,7 +330,7 @@ class Human extends Player {
 		} else {
 			text += "swap cards with ${toPlayer.name}";
 		}
-		return ask(text, 0) === 0;	
+		return speaker.ask(text, 0) === 0;	
 	}
 }		
 
@@ -362,7 +362,7 @@ function playGame(speaker) {
 	//max_rounds = MAX_ROUNDS
 	let players = [];
 
-	let choice = ask("Play X rounds or first to reach Score", ["x", "s"]);
+	let choice = speaker.ask("Play X rounds or first to reach Score", ["x", "s"]);
 	if (choice === 0) {
 		maxValue = parseInt(input("Enter number of rounds to play: "));
 	}
@@ -374,7 +374,7 @@ function playGame(speaker) {
 		maxValue = 5;
 	}
 	let isHuman = false;
-	if (ask("Play against computer", 0) === 0) {
+	if (speaker.ask("Play against computer", 0) === 0) {
 		let humanName = input("Please enter your name: ");
 		human = new Human(humanName, len(PLAYERS) + 1, speaker);
 		players.push(human);
@@ -508,7 +508,7 @@ function playGame(speaker) {
 		speaker.say ("");
 
 		if (game.isHuman) {
-			ask("Press ENTER to continue", -1);
+			speaker.ask("Press ENTER to continue", -1);
 			speaker.say ("");
 		}
 		//else:
@@ -585,9 +585,9 @@ function proclaimWinner(player, game, round) {
 // --------------------------------------------------------------------------
 
 function startGame() {
-	console.log("<<< Welcome to Gnav The Card Game >>>");
-	let choice = ask("Play multiplayer game", 0);
-	let speaker = null;
+	let speaker = new Speaker();
+	speaker.say("<<< Welcome to Gnav The Card Game >>>");
+	let choice = speaker.ask("Play multiplayer game", 0);
 	if (choice == 0) {
 		if (sys.argv.len !== 2) {
 			// host = HOST;
@@ -613,7 +613,6 @@ function startGame() {
 		// }
 	}
 	else {
-		speaker = new Speaker();
 		playGame(speaker);
 	}
 
@@ -628,46 +627,47 @@ class Speaker {
 	constructor() {}
 
 	say(what) {
-		console.log(what);
+		$("#outputWin").text(what);
 	}
-}
 
-function ask(question, answers = []) {
-	/*
-	answers = -1 : auto press any key (i.e. no questions, all answers accepted)
-	answers = 0 : auto y/n answers
-	*/
-	let noChoice = false;
-	let possibleAnswers = "";
-	let value = -1;
-	let error = true;
-	let text = !noChoice ? "${question} ${possibleAnswers[:-1]}? " : question;
-
-	if (answers === -1) {
-		noChoice = true;
-	} else if (answers === 0) {
-		answers = ['y', 'n'];
-	}
-	if (!noChoice) {
-		for (answer in answers) {
-			possibleAnswers += answer + '/';
+	ask(question, answers = []) {
+		/*
+		answers = -1 : auto press any key (i.e. no questions, all answers accepted)
+		answers = 0 : auto y/n answers
+		*/
+		let noChoice = false;
+		let possibleAnswers = "";
+		let value = -1;
+		let error = true;
+		let text = !noChoice ? "${question} ${possibleAnswers[:-1]}? " : question;
+	
+		if (answers === -1) {
+			noChoice = true;
+		} else if (answers === 0) {
+			answers = ['y', 'n'];
 		}
-	}
-
-	while (error) {
-		try {
-			choice = input(text);
-			if (!noChoice) {
-				value = answers.index(choice);
+		if (!noChoice) {
+			answers.forEach ((answer) => {
+				possibleAnswers += answer + '/';
+			});
+		}
+	
+		while (error) {
+			try {
+				choice = input(text);
+				if (!noChoice) {
+					value = answers.index(choice);
+				}
+				error = false;
 			}
-			error = false;
+			catch (ValueError) {
+				value = -1;
+				let outputText = "Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})";
+				$("#outputWin").text(outputText);
+			}
 		}
-		catch (ValueError) {
-			value = -1;
-			console.log("Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})");
-		}
+		return value;
 	}
-	return value;
 }
 
 function quote(text) {
