@@ -587,9 +587,7 @@ function proclaimWinner(player, game, round) {
 function startGame() {
 	let speaker = new Speaker();
 	speaker.say("<<< Welcome to Gnav The Card Game >>>");
-	console.log("before choice");
-	let choice = speaker.ask("Play multiplayer game", 0);
-	console.log("choice: ", choice);
+	speaker.ask("Play multiplayer game", 0);
 	if (choice == 0) {
 		if (sys.argv.len !== 2) {
 			// host = HOST;
@@ -629,6 +627,7 @@ class Speaker {
 
 	constructor() {
 		this.outputElem = 'outputWin';
+		this.value = -1;
 	}
 
 	say(what) {
@@ -642,8 +641,9 @@ class Speaker {
 		*/
 		let noChoice = false;
 		let possibleAnswers = "";
-		let value = -1;
 		let text = !noChoice ? "${question} ${possibleAnswers.splice(0, possibleAnswers.len - 1)}? " : question;
+		let output = $("#" + this.outputElem);
+		console.log(output);
 	
 		if (answers === -1) {
 			noChoice = true;
@@ -652,12 +652,46 @@ class Speaker {
 		}
 
 		for (let answer of answers) {
-			let element = document.createElement("button");
-			element.appendChild(document.createTextNode(answer));
-			$("#" + this.outputElem).appendChild(element);
+			let element = document.createElement("input"); //create button element
+			element.type = 'button';
+			element.value = 0;
+			element.name = 'btn_' + answer;
+			element.onclick = function() {
+				alert ("You clicked ", element.name, " returning value ", element.value);
+				this.value = element.value;
+			}
+			output.add(element); //add button to output div
 		}
+	}
 
-		return value;
+	getValue() {
+		return this.value;
+	}
+}
+
+/**
+ * observer pattern subject class
+ */
+class EventObserver {
+	constructor() {
+		this.observers = [];
+	}
+
+	subscribe (fn) {
+		this.observers.push(fn);
+	}
+
+	unsubscribe(fn) {
+		let index = this.observers.indexOf(fn);
+		if (index > -1) {
+			this.observers.slice(index, 1); //remove item at index
+		}
+	}
+
+	notifyAll() {
+		for (let fn of observers) {
+			console.log(fn.name, " has been notified.");
+		}
 	}
 }
 
