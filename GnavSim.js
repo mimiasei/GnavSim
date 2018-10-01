@@ -626,10 +626,13 @@ function startGame() {
  * Class for general speaker object.
  */
 class Speaker {
-	constructor() {}
+
+	constructor() {
+		this.outputElem = 'outputWin';
+	}
 
 	say(what) {
-		$("#outputWin").text(what);
+		$("#" + this.outputElem).text(what);
 	}
 
 	ask(question, answers = []) {
@@ -640,7 +643,6 @@ class Speaker {
 		let noChoice = false;
 		let possibleAnswers = "";
 		let value = -1;
-		let error = true;
 		let text = !noChoice ? "${question} ${possibleAnswers.splice(0, possibleAnswers.len - 1)}? " : question;
 	
 		if (answers === -1) {
@@ -648,31 +650,13 @@ class Speaker {
 		} else if (answers === 0) {
 			answers = ['y', 'n'];
 		}
-		if (!noChoice) {
-			for (let answer of answers) {
-				possibleAnswers += answer + '/';
-			}
+
+		for (let answer of answers) {
+			let element = document.createElement("button");
+			element.appendChild(document.createTextNode(answer));
+			$("#" + this.outputElem).appendChild(element);
 		}
-	
-		// while (error) {
-			// try {
-				// choice = input(text);
-				let element = document.createElement("button");
-     			element.appendChild(document.createTextNode("Click Me!"));
-     			let page = document.getElementById("outputWin");
-     			page.appendChild(element);
-     			console.log(element);
-				if (!noChoice) {
-					value = answers.index(choice);
-				}
-				error = false;
-		// 	}
-		// 	catch (ValueError) {
-		// 		value = -1;
-		// 		let outputText = "Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})";
-		// 		$("#outputWin").text(outputText);
-		// 	}
-		// }
+
 		return value;
 	}
 }
