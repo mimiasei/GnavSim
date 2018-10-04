@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html>
-
-  <head>
-    <meta charset="utf-8">
-    <title>Gnav Multiplayer Card Game</title>
-    <link rel="stylesheet" href="css/main.css">
-		
-		<!-- JQuery 3.2.1 hosted by Google API -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-		<!-- main game code -->
-		<script	type="application/javascript" src="../GnavSim.js"></script>	
+	<head>
+		<meta charset="utf-8">
+		<title>Gnav Multiplayer Card Game</title>
+		<link rel="stylesheet" href="css/main.css">
 	</head>
-	
-  <body>
-			<h1 class="masthead-brand">
-				Gnav Multiplayer Card Game
-			</h1>
-			<p>This is the web page for the Gnav MM game.</p>
-			<br>
-			<div id="outputWin">
-				
-			</div>
 
-			<input id="startGame" type="button" value="Start Game" onclick="startGame()" />
+	<body>
+		<h1 class="masthead-brand">
+			Gnav Multiplayer Card Game
+		</h1>
+		<p>This is the web page for the Gnav MM game.</p>
+		<br>
+		<div id="outputWin"></div>
+
+		<!-- <input id="startGame" type="button" value="Start Game" onclick="startGame()" /> -->
+
 	</body>
-	
+
+	<!-- JQuery 3.2.1 hosted by Google API -->
+	<script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<!-- main game code -->
+	<script	type="module" src="../GnavSim.js"></script>	
+	<script	type="module" src="../player.js"></script>	
+	<script	type="module" src="../cards.js"></script>	
 </html>

@@ -16,323 +16,21 @@ const TXT_NO_WAY_FOOL = " and thinks ''Aldri i livet, %s har jo narren!''";
 const HOST = "localhost";
 const PORT = 112;
 
-class Player {
+import Player from '/imports/player.js';
+import Human from './imports/human.js';
 
-	constructor(name, pid, speaker) {
-		this.name = name;
-		this.pid = pid;
-		this.speaker = speaker;
-		this.score = 5;
-		this.heldCard = null;
-		this.wins = 0;
-		this.losses = 0;
-		this.neverSwapsWithDeck = false;
-	}
+import Card from './imports/card.js';		
+import Deck from './imports/deck.js';		
+import Cuckoo from './imports/cuckoo.js';		
+import Dragoon from './imports/dragoon.js';		
+import Cat from './imports/cat.js';		
+import Horse from './imports/horse.js';		
+import House from './imports/house.js';		
+import Fool from './imports/fool.js';	
 
-	setHeldCard(card, silent = false) {
-		this.heldCard = card;
-		//if not silent: speaker.say ("INFO: " + this.name + " now has: " + this.heldCard.name)
-	}
+import Speaker from './imports/speaker.js';
 
-	drawFromDeck(deck) {
-		this.discard(deck);
-		this.setHeldCard(deck.draw());
-	}
-
-	discard(deck) {
-		if (this.heldCard !== null) {
-			deck.discard(this.heldCard);
-		}
-		this.heldCard = null;
-	}
-	
-	requestSwap(toPlayer) {
-		speaker.say (this.sayTo(toPlayer, 0) + quote(this.TXT_WANT_TO_SWAP));
-	}
-
-	answerSwap(fromPlayer) {
-		let val = this.heldCard.value;
-		if (val <= 16) {
-			speaker.say (this.sayTo(fromPlayer, 1) + quote(this.TXT_ACCEPT_SWAP));
-		}
-		else {
-			let reply = val < 21 ? Card.statements[val] : Card.statements[val].upper();
-			speaker.say (this.sayTo(fromPlayer, 1) + quote(reply));
-		}
-		return val;
-	}
-
-	swapWithPlayer(fromPlayer) {
-		speaker.say ("INFO: ${this.name} swaps cards with ${fromPlayer.name}.");
-		let card = this.heldCard;
-		this.setHeldCard(fromPlayer.heldCard);
-		fromPlayer.setHeldCard(card);
-	}
-
-	processAnswer(returnedCardValue) {
-		if (returnedCardValue > 16) { //If one of the matador cards (better than (12))
-			if (returnedCardValue == 17 || returnedCardValue == 18) { //huset, hesten
-				return 1; //must ask next player.
-			} else if (returnedCardValue == 19) { //katten
-				return 2; //Loses 1 score and must ask next player.
-			} else if (returnedCardValue == 20) { //dragonen
-				return 3; //Loses 1 score.
-			} else if (returnedCardValue == 21) { //gjoeken
-				return 4; //Turn is over for all players.
-			}
-		} else {
-			return 0; //Nothing happens.
-		}
-	}
-
-	addToScore(value) {
-		this.score += value;
-		let verb = value > 0 ? "added" : "subtracted";
-		let prepos = value > 0 ? "to" : "from";
-		speaker.say ("${this.name} ${verb} ${Math.abs(value)} ${prepos} score.");
-	}
-
-	sayTo(toPlayer, typ) {
-		let verb = typ == 0 ? ' asks ' : ' answers ';
-		return this.name + verb + toPlayer.name + ": ";
-	}
-
-	sayPass() {
-		return this.name + this.TXT_PASSES
-	}
-
-	sayNoFool(player) {
-		return this.TXT_NO_WAY_FOOL % (player.name)
-	}
-
-	knockOnTable() {
-		speaker.say (this.name + this.TXT_KNOCK)
-		return true
-	}
-
-	testForSwap(toPlayer = null) {
-		let value = this.heldCard.value;
-		let swap = SWAP_THRESHOLDNUMBER + 4;
-		let chance = Math.random();
-		if (chance < SWAP_FUZZINESS) {
-			swap--;
-		} else if (chance > 1 - SWAP_FUZZINESS) {
-			swap++;
-		}
-
-		if (value > swap) {
-			return false; //Player doesn't want to swap and will say pass.
-		} else {
-			return true; //Player wants to swap.
-		}
-	}
-}
-
-class Card {
-	
-	constructor (name, value) {
-		this.name = name;
-		this.value = value;
-
-		this.types = {
-			'Gjøken': 21,
-			'Dragonen': 20,
-			'Katten': 19,
-			'Hesten': 18,
-			'Huset': 17,
-			'(12)': 16,
-			'(11)': 15,
-			'(10)': 14,
-			'(9)': 13,
-			'(8)': 12,
-			'(7)': 11,
-			'(6)': 10,
-			'(5)': 9,
-			'(4)': 8,
-			'(3)': 7,
-			'(2)': 6,
-			'(1)': 5,
-			'Narren': 4,
-			'Potten': 3,
-			'Uglen': 2,
-			'(0)': 1
-		};
-
-		this.statements = {
-			21: 'Stå for gjøk!',
-			20: 'Hogg av!',
-			19: 'Kiss!',
-			18: 'Hest forbi!',
-			17: 'Hus forbi!'
-		}
-
-		this.name = "";
-		this.value = 0;
-		this.statement = "";
-		this.isMatador = false;
-		this.causeNoMoreSwap = false;
-		this.causeLosePoint = false;
-		this.causeAllLosePointAndStopGame = false;
-		this.isFool = false;
-	}
-}
-
-class Cuckoo extends Card {
-	constructor() {
-		this.name = "Gjøken";
-		this.value = 21;
-		this.statement = "Stå for gjøk!";
-		this.isMatador = true;
-		this.causeAllLosePointAndStopGame = true;
-	}
-}
-
-class Dragoon extends Card {
-	constructor() {
-		this.name = "Dragonen";
-		this.value = 20;
-		this.statement = "Hogg av!";
-		this.isMatador = true;
-		this.causeNoMoreSwap = true;
-		this.causeLosePoint = true;
-	}
-}
-
-class Cat extends Card {
-	constructor() {
-		this.name = "Katten";
-		this.value = 19;
-		this.statement = "Kiss!";
-		this.isMatador = true;
-		this.causeLosePoint = true;
-	}
-}
-
-class Horse extends Card {
-	constructor() {
-		this.name = "Hesten";
-		this.value = 18;
-		this.statement = "Hest forbi!";
-		this.isMatador = true;
-	}
-}
-
-class House extends Card {
-	constructor() {
-		this.name = "Huset";
-		this.value = 17;
-		this.statement = "Hus forbi!";
-		this.isMatador = true;
-	}
-}
-
-class Fool extends Card {
-	constructor() {
-		this.name = "Narren";
-		this.value = 4;
-		this.statement = "<Bank bank bank>!";
-		this.isFool = true;
-	}
-}
-
-class Deck {
-
-	constructor() {
-		this.cards = [];
-		this.discardPile = [];
-		for(let card of Card.types.items()) {
-			this.cards.append(card);
-			this.cards.append(card);
-		}
-		this.shuffleDeck();
-	}
-
-	shuffleDeck() {
-		console.log ("*** INFO: The deck is shuffled.");
-		this.cards = shuffle(this.cards);
-	}
-
-	draw() {
-		let card = null;
-		if (this.isDeckEmpty()) {
-			this.useDiscardPile();
-		}
-		return this.cards.pop();
-	}
-
-	useDiscardPile() {
-		console.log("**** INFO: The discard deck is used.");
-		this.cards = this.discardPile;
-		this.shuffleDeck();
-		this.discardPile = [];
-	}
-
-	isDeckEmpty() {
-		return len(this.cards) === 0;
-	}
-
-	discard(card) {
-		this.discardPile.append(card);
-		//console.log ("INFO: A %s card was discarded." % (card.name));
-	}
-
-	testLengthSum() {
-		if (len(this.cards) + len(this.discardPile) !== 42) {
-			console.log ("INFO: Warning! Sum of piles is not 42.");
-			this.printCards();
-			this.printCards(true);
-		}
-	}
-
-	printCards(discarded = false) {
-		let cardsLine = discarded ? "Discarded: " : "Cards: ";
-		let cardList = discarded ? this.discardPile : this.cards;
-		for (let card of cardList) {
-			cardsLine += card.name + ", ";
-		}
-		cardsLine = cardsLine.slice(0, cardsLine.length - 2);
-		console.log (cardsLine);
-	}
-}
-
-class Human extends Player {
-
-	constructor() {
-		this.human = true;
-	}
-
-	setHeldCard(card, silent = false) {
-		this.printGotCard(card.name);
-		super.setHeldCard(card, silent);
-	}
-
-	knockOnTable() {
-		result = speaker.ask("Knock on the table", 0) === 0;
-		if (result) {
-			speaker.say (this.name + this.TXT_KNOCK);
-		}
-		return result
-	}
-
-	requestSwap(toPlayer) {
-		speaker.say (this.sayTo(toPlayer, 0) + quote(this.TXT_WANT_TO_SWAP));
-	}
-
-	printGotCard(cardName = "") {
-		card = cardName === "" ? this.heldCard.name : cardName;
-		speaker.say ("Player ${his.name}, you got the card ${card}.");
-	}
-
-	testForSwap(toPlayer) {
-		let text = "Do you want to ";
-		if (toPlayer == "deck") {
-			text += "draw from the deck";
-		} else {
-			text += "swap cards with ${toPlayer.name}";
-		}
-		return speaker.ask(text, 0) === 0;	
-	}
-}		
+import * as tools from './imports/gnavtools.js';
 
 class GnavGame {
 
@@ -362,12 +60,14 @@ function playGame(speaker) {
 	//max_rounds = MAX_ROUNDS
 	let players = [];
 
-	let choice = speaker.ask("Play X rounds or first to reach Score", ["x", "s"]);
+	speaker.ask("Play X rounds or first to reach Score", ["x", "s"]);
+	let choice = 0;
+	let maxValue = 0;
 	if (choice === 0) {
-		maxValue = parseInt(input("Enter number of rounds to play: "));
+		maxValue = parseInt(speaker.input("Enter number of rounds to play: "));
 	}
 	else if (choice === 1) {
-		maxValue = parseInt(input("Enter score to reach: "));
+		maxValue = parseInt(speaker.input("Enter score to reach: "));
 	}
 	else {
 		choice = 0;
@@ -384,7 +84,7 @@ function playGame(speaker) {
 	let game = new GnavGame(choice, maxValue, isHuman);
 
 	PLAYERS.forEach(function (name, index) {
-		newPlayer = new Player(name, index, speaker);
+		let newPlayer = new Player(name, index, speaker);
 		//Test, make Johannes a player that never swaps with anyone nor the deck
 		if (index === 2) {
 			newPlayer.neverSwapsWithDeck = true;
@@ -392,8 +92,9 @@ function playGame(speaker) {
 		players.push(newPlayer);
 	});
 
-	players = shuffle(players);
+	players = tools.shuffle(players);
 	let deck = new Deck();
+				console.log(deck);
 	let round = 1;
 
 	while (!game.isGameOver()) {
@@ -402,7 +103,7 @@ function playGame(speaker) {
 
 		//Pop out top player as dealer and insert at end
 		let oldDealer = players.shift(); //Pop out first player in list, to act as dealer
-		players.append(oldDealer); //Reinsert the dealer at the end of list
+		players.push(oldDealer); //Reinsert the dealer at the end of list
 
 		//Draw cards for each player
 		for (let player of players) {
@@ -584,10 +285,16 @@ function proclaimWinner(player, game, round) {
 
 // --------------------------------------------------------------------------
 
+$(document).ready(function() {
+  startGame();
+});
+
 function startGame() {
 	let speaker = new Speaker();
+	let player = new Player();
 	speaker.say("<<< Welcome to Gnav The Card Game >>>");
 	speaker.ask("Play multiplayer game", 0);
+	let choice = 1;
 	if (choice == 0) {
 		if (sys.argv.len !== 2) {
 			// host = HOST;
@@ -616,97 +323,4 @@ function startGame() {
 		playGame(speaker);
 	}
 
-}
-
-	// ----------------------------------------------------------------------
-
-/**
- * Class for general speaker object.
- */
-class Speaker {
-
-	constructor() {
-		this.outputElem = 'outputWin';
-		this.value = -1;
-	}
-
-	say(what) {
-		$("#" + this.outputElem).text(what);
-	}
-
-	ask(question, answers = []) {
-		/*
-		answers = -1 : auto press any key (i.e. no questions, all answers accepted)
-		answers = 0 : auto y/n answers
-		*/
-		let noChoice = false;
-		let possibleAnswers = "";
-		let text = !noChoice ? "${question} ${possibleAnswers.splice(0, possibleAnswers.len - 1)}? " : question;
-		let output = $("#" + this.outputElem);
-		console.log(output);
-	
-		if (answers === -1) {
-			noChoice = true;
-		} else if (answers === 0) {
-			answers = ['y', 'n'];
-		}
-
-		for (let answer of answers) {
-			let element = document.createElement("input"); //create button element
-			element.type = 'button';
-			element.value = 0;
-			element.name = 'btn_' + answer;
-			element.onclick = function() {
-				alert ("You clicked ", element.name, " returning value ", element.value);
-				this.value = element.value;
-			}
-			output.add(element); //add button to output div
-		}
-	}
-
-	getValue() {
-		return this.value;
-	}
-}
-
-/**
- * observer pattern subject class
- */
-class EventObserver {
-	constructor() {
-		this.observers = [];
-	}
-
-	subscribe (fn) {
-		this.observers.push(fn);
-	}
-
-	unsubscribe(fn) {
-		let index = this.observers.indexOf(fn);
-		if (index > -1) {
-			this.observers.slice(index, 1); //remove item at index
-		}
-	}
-
-	notifyAll() {
-		for (let fn of observers) {
-			console.log(fn.name, " has been notified.");
-		}
-	}
-}
-
-function quote(text) {
-	return "'" + text + "'";
-}
-
-/**
- * Shuffles array in placey placey. ES6 version
- * @param {Array} a items An array containing the items.
- */
-function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
 }
