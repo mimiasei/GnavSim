@@ -6,9 +6,9 @@ import Card from './card.js';
 export default class Player {
 
 	constructor(name, pid, speaker) {
-		this.name = name;
-		this.pid = pid;
-		this.speaker = speaker;
+		this.name = name || '';
+		this.pid = pid || 0;
+		this.speaker = speaker || null;
 		this.score = 5;
 		this.heldCard = null;
 		this.wins = 0;
@@ -16,23 +16,23 @@ export default class Player {
 		this.neverSwapsWithDeck = false;
 	}
 
-	get name() { return this.name; }
-	get pid() { return this.pid; }
-	get speaker() { return this.speaker; }
-	get score() { return this.score; }
-	get heldCard() { return this.heldCard; }
-	get wins() { return this.wins; }
-	get losses() { return this.losses; }
-	get neverSwapsWithDeck() { return this.neverSwapsWithDeck; }
+	get name() { return this._name; }
+	get pid() { return this._pid; }
+	get speaker() { return this._speaker; }
+	get score() { return this._score; }
+	get heldCard() { return this._heldCard; }
+	get wins() { return this._wins; }
+	get losses() { return this._losses; }
+	get neverSwapsWithDeck() { return this._neverSwapsWithDeck; }
 
-	set name(value) { this.name = value; }
-	set pid(value) { this.pid = value; }
-	set speaker(value) { this.speaker = value; }
-	set score(value) { this.score = value; }
-	set heldCard(value) { this.heldCard = value; }
-	set wins(value) { this.wins = value; }
-	set losses(value) { this.losses = value; }
-	set neverSwapsWithDeck(value) { this.neverSwapsWithDeck = value; }
+	set name(value) { this._name = value }
+	set pid(value) { this._pid = value }
+	set speaker(value) { this._speaker = value }
+	set score(value) { this._score = value }
+	set heldCard(value) { this._heldCard = value }
+	set wins(value) { this._wins = value }
+	set losses(value) { this._losses = value }
+	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value }
 
 	setHeldCard(card, silent = false) {
 		this.heldCard = card;
@@ -118,19 +118,23 @@ export default class Player {
 	}
 
 	testForSwap(toPlayer = null) {
-		let value = this.heldCard.value;
-		let swap = SWAP_THRESHOLDNUMBER + 4;
-		let chance = Math.random();
-		if (chance < SWAP_FUZZINESS) {
-			swap--;
-		} else if (chance > 1 - SWAP_FUZZINESS) {
-			swap++;
-		}
+		if (this.heldCard) {
+			let value = this.heldCard.value;
+			let swap = SWAP_THRESHOLDNUMBER + 4;
+			let chance = Math.random();
+			if (chance < SWAP_FUZZINESS) {
+				swap--;
+			} else if (chance > 1 - SWAP_FUZZINESS) {
+				swap++;
+			}
 
-		if (value > swap) {
-			return false; //Player doesn't want to swap and will say pass.
+			if (value > swap) {
+				return false; //Player doesn't want to swap and will say pass.
+			} else {
+				return true; //Player wants to swap.
+			}
 		} else {
-			return true; //Player wants to swap.
+			return false;
 		}
 	}
 }
