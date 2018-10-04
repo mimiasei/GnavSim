@@ -3,6 +3,8 @@
         "start": "node server"
     },
     "dependencies": {
-        "express": "latest"
+        "express": "latest",
+        "unsplash-js": "^4.8.0",
+        "whatwg-fetch": "^3.0.0"
     }
 }

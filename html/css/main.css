@@ -7,3 +7,11 @@ body {
 p {
   color: orange;
 }
+
+div {
+  color: rgb(216, 209, 105);
+}
+
+img {
+  border-radius: 50%;
+}

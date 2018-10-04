@@ -10,8 +10,15 @@ export default class Speaker {
 		this.value = -1;
 	}
 
-	say(what) {
-		this.outputElem.text(what);
+	get output() { return this.outputElem }
+
+	say(what, type) {
+		type = type || 'div';
+		let $elem = $( "<" + type + ">", { id: this.makeid(), text: what } );
+		$elem.click( function() {
+			console.log(this.outputElem.id);
+		});
+		this.outputElem.append($elem);
 	}
 
 	ask(question, answers = []) {
@@ -21,7 +28,7 @@ export default class Speaker {
 		*/
 		let noChoice = false;
 		let possibleAnswers = "";
-		let text = !noChoice ? "${question} ${possibleAnswers.splice(0, possibleAnswers.len - 1)}? " : question;
+		let text = !noChoice ? `${question} ${possibleAnswers}? ` : question;
 	
 		if (answers === -1) {
 			noChoice = true;
@@ -44,8 +51,8 @@ export default class Speaker {
 
 	input(question) {
 		let randomName = this.makeid();
-		let inputElem = $('<input type="text" class="fieldname" id="${randomName}"/>');
-		this.outputElem.add(inputElem);
+		let $inputElem = $('<input type="text" class="fieldname" id="' + randomName + '"/>');
+		this.outputElem.append($inputElem);
 	}
 
 	makeid() {

@@ -83,22 +83,30 @@ function playGame(speaker) {
 
 	let game = new GnavGame(choice, maxValue, isHuman);
 
+	speaker.output.append(getRandomImgElem("cat"));
+	speaker.output.append(getRandomImgElem("house"));
+	speaker.output.append(getRandomImgElem("horse"));
+	speaker.output.append(getRandomImgElem("flower pot"));
+	speaker.output.append(getRandomImgElem("jester"));
+	speaker.output.append(getRandomImgElem("infantry"));
+	speaker.output.append(getRandomImgElem("bird"));
+
 	PLAYERS.forEach(function (name, index) {
 		let newPlayer = new Player(name, index, speaker);
 		//Test, make Johannes a player that never swaps with anyone nor the deck
 		if (index === 2) {
-			newPlayer.neverSwapsWithDeck = true;
+			newPlayer.neverSwapsWithDeck = false;
 		}
 		players.push(newPlayer);
 	});
 
 	players = tools.shuffle(players);
 	let deck = new Deck();
-				console.log(deck);
+	console.log(deck);
 	let round = 1;
 
 	while (!game.isGameOver()) {
-		speaker.say("Round: ${round} ===> Card pile length: ${deck.cards.length} -----------------------");
+		speaker.say(`Round: ${round} ===> Card pile length: ${deck.cards.length} -----------------------`);
 		speaker.say("Current dealer is: " + players[0].name);
 
 		//Pop out top player as dealer and insert at end
@@ -152,8 +160,10 @@ function playGame(speaker) {
 			}
 		}
 
-		speaker.say ("End of round " + round + " ======================================");
+		speaker.say ("End of round: " + round);
 		//End of round
+
+		console.log(players);
 
 		//Calculate scores and stats
 		sortedPlayers = players.sort((a, b) => a.heldCard.value > b.heldCard.value);
@@ -270,9 +280,9 @@ function proclaimWinner(player, game, round) {
 	speaker.say ("");
 	let text = "<<<<<<<<<<<<<<<<<< ";
 	if (game.playType === 0) {
-		text += "The winner of ${game.maxValue} rounds of GNAV is...";
+		text += `The winner of ${game.maxValue} rounds of GNAV is...`;
 	} else {
-		text += "The winner after ${round} rounds reaching score ${game.maxValue} is...";
+		text += `The winner after ${round} rounds reaching score ${game.maxValue} is...`;
 	}
 	text += " >>>>>>>>>>>>>>>>>>";
 	speaker.say (text);
@@ -286,7 +296,7 @@ function proclaimWinner(player, game, round) {
 function startGame() {
 	let speaker = new Speaker();
 	let player = new Player();
-	speaker.say("<<< Welcome to Gnav The Card Game >>>");
+	speaker.say("<<< Welcome to Gnav The Card Game >>>", "h3");
 	speaker.ask("Play multiplayer game", 0);
 	let choice = 1;
 	if (choice == 0) {
@@ -316,6 +326,11 @@ function startGame() {
 	else {
 		playGame(speaker);
 	}
+}
+
+function getRandomImgElem(search) {
+	let imageUrl = 'https://source.unsplash.com/100x100/?' + search;
+	return $( "<img>", { id: search + "_img", src: imageUrl, title: search } );
 }
 
 // --------------------------------------------------------------------------
