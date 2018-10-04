@@ -16,12 +16,31 @@ export default class Player {
 		this.neverSwapsWithDeck = false;
 	}
 
+	get name() { return this.name; }
+	get pid() { return this.pid; }
+	get speaker() { return this.speaker; }
+	get score() { return this.score; }
+	get heldCard() { return this.heldCard; }
+	get wins() { return this.wins; }
+	get losses() { return this.losses; }
+	get neverSwapsWithDeck() { return this.neverSwapsWithDeck; }
+
+	set name(name) { this.name = name; }
+	set pid(pid) { this.pid = pid; }
+	set speaker(speaker) { this.speaker = speaker; }
+	set score(score) { this.score = score; }
+	set heldCard(heldCard) { this.heldCard = heldCard; }
+	set wins(wins) { this.wins = wins; }
+	set losses(losses) { this.losses = losses; }
+	set neverSwapsWithDeck(neverSwapsWithDeck) { this.neverSwapsWithDeck = neverSwapsWithDeck; }
+
 	setHeldCard(card, silent = false) {
 		this.heldCard = card;
 		//if not silent: speaker.say ("INFO: " + this.name + " now has: " + this.heldCard.name)
 	}
 
 	drawFromDeck(deck) {
+		Object.setPrototypeOf(deck, Deck.prototype);
 		this.discard(deck);
 		let result = deck.draw();
 		this.setHeldCard(result);
