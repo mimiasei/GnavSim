@@ -1,5 +1,8 @@
 'use strict';
 
+import Deck from './deck.js';
+import Card from './card.js';
+
 export default class Player {
 
 	constructor(name, pid, speaker) {
@@ -83,16 +86,16 @@ export default class Player {
 	}
 
 	sayPass() {
-		return this.name + this.TXT_PASSES
+		return this.name + this.TXT_PASSES;
 	}
 
 	sayNoFool(player) {
-		return this.TXT_NO_WAY_FOOL % (player.name)
+		return this.TXT_NO_WAY_FOOL % (player.name);
 	}
 
 	knockOnTable() {
-		speaker.say (this.name + this.TXT_KNOCK)
-		return true
+		speaker.say (this.name + this.TXT_KNOCK);
+		return true;
 	}
 
 	testForSwap(toPlayer = null) {
