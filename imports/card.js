@@ -13,23 +13,23 @@ export default class Card {
 		this.isFool = false;
 	}
 
-	get name() { return this.name; }
-	get value() { return this.value; }
-	get statement() { return this.statement; }
-	get isMatador() { return this.isMatador; }
-	get causeNoMoreSwap() { return this.causeNoMoreSwap; }
-	get causeLosePoint() { return this.causeLosePoint; }
-	get causeAllLosePointAndStopGame() { return this.causeAllLosePointAndStopGame; }
-	get isFool() { return this.isFool; }
+	get name() { return this._name; }
+	get value() { return this._value; }
+	get statement() { return this._statement; }
+	get isMatador() { return this._isMatador; }
+	get causeNoMoreSwap() { return this._causeNoMoreSwap; }
+	get causeLosePoint() { return this._causeLosePoint; }
+	get causeAllLosePointAndStopGame() { return this._causeAllLosePointAndStopGame; }
+	get isFool() { return this._isFool; }
 
-	set name(val) { this.name = val; }
-	set value(val) { this.value = val; }
-	set statement(val) { this.statement = val; }
-	set isMatador(val) { this.isMatador = val; }
-	set causeNoMoreSwap(val) { this.causeNoMoreSwap = val; }
-	set causeLosePoint(val) { this.causeLosePoint = val; }
-	set causeAllLosePointAndStopGame(val) { this.causeAllLosePointAndStopGame = val; }
-	set isFool(val) { this.isFool = isFool; }
+	set name(val) { this._name = val; }
+	set value(val) { this._value = val; }
+	set statement(val) { this._statement = val; }
+	set isMatador(val) { this._isMatador = val; }
+	set causeNoMoreSwap(val) { this._causeNoMoreSwap = val; }
+	set causeLosePoint(val) { this._causeLosePoint = val; }
+	set causeAllLosePointAndStopGame(val) { this._causeAllLosePointAndStopGame = val; }
+	set isFool(val) { this._isFool = isFool; }
 
 	static get types() {
 		return {		
