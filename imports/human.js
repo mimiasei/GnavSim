@@ -4,9 +4,14 @@ import Player from './player.js';
 
 export default class Human extends Player {
 
-	constructor() {
+	constructor(name, pid, speaker) {
+		super(name, pid, speaker);
 		this.human = true;
 	}
+
+	get human() { return this.human; }
+
+	set human(value) { this.human = value; }
 
 	setHeldCard(card, silent = false) {
 		this.printGotCard(card.name);
