@@ -75,8 +75,8 @@ function playGame(speaker) {
 	}
 	let isHuman = false;
 	if (speaker.ask("Play against computer", 0) === 0) {
-		let humanName = input("Please enter your name: ");
-		human = new Human(humanName, len(PLAYERS) + 1, speaker);
+		let humanName = speaker.input("Please enter your name: ");
+		let human = new Human(humanName, len(PLAYERS) + 1, speaker);
 		players.push(human);
 		isHuman = true;
 	}
@@ -283,12 +283,6 @@ function proclaimWinner(player, game, round) {
 	speaker.say ("<" * (text.len / 2) + ">" * (text.len) / 2);
 }
 
-// --------------------------------------------------------------------------
-
-$(document).ready(function() {
-  startGame();
-});
-
 function startGame() {
 	let speaker = new Speaker();
 	let player = new Player();
@@ -322,5 +316,10 @@ function startGame() {
 	else {
 		playGame(speaker);
 	}
-
 }
+
+// --------------------------------------------------------------------------
+
+$(document).ready(function() {
+  startGame();
+});
