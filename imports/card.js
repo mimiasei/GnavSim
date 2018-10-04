@@ -22,14 +22,14 @@ export default class Card {
 	get causeAllLosePointAndStopGame() { return this.causeAllLosePointAndStopGame; }
 	get isFool() { return this.isFool; }
 
-	set name(name) { this.name = name; }
-	set value(value) { this.value = value; }
-	set statement(statement) { this.statement = statement; }
-	set isMatador(isMatador) { this.isMatador = isMatador; }
-	set causeNoMoreSwap(causeNoMoreSwap) { this.causeNoMoreSwap = causeNoMoreSwap; }
-	set causeLosePoint(causeLosePoint) { this.causeLosePoint = causeLosePoint; }
-	set causeAllLosePointAndStopGame(causeAllLosePointAndStopGame) { this.causeAllLosePointAndStopGame = causeAllLosePointAndStopGame; }
-	set isFool(isFool) { this.isFool = isFool; }
+	set name(val) { this.name = val; }
+	set value(val) { this.value = val; }
+	set statement(val) { this.statement = val; }
+	set isMatador(val) { this.isMatador = val; }
+	set causeNoMoreSwap(val) { this.causeNoMoreSwap = val; }
+	set causeLosePoint(val) { this.causeLosePoint = val; }
+	set causeAllLosePointAndStopGame(val) { this.causeAllLosePointAndStopGame = val; }
+	set isFool(val) { this.isFool = isFool; }
 
 	static get types() {
 		return {		
