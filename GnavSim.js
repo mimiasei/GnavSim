@@ -120,7 +120,7 @@ function playGame(speaker) {
 			let wantsToSwap = false;
 			let sayPass = player.sayPass();
 			if (nbr !== players.len - 1) {
-				if( players[nbr + 1].heldCard && players[nbr + 1].heldCard.value === 4) { //If the other player has Narren...
+				if( players[nbr + 1] && players[nbr + 1].heldCard && players[nbr + 1].heldCard.value === 4) { //If the other player has Narren...
 					if (!player.testForSwap(players[nbr + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
 						sayPass += player.sayNoFool(players[nbr + 1]);
 					} else {
@@ -152,7 +152,7 @@ function playGame(speaker) {
 			}
 		}
 
-		speaker.say ("End of round " + str(round) + " ======================================");
+		speaker.say ("End of round " + round + " ======================================");
 		//End of round
 
 		//Calculate scores and stats
