@@ -25,14 +25,14 @@ export default class Player {
 	get losses() { return this.losses; }
 	get neverSwapsWithDeck() { return this.neverSwapsWithDeck; }
 
-	set name(name) { this.name = name; }
-	set pid(pid) { this.pid = pid; }
-	set speaker(speaker) { this.speaker = speaker; }
-	set score(score) { this.score = score; }
-	set heldCard(heldCard) { this.heldCard = heldCard; }
-	set wins(wins) { this.wins = wins; }
-	set losses(losses) { this.losses = losses; }
-	set neverSwapsWithDeck(neverSwapsWithDeck) { this.neverSwapsWithDeck = neverSwapsWithDeck; }
+	set name(value) { this.name = value; }
+	set pid(value) { this.pid = value; }
+	set speaker(value) { this.speaker = value; }
+	set score(value) { this.score = value; }
+	set heldCard(value) { this.heldCard = value; }
+	set wins(value) { this.wins = value; }
+	set losses(value) { this.losses = value; }
+	set neverSwapsWithDeck(value) { this.neverSwapsWithDeck = value; }
 
 	setHeldCard(card, silent = false) {
 		this.heldCard = card;
