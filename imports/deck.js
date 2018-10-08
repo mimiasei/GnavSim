@@ -6,46 +6,56 @@ import * as tools from './gnavtools.js';
 export default class Deck {
 
 	constructor() {
-		this.cards = [];
-		this.discardPile = [];
-		for(let i = 0; i < Card.types.len; i++) {
-			this.cards.push(Card.types[i]);
-			this.cards.push(Card.types[i]);
+		this._cards = [];
+		this._discardPile = [];
+
+		for(let i = 0; i < Card.typesSize; i++) {
+			let card = {
+				name: Card.type(i),
+				value: Card.types[Card.type(i)]
+			}
+			this._cards.push(card);
+			this._cards.push(card);
 		}
 		this.shuffleDeck();
 	}
 
+	get cards() { return this._cards }
+	get discardPile() { return this._discardPile }
+
+	set cards(value) { this._cards = Array.from(value) }
+	set discardPile(value) { this._discardPile = Array.from(value) }
+
 	shuffleDeck() {
 		console.log ("*** INFO: The deck is shuffled.");
-		this.cards = tools.shuffle(this.cards);
+		this._cards = tools.shuffle(this._cards);
 	}
 
 	draw() {
-		let card = null;
 		if (this.isDeckEmpty()) {
 			this.useDiscardPile();
 		}
-		return this.cards.pop();
+		return this._cards.pop();
 	}
 
 	useDiscardPile() {
 		console.log("**** INFO: The discard deck is used.");
-		this.cards = this.discardPile;
+		this._cards = Array.from(this._discardPile);
 		this.shuffleDeck();
-		this.discardPile = [];
+		this._discardPile = [];
 	}
 
 	isDeckEmpty() {
-		return this.cards.len === 0;
+		return this._cards.length === 0;
 	}
 
 	discard(card) {
-		this.discardPile.push(card);
+		this._discardPile.push(card);
 		//console.log ("INFO: A %s card was discarded." % (card.name));
 	}
 
 	testLengthSum() {
-		if (len(this.cards) + len(this.discardPile) !== 42) {
+		if (this._cards.length + this._discardPile.length !== 42) {
 			console.log ("INFO: Warning! Sum of piles is not 42.");
 			this.printCards();
 			this.printCards(true);
@@ -54,7 +64,7 @@ export default class Deck {
 
 	printCards(discarded = false) {
 		let cardsLine = discarded ? "Discarded: " : "Cards: ";
-		let cardList = discarded ? this.discardPile : this.cards;
+		let cardList = discarded ? this._discardPile : this._cards;
 		for (let card of cardList) {
 			cardsLine += card.name + ", ";
 		}

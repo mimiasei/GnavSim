@@ -1,15 +1,15 @@
 'use strict';
 
-/**
- * Class for general speaker object.
- */
-export class Speaker {
-	constructor() {}
+export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Oivind", "Ask"];
+export const MAX_ROUNDS = 1;
+export const SWAP_THRESHOLDNUMBER = 4;
+export const SWAP_FUZZINESS = 0.03; //Simulates human error. 0.1 = 10% chance of making a mistake.
 
-	say(what) {
-		console.log(what);
-	}
-}
+export const TXT_WANT_TO_SWAP = "Jeg vil gjerne bytte med deg.";
+export const TXT_ACCEPT_SWAP = "Jada, her er kortet mitt.";
+export const TXT_KNOCK = " banker tre ganger på bordet. <BANK, BANK, BANK>";
+export const TXT_PASSES = " sier 'Jeg står.'";
+export const TXT_NO_WAY_FOOL = " and thinks ''Aldri i livet, %s har jo narren!''";
 
 export function ask(question, answers = []) {
 	/*
@@ -20,7 +20,7 @@ export function ask(question, answers = []) {
 	let possibleAnswers = "";
 	let value = -1;
 	let error = true;
-	let text = !noChoice ? "${question} ${possibleAnswers[:-1]}? " : question;
+	let text = !noChoice ? `${question} ${possibleAnswers.slice(0, possibleAnswers.len - 1)}? ` : question;
 
 	if (answers === -1) {
 		noChoice = true;
@@ -43,7 +43,7 @@ export function ask(question, answers = []) {
 		}
 		catch (ValueError) {
 			value = -1;
-			console.log("Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})");
+			console.log(`Please select either of (${possibleAnswers.splice(0, possibleAnswers.len - 1)})`);
 		}
 	}
 	return value;

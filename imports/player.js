@@ -2,18 +2,19 @@
 
 import Deck from './deck.js';
 import Card from './card.js';
+import * as tools from './gnavtools.js';
 
 export default class Player {
 
 	constructor(name, pid, speaker) {
-		this.name = name || '';
-		this.pid = pid || 0;
-		this.speaker = speaker || null;
-		this.score = 5;
-		this.heldCard = null;
-		this.wins = 0;
-		this.losses = 0;
-		this.neverSwapsWithDeck = false;
+		this._name = name || '';
+		this._pid = pid || 0;
+		this._speaker = speaker || null;
+		this._score = 5;
+		this._heldCard = null;
+		this._wins = 0;
+		this._losses = 0;
+		this._neverSwapsWithDeck = false;
 	}
 
 	get name() { return this._name; }
@@ -34,46 +35,42 @@ export default class Player {
 	set losses(value) { this._losses = value }
 	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value }
 
-	setHeldCard(card, silent = false) {
-		this.heldCard = card;
-		//if not silent: speaker.say ("INFO: " + this.name + " now has: " + this.heldCard.name)
-	}
-
 	drawFromDeck(deck) {
-		Object.setPrototypeOf(deck, Deck.prototype);
+		// Object.setPrototypeOf(deck, Deck.prototype);
 		this.discard(deck);
 		let result = deck.draw();
-		this.setHeldCard(result);
+		this._heldCard = jQuery.extend(true, {}, result);
 	}
 
 	discard(deck) {
-		if (this.heldCard !== null) {
-			deck.discard(this.heldCard);
+		// Object.setPrototypeOf(deck, Deck.prototype);
+		if (this._heldCard !== null) {
+			deck.discard(this._heldCard);
 		}
-		this.heldCard = null;
+		this._heldCard = null;
 	}
 	
 	requestSwap(toPlayer) {
-		speaker.say (this.sayTo(toPlayer, 0) + quote(this.TXT_WANT_TO_SWAP));
+		this._speaker.say (this.sayTo(toPlayer, 0) + quote(tools.TXT_WANT_TO_SWAP));
 	}
 
 	answerSwap(fromPlayer) {
-		let val = this.heldCard.value;
+		let val = this._heldCard.value;
 		if (val <= 16) {
-			speaker.say (this.sayTo(fromPlayer, 1) + quote(this.TXT_ACCEPT_SWAP));
+			this._speaker.say (this.sayTo(fromPlayer, 1) + quote(tools.TXT_ACCEPT_SWAP));
 		}
 		else {
-			let reply = val < 21 ? Card.statements[val] : Card.statements[val].upper();
-			speaker.say (this.sayTo(fromPlayer, 1) + quote(reply));
+			let reply = val < 21 ? Card.statement(val) : Card.statement(val).toUpperCase();
+			this._speaker.say (this.sayTo(fromPlayer, 1) + quote(reply));
 		}
 		return val;
 	}
 
 	swapWithPlayer(fromPlayer) {
-		speaker.say ("INFO: ${this.name} swaps cards with ${fromPlayer.name}.");
-		let card = this.heldCard;
-		this.setHeldCard(fromPlayer.heldCard);
-		fromPlayer.setHeldCard(card);
+		this._speaker.say ("INFO: ${this.name} swaps cards with ${fromPlayer.name}.");
+		let card = jQuery.extend(true, {}, this._heldCard);
+		this._heldCard = jQuery.extend(true, {}, fromPlayer.heldCard);
+		fromPlayer.heldCard = jQuery.extend(true, {}, card);
 	}
 
 	processAnswer(returnedCardValue) {
@@ -93,38 +90,38 @@ export default class Player {
 	}
 
 	addToScore(value) {
-		this.score += value;
+		this._score += value;
 		let verb = value > 0 ? "added" : "subtracted";
 		let prepos = value > 0 ? "to" : "from";
-		speaker.say ("${this.name} ${verb} ${Math.abs(value)} ${prepos} score.");
+		this._speaker.say (`${this.name} ${verb} ${Math.abs(value)} ${prepos} score.`);
 	}
 
 	sayTo(toPlayer, typ) {
 		let verb = typ == 0 ? ' asks ' : ' answers ';
-		return this.name + verb + toPlayer.name + ": ";
+		return this._name + verb + toPlayer.name + ": ";
 	}
 
 	sayPass() {
-		return this.name + this.TXT_PASSES;
+		return this._name + tools.TXT_PASSES;
 	}
 
 	sayNoFool(player) {
-		return this.TXT_NO_WAY_FOOL % (player.name);
+		return tools.TXT_NO_WAY_FOOL % (player.name);
 	}
 
 	knockOnTable() {
-		speaker.say (this.name + this.TXT_KNOCK);
+		this._speaker.say (this._name + tools.TXT_KNOCK);
 		return true;
 	}
 
 	testForSwap(toPlayer = null) {
-		if (this.heldCard) {
-			let value = this.heldCard.value;
-			let swap = SWAP_THRESHOLDNUMBER + 4;
+		if (this._heldCard) {
+			let value = this._heldCard.value;
+			let swap = tools.SWAP_THRESHOLDNUMBER + 4;
 			let chance = Math.random();
-			if (chance < SWAP_FUZZINESS) {
+			if (chance < tools.SWAP_FUZZINESS) {
 				swap--;
-			} else if (chance > 1 - SWAP_FUZZINESS) {
+			} else if (chance > 1 - tools.SWAP_FUZZINESS) {
 				swap++;
 			}
 

@@ -1,17 +1,4 @@
 
-// import * as gnavtools from 'gnavtools';
-
-const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Oivind", "Ask"];
-const MAX_ROUNDS = 1;
-const SWAP_THRESHOLDNUMBER = 4;
-const SWAP_FUZZINESS = 0.03; //Simulates human error. 0.1 = 10% chance of making a mistake.
-
-const TXT_WANT_TO_SWAP = "Jeg vil gjerne bytte med deg.";
-const TXT_ACCEPT_SWAP = "Jada, her er kortet mitt.";
-const TXT_KNOCK = " banker tre ganger på bordet. <BANK, BANK, BANK>";
-const TXT_PASSES = " sier 'Jeg står.'";
-const TXT_NO_WAY_FOOL = " and thinks ''Aldri i livet, %s har jo narren!''";
-
 // Multiplayer stuff -----------------
 const HOST = "localhost";
 const PORT = 112;
@@ -60,8 +47,8 @@ function playGame(speaker) {
 	//max_rounds = MAX_ROUNDS
 	let players = [];
 
-	speaker.ask("Play X rounds or first to reach Score", ["x", "s"]);
-	let choice = 0;
+	// speaker.ask("Play X rounds or first to reach Score", ["x", "s"]);
+	let choice = -1;
 	let maxValue = 0;
 	if (choice === 0) {
 		maxValue = parseInt(speaker.input("Enter number of rounds to play: "));
@@ -71,27 +58,27 @@ function playGame(speaker) {
 	}
 	else {
 		choice = 0;
-		maxValue = 5;
+		maxValue = 8;
 	}
 	let isHuman = false;
 	if (speaker.ask("Play against computer", 0) === 0) {
 		let humanName = speaker.input("Please enter your name: ");
-		let human = new Human(humanName, len(PLAYERS) + 1, speaker);
+		let human = new Human(humanName, tools.PLAYERS.length + 1, speaker);
 		players.push(human);
 		isHuman = true;
 	}
 
 	let game = new GnavGame(choice, maxValue, isHuman);
 
-	speaker.output.append(getRandomImgElem("cat"));
-	speaker.output.append(getRandomImgElem("house"));
-	speaker.output.append(getRandomImgElem("horse"));
-	speaker.output.append(getRandomImgElem("flower pot"));
-	speaker.output.append(getRandomImgElem("jester"));
-	speaker.output.append(getRandomImgElem("infantry"));
-	speaker.output.append(getRandomImgElem("bird"));
+	// speaker.output.append(getRandomImgElem("cat closeup"));
+	// speaker.output.append(getRandomImgElem("house"));
+	// speaker.output.append(getRandomImgElem("horse"));
+	// speaker.output.append(getRandomImgElem("pot"));
+	// speaker.output.append(getRandomImgElem("fool"));
+	// speaker.output.append(getRandomImgElem("cavalry"));
+	// speaker.output.append(getRandomImgElem("bird"));
 
-	PLAYERS.forEach(function (name, index) {
+	tools.PLAYERS.forEach(function (name, index) {
 		let newPlayer = new Player(name, index, speaker);
 		//Test, make Johannes a player that never swaps with anyone nor the deck
 		if (index === 2) {
@@ -102,8 +89,9 @@ function playGame(speaker) {
 
 	players = tools.shuffle(players);
 	let deck = new Deck();
-	console.log(deck);
 	let round = 1;
+	let sortedPlayers = [];
+	let highestScore = [];
 
 	while (!game.isGameOver()) {
 		speaker.say(`Round: ${round} ===> Card pile length: ${deck.cards.length} -----------------------`);
@@ -114,46 +102,50 @@ function playGame(speaker) {
 		players.push(oldDealer); //Reinsert the dealer at the end of list
 
 		//Draw cards for each player
-		for (let player of players) {
-			player.drawFromDeck(deck);
-			if (player.heldCard && player.heldCard.value === 4) { //If player receives Narren
-				if (player.knockOnTable()) {
-					player.addToScore(1);
+		for (let i = 0; i < players.length; i++) {
+			players[i].drawFromDeck(deck);
+			console.log("player card:");
+console.log(players[i].heldCard);
+			if (players[i].heldCard && players[i].heldCard.value === 4) { //If player receives Narren
+				if (players[i].knockOnTable()) {
+					players[i].addToScore(1);
 				}
 			}
 		}
 
 		//Play round
-		for (let [nbr, player] of players.entries()) {
+		console.log("playing round...");
+		for (let i = 0; i < players.length; i++) {
+			console.log(players[i]);
 			let wantsToSwap = false;
-			let sayPass = player.sayPass();
-			if (nbr !== players.len - 1) {
-				if( players[nbr + 1] && players[nbr + 1].heldCard && players[nbr + 1].heldCard.value === 4) { //If the other player has Narren...
-					if (!player.testForSwap(players[nbr + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
-						sayPass += player.sayNoFool(players[nbr + 1]);
+			let sayPass = players[i].sayPass();
+			if (i !== players.len - 1) {
+				if( players[i + 1] && players[i + 1].heldCard && players[i + 1].heldCard.value === 4) { //If the other player has Narren...
+					if (!players[i].testForSwap(players[i + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
+						sayPass += players[i].sayNoFool(players[i + 1]);
 					} else {
 						wantsToSwap = true;
 					}
 				} else {
-					if (!player.neverSwapsWithDeck && player.testForSwap(players[nbr + 1])) { //Only ask to swap if card is 4 or less.
+					if (!players[i].neverSwapsWithDeck && players[i].testForSwap(players[i + 1])) { //Only ask to swap if card is 4 or less.
 						wantsToSwap = true;
 					} else {
-						if (player.neverSwapsWithDeck) {
-							speaker.say (player.name + " never swaps!");
+						if (players[i].neverSwapsWithDeck) {
+							speaker.say (players[i].name + " never swaps!");
 						}
 					}
 				}
 				if (wantsToSwap) {
-					if (!askPlayers(nbr, player, players, deck)) { //Check if Staa for gjok! is called.
+					if (!askPlayers(i, players[i], players, deck, speaker)) { //Check if Staa for gjok! is called.
 						break;
 					}
 				} else {
 					speaker.say (sayPass);
 				}
 			} else {
-				if (player.testForSwap("deck")) { //Only swap if card is 4 or less.
-					speaker.say (player.name + " draws from the deck.");
-					player.drawFromDeck(deck); //Draw from deck if noone else to swap with.
+				if (players[i].testForSwap("deck")) { //Only swap if card is 4 or less.
+					speaker.say (players[i].name + " draws from the deck.");
+					players[i].drawFromDeck(deck); //Draw from deck if noone else to swap with.
 				} else {
 					speaker.say (sayPass);
 				}
@@ -163,13 +155,13 @@ function playGame(speaker) {
 		speaker.say ("End of round: " + round);
 		//End of round
 
-		console.log(players);
-
 		//Calculate scores and stats
-		sortedPlayers = players.sort((a, b) => a.heldCard.value > b.heldCard.value);
-		winner = sortedPlayers[0];
+		console.log(players);
+		sortedPlayers = players.sort(function (a, b) { return a.heldCard.value > b.heldCard.value; }); 
+		console.log(sortedPlayers);
+		let winner = sortedPlayers[0];
 		winner.wins++;
-		loser = sortedPlayers[len(sortedPlayers) - 1];
+		let loser = sortedPlayers[sortedPlayers.length - 1];
 		loser.losses++;
 		speaker.say ("Winner of this round is " + winner.name + " with the card " + winner.heldCard.name);
 		winner.addToScore(1);
@@ -190,29 +182,29 @@ function playGame(speaker) {
 
 		deck.testLengthSum();
 
-		mostWins = players.sort((a, b) => a.wins > b.wins);
-		mostWins = players.sort((a, b) => a.losses > b.losses);
-		mostWins = players.sort((a, b) => a.score > b.score);
+		let mostWins = players.sort((a, b) => (a.wins > b.wins) ? 1 : ((b.wins > a.wins) ? -1 : 0));
+		let mostLosses = players.sort((a, b) => (a.losses > b.losses) ? 1 : ((b.losses > a.losses) ? -1 : 0));
+		highestScore = players.sort((a, b) => (a.score > b.score) ? 1 : ((b.score > a.score) ? -1 : 0));
 
-		scoreLine = "-------> Scores: "
+		let scoreLine = "-------> Scores: "
 
 		for (let player of players) {
 			let thisPly = player.name;
 			if (player.pid == highestScore[0].pid) {
-				thisPly = "**" + thisPly.upper() + "**";
+				thisPly = "**" + thisPly.toUpperCase() + "**";
 			}
-			scoreLine += thisPly + ": " + str(player.score) + ", ";
+			scoreLine += thisPly + ": " + player.score + ", ";
 		}
 		speaker.say ("");
 		speaker.say (scoreLine.slice(0, scoreLine.len - 2));
-		speaker.say ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + str(mostWins[0].wins) + ", most losses -> " + mostLosses[0].name + ": " + str(mostLosses[0].losses));
+		speaker.say ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + mostWins[0].wins + ", most losses -> " + mostLosses[0].name + ": " + mostLosses[0].losses);
 
 		round++;
 
 		if (game.playType === 0) {
 			game.incValue();
 		} else {
-			speaker.say("INFO: Setting " + str(highestScore[0].score) + " as new best score value for game.");
+			speaker.say("INFO: Setting " + highestScore[0].score + " as new best score value for game.");
 			game.setValue(highestScore[0].score);
 		}
 
@@ -227,10 +219,10 @@ function playGame(speaker) {
 	}
 	//End of game loop while
 
-	proclaimWinner(highestScore[0], game, round);
+	proclaimWinner(highestScore[0], game, round, speaker);
 }
 
-function askPlayers(nbr, player, players, deck) {
+function askPlayers(nbr, player, players, deck, speaker) {
 	let nextAdd = 1;
 	let hasSwapped = false;
 	let dragonen = false;
@@ -276,7 +268,7 @@ function subractFromAllPlayers(player, players) {
 	}
 }
 
-function proclaimWinner(player, game, round) {
+function proclaimWinner(player, game, round, speaker) {
 	speaker.say ("");
 	let text = "<<<<<<<<<<<<<<<<<< ";
 	if (game.playType === 0) {
@@ -286,21 +278,21 @@ function proclaimWinner(player, game, round) {
 	}
 	text += " >>>>>>>>>>>>>>>>>>";
 	speaker.say (text);
-	speaker.say ("<<" + (text.len - 4) * " " + ">>");
-	spaces = ((text.len - 2) / 2) - (player.name.len / 2);
+	speaker.say ("<<" + (text.length - 4) * " " + ">>");
+	let spaces = ((text.length - 2) / 2) - (player.name.length / 2);
 	speaker.say ("<<" + (" " * spaces) + player.name + (" " * (spaces - 2)) + ">>");
-	speaker.say ("<<" + (text.len - 4) * " " + ">>");
-	speaker.say ("<" * (text.len / 2) + ">" * (text.len) / 2);
+	speaker.say ("<<" + (text.length - 4) * " " + ">>");
+	speaker.say ("<" * (text.length / 2) + ">" * (text.length) / 2);
 }
 
 function startGame() {
 	let speaker = new Speaker();
-	let player = new Player();
+	// let player = new Player();
 	speaker.say("<<< Welcome to Gnav The Card Game >>>", "h3");
 	speaker.ask("Play multiplayer game", 0);
 	let choice = 1;
 	if (choice == 0) {
-		if (sys.argv.len !== 2) {
+		if (sys.argv.length !== 2) {
 			// host = HOST;
 			// port = PORT;
 		}
@@ -309,7 +301,7 @@ function startGame() {
 			// port = int(port);
 		}
 		speaker = gnavChat.ChatSpeaker();
-		let clientThreads = [];
+		// let clientThreads = [];
 		let choice = 0;
 		while (choice === 0) {
 			// networkClient = gnavChat.NetworkClient(speaker, host, port)

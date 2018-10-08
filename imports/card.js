@@ -3,14 +3,14 @@
 export default class Card {
 
 	constructor (name, value) {
-		this.name = name || "";
-		this.value = value || 0;
-		this.statement = "";
-		this.isMatador = false;
-		this.causeNoMoreSwap = false;
-		this.causeLosePoint = false;
-		this.causeAllLosePointAndStopGame = false;
-		this.isFool = false;
+		this._name = name || "";
+		this._value = value || 0;
+		this._statement = "";
+		this._isMatador = false;
+		this._causeNoMoreSwap = false;
+		this._causeLosePoint = false;
+		this._causeAllLosePointAndStopGame = false;
+		this._isFool = false;
 	}
 
 	get name() { return this._name; }
@@ -33,7 +33,7 @@ export default class Card {
 
 	static get types() {
 		return {		
-			'GjÃ¸ken': 21,
+			'Gjøken': 21,
 			'Dragonen': 20,
 			'Katten': 19,
 			'Hesten': 18,
@@ -57,14 +57,30 @@ export default class Card {
 		};
 	};
 
+	static get typesSize() {
+		return Object.keys(this.types).length;
+	}
+
+	static type(index) {
+		return Object.keys(this.types)[index];
+	}
+
 	static get statements() {
 		return {
-			21: 'StÃ¥ for gjÃ¸k!',
+			21: 'Stå for gjøk!',
 			20: 'Hogg av!',
 			19: 'Kiss!',
 			18: 'Hest forbi!',
 			17: 'Hus forbi!'
 		};
 	};
+
+	static get statementsSize() {
+		return Object.keys(this.statements).length;
+	}
+
+	static statement(index) {
+		return Object.keys(this.statements)[index];
+	}
 
 }
