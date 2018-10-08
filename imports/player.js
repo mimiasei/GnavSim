@@ -30,7 +30,7 @@ export default class Player {
 	set pid(value) { this._pid = value }
 	set speaker(value) { this._speaker = value }
 	set score(value) { this._score = value }
-	set heldCard(value) { this._heldCard = value }
+	set heldCard(value) { this._heldCard = jQuery.extend(true, {}, value) }
 	set wins(value) { this._wins = value }
 	set losses(value) { this._losses = value }
 	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value }
@@ -67,9 +67,12 @@ export default class Player {
 	}
 
 	swapWithPlayer(fromPlayer) {
+		console.log("swapping...");
 		this._speaker.say ("INFO: ${this.name} swaps cards with ${fromPlayer.name}.");
 		let card = jQuery.extend(true, {}, this._heldCard);
+		console.log(card);
 		this._heldCard = jQuery.extend(true, {}, fromPlayer.heldCard);
+		console.log(this._heldCard);
 		fromPlayer.heldCard = jQuery.extend(true, {}, card);
 	}
 
