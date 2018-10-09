@@ -192,7 +192,7 @@ function playGame(speaker) {
 			}
 			scoreLine += thisPly + ": " + player.score + ", ";
 		}
-		speaker.say ("");
+		speaker.addSpace();
 		speaker.say (scoreLine.slice(0, scoreLine.len - 2));
 		speaker.say ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + mostWins[0].wins + ", most losses -> " + mostLosses[0].name + ": " + mostLosses[0].losses);
 
@@ -205,11 +205,11 @@ function playGame(speaker) {
 			game.setValue(highestScore[0].score);
 		}
 
-		speaker.say ("");
+		speaker.addSpace();
 
 		if (game.isHuman) {
 			speaker.ask("Press ENTER to continue", -1);
-			speaker.say ("");
+			speaker.addSpace();
 		}
 		//else:
 			//time.sleep(1)
@@ -266,7 +266,7 @@ function subractFromAllPlayers(player, players) {
 }
 
 function proclaimWinner(player, game, round, speaker) {
-	speaker.say ("");
+	speaker.addSpace();
 	let text = "<<<<<<<<<<<<<<<<<< ";
 	if (game.playType === 0) {
 		text += `The winner of ${game.maxValue} rounds of GNAV is...`;

@@ -15,10 +15,18 @@ export default class Speaker {
 	say(what, type) {
 		type = type || 'div';
 		let $elem = $( "<" + type + ">", { id: this.makeid(), text: what } );
-		$elem.click( function() {
-			console.log(this.outputElem.id);
-		});
+		// $elem.hover(
+		// 	function () { $(this).addClass('hover'); },
+		// 	function () { $(this).removeClass('hover'); }
+		// )
+		// $elem.click( function() {
+		// 	console.log($elem[0]);
+		// });
 		this.outputElem.append($elem);
+	}
+
+	addSpace() {
+		this.say("", "br");
 	}
 
 	ask(question, answers = []) {
@@ -56,10 +64,10 @@ export default class Speaker {
 	}
 
 	makeid() {
-		let text = "";
 		let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		let text = "";
 
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < 7; i++) {
 			text += possible.charAt(Math.floor(Math.random() * possible.length));
 		}
 

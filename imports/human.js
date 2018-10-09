@@ -6,33 +6,34 @@ export default class Human extends Player {
 
 	constructor(name, pid, speaker) {
 		super(name, pid, speaker);
-		this.human = true;
+		this._human = true;
 	}
 
-	get human() { return this.human; }
+	get human() { return this._human; }
+	get name() { return super.name; }
 
-	set human(value) { this.human = value; }
-
-	setHeldCard(card, silent = false) {
-		this.printGotCard(card.name);
-		super.setHeldCard(card, silent);
-	}
+	set human(value) { this._human = value; }
+	set heldCard(value) {
+		console.log(card);
+		super.heldCard = jQuery.extend(true, {}, value);
+		this.printGotCard(this._heldCard.name);
+ 	}
 
 	knockOnTable() {
 		result = speaker.ask("Knock on the table", 0) === 0;
 		if (result) {
-			speaker.say (this.name + this.TXT_KNOCK);
+			speaker.say (this.name + tools.TXT_KNOCK);
 		}
 		return result
 	}
 
 	requestSwap(toPlayer) {
-		speaker.say (this.sayTo(toPlayer, 0) + quote(this.TXT_WANT_TO_SWAP));
+		this._speaker.say (this.sayTo(toPlayer, 0) + quote(tools.TXT_WANT_TO_SWAP));
 	}
 
 	printGotCard(cardName = "") {
-		card = cardName === "" ? this.heldCard.name : cardName;
-		speaker.say ("Player ${his.name}, you got the card ${card}.");
+		card = cardName === "" ? this._heldCard.name : cardName;
+		this._speaker.say ("Player ${his.name}, you got the card ${card}.");
 	}
 
 	testForSwap(toPlayer) {
@@ -42,6 +43,6 @@ export default class Human extends Player {
 		} else {
 			text += "swap cards with ${toPlayer.name}";
 		}
-		return speaker.ask(text, 0) === 0;	
+		return this._speaker.ask(text, 0) === 0;	
 	}
 }

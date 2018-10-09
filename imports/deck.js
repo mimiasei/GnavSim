@@ -10,10 +10,7 @@ export default class Deck {
 		this._discardPile = [];
 
 		for(let i = 0; i < Card.typesSize; i++) {
-			let card = {
-				name: Card.type(i),
-				value: Card.types[Card.type(i)]
-			}
+			let card = new Card(Card.type(i), Card.types[Card.type(i)]);
 			this._cards.push(card);
 			this._cards.push(card);
 		}
@@ -29,6 +26,7 @@ export default class Deck {
 	shuffleDeck() {
 		console.log ("*** INFO: The deck is shuffled.");
 		this._cards = tools.shuffle(this._cards);
+		console.log(this._cards);
 	}
 
 	draw() {
