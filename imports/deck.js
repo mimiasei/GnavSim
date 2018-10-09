@@ -6,14 +6,7 @@ import * as tools from './gnavtools.js';
 export default class Deck {
 
 	constructor() {
-		this._cards = [];
-		this._discardPile = [];
-
-		for(let i = 0; i < Card.typesSize; i++) {
-			let card = new Card(Card.type(i), Card.types[Card.type(i)]);
-			this._cards.push(card);
-			this._cards.push(card);
-		}
+		this.buildDeck();
 		this.shuffleDeck();
 	}
 
@@ -23,17 +16,27 @@ export default class Deck {
 	set cards(value) { this._cards = Array.from(value) }
 	set discardPile(value) { this._discardPile = Array.from(value) }
 
+	buildDeck() {
+		this._cards = [];
+		this._discardPile = [];
+		for(let i = 0; i < Card.typesSize; i++) {
+			let card = new Card(Card.type(i), Card.types[Card.type(i)]);
+			this._cards.push(card);
+			this._cards.push(card);
+		}
+	}
+
 	shuffleDeck() {
 		console.log ("*** INFO: The deck is shuffled.");
 		this._cards = tools.shuffle(this._cards);
-		console.log(this._cards);
 	}
 
 	draw() {
 		if (this.isDeckEmpty()) {
 			this.useDiscardPile();
 		}
-		return this._cards.pop();
+		let card = this._cards.pop();
+		return card;
 	}
 
 	useDiscardPile() {

@@ -29,11 +29,11 @@ export default class Card {
 	set causeNoMoreSwap(val) { this._causeNoMoreSwap = val; }
 	set causeLosePoint(val) { this._causeLosePoint = val; }
 	set causeAllLosePointAndStopGame(val) { this._causeAllLosePointAndStopGame = val; }
-	set isFool(val) { this._isFool = isFool; }
+	set isFool(val) { this._isFool = val; }
 
 	static get types() {
 		return {		
-			'Gjøken': 21,
+			'Gj?ken': 21,
 			'Dragonen': 20,
 			'Katten': 19,
 			'Hesten': 18,
@@ -67,7 +67,7 @@ export default class Card {
 
 	static get statements() {
 		return {
-			21: 'Stå for gjøk!',
+			21: 'St?for gj?k!',
 			20: 'Hogg av!',
 			19: 'Kiss!',
 			18: 'Hest forbi!',
@@ -81,6 +81,19 @@ export default class Card {
 
 	static statement(index) {
 		return Object.keys(this.statements)[index];
+	}
+
+	static clone(card) {
+		let cloned = Object.assign (Object.create (Object.getPrototypeOf (card)), card);
+		cloned.name = card.name;
+		cloned.value = card.value;
+		cloned.statement = card.statement;
+		cloned.isMatador = card.isMatador;
+		cloned.causeNoMoreSwap = card.causeNoMoreSwap;
+		cloned.causeLosePoint = card.causeLosePoint;
+		cloned.causeAllLosePointAndStopGame = card.causeAllLosePointAndStopGame;
+		cloned.isFool = card.isFool;
+		return cloned;
 	}
 
 }

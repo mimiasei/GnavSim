@@ -104,6 +104,7 @@ function playGame(speaker) {
 		//Draw cards for each player
 		for (let i = 0; i < players.length; i++) {
 			players[i].drawFromDeck(deck);
+			let card = players[i].heldCard;
 			if (players[i].heldCard && players[i].heldCard.value === 4) { //If player receives Narren
 				if (players[i].knockOnTable()) {
 					players[i].addToScore(1);
@@ -113,6 +114,7 @@ function playGame(speaker) {
 
 		//Play round
 		console.log("playing round...");
+		console.log(players);
 		for (let i = 0; i < players.length; i++) {
 			let wantsToSwap = false;
 			let sayPass = players[i].sayPass();

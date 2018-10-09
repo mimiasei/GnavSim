@@ -6,11 +6,22 @@
 export default class Speaker {
 
 	constructor() {
-		this.outputElem = $("#" + "outputWin");
-		this.value = -1;
+		this._output = $("#" + "outputWin");
+		this._value = -1;
 	}
 
-	get output() { return this.outputElem }
+	get output() { return this._output }
+	get value() { return this._value }
+
+	set output(value) { this._output = jQuery.extend(true, {}, value) }
+	set value(value) { this._value = value }
+
+	static clone(speaker) {
+		let cloned = Object.assign (Object.create (Object.getPrototypeOf (speaker)), speaker);
+		cloned.output = speaker.output;
+		cloned.value = speaker.value;
+		return cloned;
+	}
 
 	say(what, type) {
 		type = type || 'div';
@@ -22,7 +33,7 @@ export default class Speaker {
 		// $elem.click( function() {
 		// 	console.log($elem[0]);
 		// });
-		this.outputElem.append($elem);
+		this._output.append($elem);
 	}
 
 	addSpace() {
@@ -53,14 +64,14 @@ export default class Speaker {
 				alert ("You clicked ", element.name, " returning value ", element.value);
 				this.value = element.value;
 			}
-			this.outputElem.add(element); //add button to output div
+			this._output.add(element); //add button to output div
 		}
 	}
 
 	input(question) {
 		let randomName = this.makeid();
 		let $inputElem = $('<input type="text" class="fieldname" id="' + randomName + '"/>');
-		this.outputElem.append($inputElem);
+		this._output.append($inputElem);
 	}
 
 	makeid() {

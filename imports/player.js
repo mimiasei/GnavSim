@@ -30,20 +30,35 @@ export default class Player {
 	set pid(value) { this._pid = value }
 	set speaker(value) { this._speaker = value }
 	set score(value) { this._score = value }
-	set heldCard(value) { this._heldCard = jQuery.extend(true, {}, value) }
+	set heldCard(value) { this._heldCard = Card.clone(value) }
 	set wins(value) { this._wins = value }
 	set losses(value) { this._losses = value }
 	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value }
+
+	static clone(player) {
+		let cloned = Object.assign (Object.create (Object.getPrototypeOf (player)), player);
+		cloned.name = player.name;
+		cloned.pid = player.pid;
+		cloned.speaker = Speaker.clone(player.speaker);
+		cloned.score = player.score;
+		cloned.heldCard = Card.clone(player.heldCard);
+		cloned.wins = player.wins;
+		cloned.losses = player.losses;
+		cloned.neverSwapsWithDeck = player.neverSwapsWithDeck;
+		return cloned;
+	}
 
 	drawFromDeck(deck) {
 		// Object.setPrototypeOf(deck, Deck.prototype);
 		this.discard(deck);
 		let result = deck.draw();
-		this._heldCard = jQuery.extend(true, {}, result);
+		this.heldCard = result;
 	}
 
 	discard(deck) {
 		// Object.setPrototypeOf(deck, Deck.prototype);
+		console.log(this._name + " before discarding..");
+		console.log(this._heldCard);
 		if (this._heldCard !== null) {
 			deck.discard(this._heldCard);
 		}

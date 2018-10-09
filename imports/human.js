@@ -14,8 +14,7 @@ export default class Human extends Player {
 
 	set human(value) { this._human = value; }
 	set heldCard(value) {
-		console.log(card);
-		super.heldCard = jQuery.extend(true, {}, value);
+		super.heldCard = value;
 		this.printGotCard(this._heldCard.name);
  	}
 
