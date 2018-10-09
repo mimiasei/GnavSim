@@ -58,7 +58,7 @@ function playGame(speaker) {
 	}
 	else {
 		choice = 0;
-		maxValue = 8;
+		maxValue = 10;
 	}
 	let isHuman = false;
 	if (speaker.ask("Play against computer", 0) === 0) {
@@ -104,7 +104,7 @@ function playGame(speaker) {
 		//Draw cards for each player
 		for (let i = 0; i < players.length; i++) {
 			players[i].drawFromDeck(deck);
-			let card = players[i].heldCard;
+
 			if (players[i].heldCard && players[i].heldCard.value === 4) { //If player receives Narren
 				if (players[i].knockOnTable()) {
 					players[i].addToScore(1);
@@ -112,9 +112,9 @@ function playGame(speaker) {
 			}
 		}
 
-		//Play round
 		console.log("playing round...");
-		console.log(players);
+
+		//Play round
 		for (let i = 0; i < players.length; i++) {
 			let wantsToSwap = false;
 			let sayPass = players[i].sayPass();
@@ -151,21 +151,27 @@ function playGame(speaker) {
 			}
 		}
 
+		speaker.addSpace();
 		speaker.say ("End of round: " + round);
+		speaker.addSpace();
 		//End of round
 
 		//Calculate scores and stats
-		console.log(players[0]);
-		sortedPlayers = players.sort(function (a, b) { return a.heldCard.value > b.heldCard.value; }); 
-		console.log(sortedPlayers);
+		console.log("End of round: " + round);
+		sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
+
 		let winner = sortedPlayers[0];
 		winner.wins++;
+
 		let loser = sortedPlayers[sortedPlayers.length - 1];
 		loser.losses++;
+
 		speaker.say ("Winner of this round is " + winner.name + " with the card " + winner.heldCard.name);
 		winner.addToScore(1);
+
 		speaker.say ("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name);
 		loser.addToScore(-1);
+
 		//Search for Narren among players
 		for (let player of players) {
 			if (player.heldCard.value === 4) {
@@ -181,9 +187,9 @@ function playGame(speaker) {
 
 		deck.testLengthSum();
 
-		let mostWins = players.sort((a, b) => (a.wins > b.wins) ? 1 : ((b.wins > a.wins) ? -1 : 0));
-		let mostLosses = players.sort((a, b) => (a.losses > b.losses) ? 1 : ((b.losses > a.losses) ? -1 : 0));
-		highestScore = players.sort((a, b) => (a.score > b.score) ? 1 : ((b.score > a.score) ? -1 : 0));
+		let mostWins = Array.from(players.sort((a, b) => (a.wins < b.wins) ? 1 : ((a.wins > b.wins) ? -1 : 0)));
+		let mostLosses = Array.from(players.sort((a, b) => (a.losses < b.losses) ? 1 : ((a.losses > b.losses) ? -1 : 0)));
+		highestScore = Array.from(players.sort((a, b) => (a.score < b.score) ? 1 : ((a.score > b.score) ? -1 : 0)));
 
 		let scoreLine = "-------> Scores: "
 

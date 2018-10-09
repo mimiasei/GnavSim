@@ -1,6 +1,6 @@
 'use strict';
 
-export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Oivind", "Ask"];
+export const PLAYERS = ["Kristoffer", "Matias", "Johannes"]; //, "Miriam", "Mikkel", "Emil", "Oivind", "Ask"];
 export const MAX_ROUNDS = 1;
 export const SWAP_THRESHOLDNUMBER = 4;
 export const SWAP_FUZZINESS = 0.03; //Simulates human error. 0.1 = 10% chance of making a mistake.
