@@ -33,7 +33,7 @@ export default class Card {
 
 	static get types() {
 		return {		
-			'Gj?ken': 21,
+			'Gjøken': 21,
 			'Dragonen': 20,
 			'Katten': 19,
 			'Hesten': 18,
@@ -67,7 +67,7 @@ export default class Card {
 
 	static get statements() {
 		return {
-			21: 'St?for gj?k!',
+			21: 'Stå for gjøk!',
 			20: 'Hogg av!',
 			19: 'Kiss!',
 			18: 'Hest forbi!',

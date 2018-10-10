@@ -57,8 +57,6 @@ export default class Player {
 
 	discard(deck) {
 		// Object.setPrototypeOf(deck, Deck.prototype);
-		console.log(this._name + " before discarding..");
-		console.log(this._heldCard);
 		if (this._heldCard !== null) {
 			deck.discard(this._heldCard);
 		}
@@ -83,7 +81,7 @@ export default class Player {
 
 	swapWithPlayer(fromPlayer) {
 		console.log("swapping...");
-		this._speaker.say ("INFO: ${this.name} swaps cards with ${fromPlayer.name}.");
+		this._speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
 		let card = jQuery.extend(true, {}, this._heldCard);
 		console.log(card);
 		this._heldCard = jQuery.extend(true, {}, fromPlayer.heldCard);
@@ -124,7 +122,8 @@ export default class Player {
 	}
 
 	sayNoFool(player) {
-		return tools.TXT_NO_WAY_FOOL % (player.name);
+		console.log("saying no fool...");
+		return tools.highlight(tools.TXT_NO_WAY_FOOL, player.name);
 	}
 
 	knockOnTable() {

@@ -2,6 +2,12 @@
 
 import Card from './card.js';
 import * as tools from './gnavtools.js';
+import Cuckoo from './cuckoo.js';
+import Dragoon from './dragoon.js';
+import Cat from './cat.js';
+import Horse from './horse.js';
+import House from './house.js';
+import Fool from './fool.js';
 
 export default class Deck {
 
@@ -19,8 +25,32 @@ export default class Deck {
 	buildDeck() {
 		this._cards = [];
 		this._discardPile = [];
+		let card = null;
 		for(let i = 0; i < Card.typesSize; i++) {
-			let card = new Card(Card.type(i), Card.types[Card.type(i)]);
+			switch (i) {
+				case 0:
+					card = new Cuckoo();
+					break;
+				case 1:
+					card = new Dragoon();
+					break;
+				case 2:
+					card = new Cat();
+					break;
+				case 3:
+					card = new Horse();
+					break;
+				case 4:
+					card = new House();
+					break;
+				case 17:
+					card = new Fool();
+					break;
+				default:
+					card = new Card(Card.type(i), Card.types[Card.type(i)]);
+					break;
+			}
+			
 			this._cards.push(card);
 			this._cards.push(card);
 		}

@@ -5,6 +5,7 @@ import Card from './card.js';
 export default class Cat extends Card {
 
 	constructor() {
+		super();
 		this.name = "Katten";
 		this.value = 19;
 		this.statement = "Kiss!";

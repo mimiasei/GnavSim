@@ -122,6 +122,7 @@ function playGame(speaker) {
 				if( players[i + 1] && players[i + 1].heldCard && players[i + 1].heldCard.value === 4) { //If the other player has Narren...
 					if (!players[i].testForSwap(players[i + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
 						sayPass += players[i].sayNoFool(players[i + 1]);
+						console.log(players[i].sayNoFool(players[i + 1]));
 					} else {
 						wantsToSwap = true;
 					}
@@ -195,7 +196,7 @@ function playGame(speaker) {
 
 		for (let player of players) {
 			let thisPly = player.name;
-			if (player.pid == highestScore[0].pid) {
+			if (player.pid === highestScore[0].pid) {
 				thisPly = "**" + thisPly.toUpperCase() + "**";
 			}
 			scoreLine += thisPly + ": " + player.score + ", ";
@@ -233,14 +234,15 @@ function askPlayers(nbr, player, players, deck, speaker) {
 	let dragonen = false;
 
 	while (!hasSwapped && !dragonen && (nbr + nextAdd) < players.len) {
-		//speaker.say ("%s is now about to ask the next player, %s, if he wants to swap..." % (player.name, players[nbr + nextAdd].name))
 		player.requestSwap(players[nbr + nextAdd]);
 		returnedCardValue = players[nbr + nextAdd].answerSwap(player);
+
 		if (returnedCardValue === 4) {
-			speaker.say (":-) Everybody starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'");
+			speaker.say ("Everyone starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'");
 		}
 
 		result = player.processAnswer(returnedCardValue);
+
 		if (result === 1) { //Hesten or huset
 			nextAdd++;
 		} else if (result === 2) { //katten
@@ -283,11 +285,11 @@ function proclaimWinner(player, game, round, speaker) {
 	}
 	text += " >>>>>>>>>>>>>>>>>>";
 	speaker.say (text);
-	speaker.say ("<<" + (text.length - 4) * " " + ">>");
+	speaker.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
 	let spaces = ((text.length - 2) / 2) - (player.name.length / 2);
-	speaker.say ("<<" + (" " * spaces) + player.name + (" " * (spaces - 2)) + ">>");
-	speaker.say ("<<" + (text.length - 4) * " " + ">>");
-	speaker.say ("<" * (text.length / 2) + ">" * (text.length) / 2);
+	speaker.say ('<<' + (' '.repeat(spaces)) + player.name + (' '.repeat(spaces - 2)) + '>>');
+	speaker.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
+	speaker.say ('<'.repeat(text.length / 2) + '>'.repeat(text.length / 2));
 }
 
 function startGame() {

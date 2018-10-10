@@ -5,6 +5,7 @@ import Card from './card.js';
 export default class Dragoon extends Card {
 
 	constructor() {
+		super();
 		this.name = "Dragonen";
 		this.value = 20;
 		this.statement = "Hogg av!";

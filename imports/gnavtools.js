@@ -7,9 +7,9 @@ export const SWAP_FUZZINESS = 0.03; //Simulates human error. 0.1 = 10% chance of
 
 export const TXT_WANT_TO_SWAP = "Jeg vil gjerne bytte med deg.";
 export const TXT_ACCEPT_SWAP = "Jada, her er kortet mitt.";
-export const TXT_KNOCK = " banker tre ganger p√• bordet. <BANK, BANK, BANK>";
-export const TXT_PASSES = " sier 'Jeg st√•r.'";
-export const TXT_NO_WAY_FOOL = " and thinks ''Aldri i livet, %s har jo narren!''";
+export const TXT_KNOCK = " banker tre ganger pÂ bordet. <BANK, BANK, BANK>";
+export const TXT_PASSES = " sier 'Jeg stÂr.'";
+export const TXT_NO_WAY_FOOL = [" and thinks 'Aldri i livet, ", "", " har jo narren!'"];
 
 export function ask(question, answers = []) {
 	/*
@@ -53,14 +53,22 @@ export function quote(text) {
 	return "'" + text + "'";
 }
 
+export function highlight(strings, ...values) {
+	let str = '';
+	strings.forEach((string, i) => {
+		str += string + (values[i] || '');
+	});
+	return str;
+}
+
 /**
  * Shuffles array in placey placey. ES6 version
  * @param {Array} a items An array containing the items.
  */
 export function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
+	for (let i = a.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[a[i], a[j]] = [a[j], a[i]];
+	}
+	return a;
 }
