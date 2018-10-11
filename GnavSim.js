@@ -14,36 +14,75 @@ import Cat from './imports/cat.js';
 import Horse from './imports/horse.js';		
 import House from './imports/house.js';		
 import Fool from './imports/fool.js';	
+import Game from './imports/game.js';	
+
 
 import Speaker from './imports/speaker.js';
 
 import * as tools from './imports/gnavtools.js';
 
-class GnavGame {
+// class GnavGame {
 
-	constructor(playType, maxValue, isHuman) {
-		this.playType = playType; //0 = max rounds, 1 = reach score
-		this.value = 0; //current value, either round or highest score
-		this.maxValue = maxValue; //value to reach, either rounds or score
-		this.isHuman = isHuman;
-	}
+// 	constructor(playType, maxValue, isHuman) {
+// 		this.playType = playType; //0 = max rounds, 1 = reach score
+// 		this.value = 0; //current value, either round or highest score
+// 		this.maxValue = maxValue; //value to reach, either rounds or score
+// 		this.isHuman = isHuman;
+// 	}
 
-	isGameOver() {
-		return (this.value >= this.maxValue);
-	}
+// 	isGameOver() {
+// 		return (this.value >= this.maxValue);
+// 	}
 
-	incValue() {
-		this.value++;
-	}
+// 	incValue() {
+// 		this.value++;
+// 	}
 
-	setValue(value) {
-		this.value = value;
-	}
-}
+// 	setValue(value) {
+// 		this.value = value;
+// 	}
+// }
 
 // ------------- End of classes ---------------		
 
+$(document).ready(function() {
+	$('#btn_startGame').click(() => {
+		startGame();
+	});
+  //startGame();
+});
+
+function startGame() {
+
+	let speaker = new Speaker();
+
+	//clear main output element
+	speaker.clear();
+
+	// let player = new Player();
+	speaker.say("<<< Welcome to Gnav The Card Game >>>", "h3");
+	
+	let callBack = function(event) {
+		let value = parseInt(event.toElement.value);
+		switch (value) {
+			case 0: alert ("You clicked button returning value " + value + ". Multiplayer not ready yet.");
+					break;
+			case 1: playGame(speaker);
+					break;
+			default:
+					console.log("default");
+					break;
+		}
+	}
+
+	speaker.ask("Play multiplayer game?", 0, callBack);
+}
+
 function playGame(speaker) {
+
+	//clear main output element
+	speaker.clear();
+	
 	//max_rounds = MAX_ROUNDS
 	let players = [];
 
@@ -68,7 +107,7 @@ function playGame(speaker) {
 		isHuman = true;
 	}
 
-	let game = new GnavGame(choice, maxValue, isHuman);
+	let game = new Game(choice, maxValue, isHuman);
 
 	// speaker.output.append(getRandomImgElem("cat closeup"));
 	// speaker.output.append(getRandomImgElem("house"));
@@ -292,48 +331,7 @@ function proclaimWinner(player, game, round, speaker) {
 	speaker.say ('<'.repeat(text.length / 2) + '>'.repeat(text.length / 2));
 }
 
-function startGame() {
-	let speaker = new Speaker();
-	// let player = new Player();
-	speaker.say("<<< Welcome to Gnav The Card Game >>>", "h3");
-	speaker.ask("Play multiplayer game", 0);
-	let choice = 1;
-	if (choice == 0) {
-		if (sys.argv.length !== 2) {
-			// host = HOST;
-			// port = PORT;
-		}
-		else {
-			// host, port = sys.argv[1].split(":");
-			// port = int(port);
-		}
-		speaker = gnavChat.ChatSpeaker();
-		// let clientThreads = [];
-		let choice = 0;
-		while (choice === 0) {
-			// networkClient = gnavChat.NetworkClient(speaker, host, port)
-			// clientThread = threading.Thread(target = networkClient.loop)
-			// clientThreads.append(clientThread)
-			// console.log ("Client thread %d added to list." % len(clientThreads))
-			// choice = ask("Create new client", 0);
-		}
-		// console.log("Starting all %d threads..." % len(clientThreads))
-		// for (thread in clientThreads) {
-		// 	thread.start();
-		// }
-	}
-	else {
-		playGame(speaker);
-	}
-}
-
 function getRandomImgElem(search) {
 	let imageUrl = 'https://source.unsplash.com/100x100/?' + search;
 	return $( "<img>", { id: search + "_img", src: imageUrl, title: search } );
 }
-
-// --------------------------------------------------------------------------
-
-$(document).ready(function() {
-  startGame();
-});

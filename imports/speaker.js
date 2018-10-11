@@ -23,6 +23,10 @@ export default class Speaker {
 		return cloned;
 	}
 
+	clear() {
+		this._output.html('');
+	}
+
 	say(what, type) {
 		type = type || 'div';
 		let $elem = $( "<" + type + ">", { id: this.makeid(), text: what } );
@@ -40,31 +44,40 @@ export default class Speaker {
 		this.say("", "br");
 	}
 
-	ask(question, answers = []) {
+	ask(question, answers, callbackFn) {
 		/*
 		answers = -1 : auto press any key (i.e. no questions, all answers accepted)
 		answers = 0 : auto y/n answers
 		*/
+		//answers = answers || -1;	
 		let noChoice = false;
-		let possibleAnswers = "";
-		let text = !noChoice ? `${question} ${possibleAnswers}? ` : question;
 	
 		if (answers === -1) {
 			noChoice = true;
 		} else if (answers === 0) {
-			answers = ['Yes', 'No'];
+			answers = [
+				{
+					text : 'Yes',
+					value : 0
+				},
+				{			
+					text : 'No',
+					value : 1
+				},
+			];
 		}
 
+		this.say(question);
+		
 		for (let answer of answers) {
-			let element = document.createElement("input"); //create button element
+			let element = document.createElement("button"); //create button element
+			let text = document.createTextNode(answer.text); //create button text
+			element.appendChild(text);
 			element.type = 'button';
-			element.value = 0;
-			element.name = 'btn_' + answer;
-			element.onclick = function() {
-				alert ("You clicked ", element.name, " returning value ", element.value);
-				this.value = element.value;
-			}
-			this._output.add(element); //add button to output div
+			element.name = 'btn_' + answer.text + '_' + this.makeid();
+			element.value = answer.value;
+			element.onclick = callbackFn;
+			this._output.append(element); //add button to output div
 		}
 	}
 

@@ -7,8 +7,8 @@ export const SWAP_FUZZINESS = 0.03; //Simulates human error. 0.1 = 10% chance of
 
 export const TXT_WANT_TO_SWAP = "Jeg vil gjerne bytte med deg.";
 export const TXT_ACCEPT_SWAP = "Jada, her er kortet mitt.";
-export const TXT_KNOCK = " banker tre ganger på bordet. <BANK, BANK, BANK>";
-export const TXT_PASSES = " sier 'Jeg står.'";
+export const TXT_KNOCK = " banker tre ganger pÃ¥ bordet. <BANK, BANK, BANK>";
+export const TXT_PASSES = " sier 'Jeg stÃ¥r'";
 export const TXT_NO_WAY_FOOL = [" and thinks 'Aldri i livet, ", "", " har jo narren!'"];
 
 export function ask(question, answers = []) {
