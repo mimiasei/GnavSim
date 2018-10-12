@@ -7,13 +7,33 @@ body {
   line-height: 1.4;
 }
 
+.flex {
+  display: flex;
+  align-content: space-between;
+}
+
+#playerStats {
+  border: 2px;
+  background: rgba(7, 79, 87, 1); /*midnight green*/
+}
+
+#outputWin {
+  border: 2px;
+  background: rgba(7, 79, 87, 1); /*midnight green*/
+}
+
+#info {
+  border: 2px;
+  background: rgba(7, 79, 87, 1);  /*midnight green*/
+}
+
 p {
   color: orange;
   white-space: pre-wrap;
 }
 
 div {
-  color: rgb(216, 209, 105);
+  color: whitesmoke;
   white-space: pre-wrap;
 }
 
@@ -24,3 +44,11 @@ img {
 .hover {
 	cursor: pointer;
 }
+
+/* RGB
+$color1: rgba(7, 79, 87, 1); //midnight green
+$color2: rgba(7, 113, 135, 1); //metallic seaweed
+$color3: rgba(116, 165, 127, 1); //shiny shamrock
+$color4: rgba(187, 219, 180, 1); //light moss green
+$color5: rgba(252, 240, 204, 1); //blanched almond
+ */

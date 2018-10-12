@@ -7,13 +7,19 @@ export default class Speaker {
 
 	constructor() {
 		this._output = $("#" + "outputWin");
+		this._stats = $("#" + "playerStats");
+		this._info = $("#" + "info");
 		this._value = -1;
 	}
 
 	get output() { return this._output }
+	get stats() { return this._stats }
+	get info() { return this._info }
 	get value() { return this._value }
 
 	set output(value) { this._output = jQuery.extend(true, {}, value) }
+	set stats(value) { this._stats = jQuery.extend(true, {}, value) }
+	set info(value) { this._info = jQuery.extend(true, {}, value) }
 	set value(value) { this._value = value }
 
 	static clone(speaker) {
@@ -85,6 +91,19 @@ export default class Speaker {
 		let randomName = this.makeid();
 		let $inputElem = $('<input type="text" class="fieldname" id="' + randomName + '"/>');
 		this._output.append($inputElem);
+	}
+
+	addToStats(name) {
+		type = type || 'div';
+		let $elem = $( "<" + type + ">", { id: this.makeid(), text: name } );
+		statsElems.push($elem);
+		this._stats.append($elem);
+	}
+
+	sayFromStats(text, id) {
+		type = type || 'div';
+		let $elem = $( "<" + type + ">", { id: this.makeid(), text: what } );
+		this._stats.append($elem);
 	}
 
 	makeid() {
