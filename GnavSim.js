@@ -124,6 +124,8 @@ function playGame(speaker) {
 			newPlayer.neverSwapsWithDeck = false;
 		}
 		players.push(newPlayer);
+
+		speaker.addToStats(name); //Add score elem to speaker stats array
 	});
 
 	players = tools.shuffle(players);
@@ -155,6 +157,9 @@ function playGame(speaker) {
 
 		//Play round
 		for (let i = 0; i < players.length; i++) {
+
+			updateStats(players[i], speaker);
+
 			let wantsToSwap = false;
 			let sayPass = players[i].sayPass();
 			if (i !== players.len - 1) {
@@ -265,6 +270,12 @@ function playGame(speaker) {
 	//End of game loop while
 
 	proclaimWinner(highestScore[0], game, round, speaker);
+}
+
+function updateStats(speaker, players) {
+	for (let elem of speaker.statsElems) {
+
+	}
 }
 
 function askPlayers(nbr, player, players, deck, speaker) {

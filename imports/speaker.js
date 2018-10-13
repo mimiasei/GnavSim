@@ -10,12 +10,14 @@ export default class Speaker {
 		this._stats = $("#" + "playerStats");
 		this._info = $("#" + "info");
 		this._value = -1;
+		this._statsElems = [];
 	}
 
 	get output() { return this._output }
 	get stats() { return this._stats }
 	get info() { return this._info }
 	get value() { return this._value }
+	get statsElems() { return this._statsElems }
 
 	set output(value) { this._output = jQuery.extend(true, {}, value) }
 	set stats(value) { this._stats = jQuery.extend(true, {}, value) }
@@ -95,26 +97,34 @@ export default class Speaker {
 
 	addToStats(name) {
 		type = type || 'div';
-		let $elem = $( "<" + type + ">", { id: this.makeid(), text: name } );
+		let $elem = $( "<" + type + ">", { id: this.makeid(name, type), text: name } );
 		statsElems.push($elem);
 		this._stats.append($elem);
 	}
 
-	sayFromStats(text, id) {
+	getStatsElem(name) {
+		return this._statsElems.find((e) => {
+			return e.text = name; 
+		});
+	}
+
+	sayFromStats(what, type) {
 		type = type || 'div';
-		let $elem = $( "<" + type + ">", { id: this.makeid(), text: what } );
+		let $elem = $( "<" + type + ">", { id: this.makeid(what.split(' ')[0], type), text: what } );
 		this._stats.append($elem);
 	}
 
-	makeid() {
+	makeid(text, type) {
 		let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		let text = "";
-
+		let rnd = "";
 		for (let i = 0; i < 7; i++) {
-			text += possible.charAt(Math.floor(Math.random() * possible.length));
-		}
+			rnd += possible.charAt(Math.floor(Math.random() * possible.length));
+	    }
 
-		return text;
+		text = text || rnd;
+		type = type || 'div';
+
+		return type + '_' + text;
 	}
 
 	getValue() {
