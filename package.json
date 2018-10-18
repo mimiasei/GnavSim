@@ -1,10 +1,26 @@
 {
-    "scripts": {
-        "start": "node server"
-    },
-    "dependencies": {
-        "express": "latest",
-        "unsplash-js": "^4.8.0",
-        "whatwg-fetch": "^3.0.0"
-    }
+  "scripts": {
+    "start": "node server"
+  },
+  "dependencies": {
+    "express": "latest",
+    "socket.io": "^2.1.1"
+  },
+  "name": "gnavsim_server",
+  "description": "Simulates a Gnav card game for n rounds with x players, simply to establish whether the scores remain basically identical to their starting values of 5. A playable game is under development which will be multiplayer and (hopefully) with a server on internet.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "nodemon": "^1.18.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mimi1763/GnavSim.git"
+  },
+  "author": "Mikkel Syse Groesland",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mimi1763/GnavSim/issues"
+  },
+  "homepage": "https://github.com/mimi1763/GnavSim#readme"
 }

@@ -46,11 +46,22 @@ import * as tools from './imports/gnavtools.js';
 // ------------- End of classes ---------------		
 
 $(document).ready(function() {
+	console.log("document is ready");
 	$('#btn_startGame').click(() => {
 		startGame();
 	});
+
+	$('#btn_chat').click(() => {
+		chat();
+	});
   //startGame();
 });
+
+function chat() {
+	console.log("starting chat");
+	var socket = io.connect('http://localhost:8000');
+
+}
 
 function startGame() {
 
