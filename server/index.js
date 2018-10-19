@@ -16,6 +16,14 @@ app.use(express.static('imports'));
 //Socket setup
 var io = socket(server);
 
-io.on('connection', function() {
+io.on('connection', function(socket) {
     console.log('connection made to socket');
+
+    socket.on('chat', function(data) {
+        io.sockets.emit('chat', data);
+    });
+
+    socket.on('typing', function(data) {
+        socket.broadcast.emit('typing', data);
+    });
 });

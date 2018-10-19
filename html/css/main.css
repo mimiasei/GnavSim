@@ -27,6 +27,12 @@ body {
   background: rgba(7, 79, 87, 1);  /*midnight green*/
 }
 
+#chat_output {
+  border: 2px;
+  border-color: rgba(187, 219, 180, 1); /*light moss green*/
+  background: rgba(7, 113, 135, 1); /*metallic seaweed*/
+}
+
 p {
   color: orange;
   white-space: pre-wrap;
@@ -43,6 +49,14 @@ img {
 
 .hover {
 	cursor: pointer;
+}
+
+.margin-bottom-10 {
+  margin-bottom: 10px;
+}
+
+.margin-top-10 {
+  margin-top: 10px;
 }
 
 /* RGB

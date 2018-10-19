@@ -1,7 +1,7 @@
 
 // Multiplayer stuff -----------------
-const HOST = "localhost";
-const PORT = 112;
+const HOST = "http://localhost";
+const PORT = 8000;
 
 import Player from '/imports/player.js';
 import Human from './imports/human.js';
@@ -47,23 +47,62 @@ import * as tools from './imports/gnavtools.js';
 
 $(document).ready(function() {
 	console.log("document is ready");
+	$('#chat_section').hide();
+
 	$('#btn_startGame').click(() => {
 		startGame();
 	});
 
+	var active_chat = false;
+
 	$('#btn_chat').click(() => {
-		chat();
+		active_chat = !active_chat;
+		chat(active_chat);
 	});
-  //startGame();
 });
 
-function chat() {
-	console.log("starting chat");
-	var socket = io.connect('http://localhost:8000');
+function chat(active_chat) {
+	if (active_chat) {
+		console.log("starting chat");
+		var $input_handle = $('#chat_handle');
+		var $input_msg = $('#chat_message');
+		var $btn_send = $('#chat_send');
+		var $output = $('#chat_output');
+		var $comment = $('#chat_comment');
+		
+		$('#chat_section').show();
+		
+		var socket = io.connect(HOST + ':' + PORT);
+		
+		//Emit events
+		$btn_send.on('click', function() {
+			socket.emit('chat', {
+				handle: $input_handle.val(),
+				message: $input_msg.val(),
+			});
+		});
 
+		$input_msg.on('keypress', function() {
+			socket.emit('typing', $input_handle.val());
+		});
+
+		//Listen for events
+		socket.on('chat', function(data) {
+			$output.append('<p><strong>' + data.handle + ': </strong>' + data.message + '</p>');
+		});
+
+		socket.on('typing', function(data) {
+			$comment.html('<p><em>' + data + ' is typing...</em></p>');
+		});
+
+
+	} else {
+		$('#chat_section').hide();
+	}
 }
 
 function startGame() {
+	$('#chat_section').hide();
 
 	let speaker = new Speaker();
 
