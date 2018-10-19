@@ -61,8 +61,8 @@ img {
 
 .myButton {
 	background-color:#bababa;
-	-moz-border-radius:16px;
-	-webkit-border-radius:16px;
+	-moz-border-radius:12px;
+	-webkit-border-radius:12px;
 	border-radius:12px;
 	display:inline-block;
 	cursor:pointer;
@@ -72,7 +72,6 @@ img {
 	padding: 4px 12px;
   text-decoration:none;
   outline: none;
-  
 }
 .myButton:hover {
   background-color:#e7e7e7;
