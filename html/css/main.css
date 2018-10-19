@@ -60,21 +60,19 @@ img {
 }
 
 .myButton {
-	/*-moz-box-shadow:inset 0px 0px 0px 0px #91b8b3;
-	-webkit-box-shadow:inset 0px 0px 0px 0px #91b8b3;
-	box-shadow:inset 0px 0px 0px 0px #91b8b3;*/
 	background-color:#bababa;
 	-moz-border-radius:16px;
 	-webkit-border-radius:16px;
-	border-radius:16px;
+	border-radius:12px;
 	display:inline-block;
 	cursor:pointer;
 	color:#4e4e4e;
 	font-family:Arial;
 	font-size:13px;
-	padding: 6px 18px;
+	padding: 4px 12px;
   text-decoration:none;
   outline: none;
+  
 }
 .myButton:hover {
   background-color:#e7e7e7;
@@ -85,10 +83,11 @@ img {
 }
 
 input {
-  border-radius: 8px;
+  border-radius: 6px;
   width: 33%;
   height: 18px;
   padding: 3px;
+  outline: none;
 }
 
 .hover {

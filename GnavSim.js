@@ -87,6 +87,12 @@ function chat(active_chat) {
 			socket.emit('typing', $input_handle.val());
 		});
 
+		$input_msg.on('keyup', function(event) {
+			if (event.keyCode === 13) {
+				$btn_send.click();
+			}
+		});
+
 		//Listen for events
 		socket.on('chat', function(data) {
 			$output.append('<p><strong>' + data.handle + ': </strong>' + data.message + '</p>');
