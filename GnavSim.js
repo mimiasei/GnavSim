@@ -80,6 +80,7 @@ function chat(active_chat) {
 				handle: $input_handle.val(),
 				message: $input_msg.val(),
 			});
+			$input_msg.val(''); //clear message field
 		});
 
 		$input_msg.on('keypress', function() {

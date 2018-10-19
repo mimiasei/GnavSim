@@ -13,8 +13,8 @@
 			Gnav Multiplayer Card Game
 		</h1>
 		
-		<input id="btn_startGame" type="button" value="Start Game" />
-		<input id="btn_chat" type="button" value="Chat" />
+		<button class="myButton margin-right-10" id="btn_startGame" type="button">Start Game</button>
+		<button class="myButton margin-left-10" id="btn_chat" type="button">Chat</button>
 
 		<div class="flex">
 			<div id="playerStats"></div>
@@ -23,11 +23,17 @@
 		</div>
 
 		<div id="chat_section">
-			<input class="margin-bottom-10" id="chat_handle" type="text" placeholder="Handle">
-			<input class="margin-bottom-10" id="chat_message" type="text" placeholder="Message">
-			<button id="chat_send">Send Message</button>
-			<div class="margin-top-10" id="chat_output"></div>
-			<div class="margin-top-10" id="chat_comment"></div>
+			<input class="margin-bottom-10" id="chat_handle" type="text" placeholder="Enter handle">
+			<input class="margin-bottom-10" id="chat_message" type="text" placeholder="Type message">
+
+			<button class="myButton" id="chat_send">Send Message</button>
+			<div id="chat_comment"></div>
+
+			<div class="flex margin-top-10">
+				<div class="filler"></div>
+				<div id="chat_output"></div>
+				<div class="filler"></div>
+			</div>
 		</div>
 
 

@@ -31,6 +31,14 @@ body {
   border: 2px;
   border-color: rgba(187, 219, 180, 1); /*light moss green*/
   background: rgba(7, 113, 135, 1); /*metallic seaweed*/
+  position: relative;
+  text-align: left;
+  width: 50%;
+  padding: 0 5px; /* left, right */
+}
+
+#chat_comment {
+  color: darkslategray;
 }
 
 p {
@@ -43,8 +51,44 @@ div {
   white-space: pre-wrap;
 }
 
+div.filler {
+  width: 25%;
+}
+
 img {
   border-radius: 50%;
+}
+
+.myButton {
+	/*-moz-box-shadow:inset 0px 0px 0px 0px #91b8b3;
+	-webkit-box-shadow:inset 0px 0px 0px 0px #91b8b3;
+	box-shadow:inset 0px 0px 0px 0px #91b8b3;*/
+	background-color:#bababa;
+	-moz-border-radius:16px;
+	-webkit-border-radius:16px;
+	border-radius:16px;
+	display:inline-block;
+	cursor:pointer;
+	color:#4e4e4e;
+	font-family:Arial;
+	font-size:13px;
+	padding: 6px 18px;
+  text-decoration:none;
+  outline: none;
+}
+.myButton:hover {
+  background-color:#e7e7e7;
+  color:#9b9b9b;
+}
+.myButton:active {
+  color:#8d8d5f;
+}
+
+input {
+  border-radius: 8px;
+  width: 33%;
+  height: 18px;
+  padding: 3px;
 }
 
 .hover {
@@ -57,6 +101,14 @@ img {
 
 .margin-top-10 {
   margin-top: 10px;
+}
+
+.margin-left-10 {
+  margin-left: 10px;
+}
+
+.margin-right-10 {
+  margin-right: 10px;
 }
 
 /* RGB
