@@ -157,6 +157,9 @@ function playGame(speaker) {
 		maxValue = 10;
 	}
 	let isHuman = false;
+	let callback = function() {
+		
+	}
 	if (speaker.ask("Play against computer", 0) === 0) {
 		let humanName = speaker.input("Please enter your name: ");
 		let human = new Human(humanName, tools.PLAYERS.length + 1, speaker);

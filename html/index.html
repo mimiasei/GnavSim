@@ -3,52 +3,97 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>Gnav Multiplayer Card Game</title>
-
-		<link rel="stylesheet" href="css/main.css">
-		
 	</head>
 
 	<body class="gnav_main">
-		<h1>
-			Gnav Multiplayer Card Game
-		</h1>
-		
-		<button class="myButton margin-right-10" id="btn_startGame" type="button">Start Game</button>
-		<button class="myButton margin-left-10" id="btn_chat" type="button">Chat</button>
-
-		<div class="flex">
-			<div id="playerStats"></div>
-			<div id="outputWin"></div>
-			<div id="Info"></div>
-		</div>
-
-		<div id="chat_section">
-			<input id="chat_handle" type="text" placeholder="Enter handle">
-
-			<div class="flex">
-				<div class="filler"></div>
-				<input class="margin-bottom-10" id="chat_message" type="text" placeholder="Type message">
-				<button class="myButton margin-left-10" id="chat_send">Send Message</button>
-				<div class="filler"></div>
+		<!--main game section-->
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<div>
+						<h1>
+							GnavSim <small>Multiplayer online card game</small>
+						</h1>
+					</div>
+				</div>
 			</div>
+			<div class="row">
+				<div class="col-md-3">
+					<table class="table table-sm">
+						<thead>
+							<tr>
+								<th>
+									#
+								</th>
+								<th>
+									Name
+								</th>
+								<th>
+									Score
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+				<div class="col-md-9">
+					<div class="flex">
+						<button class="myButton margin-right-10" id="btn_startGame" type="button">Start Game</button>
+						<button class="myButton margin-left-10" id="btn_chat" type="button">Chat</button>
+					</div>
 
-			<div id="chat_comment"></div>
+					<div id="outputWin"></div>
 
-			<div class="flex margin-top-10">
-				<div class="filler"></div>
-				<div id="chat_output"></div>
-				<div class="filler"></div>
+					<div id="chat_section">
+						<input id="chat_handle" type="text" placeholder="Enter handle">
+			
+						<div class="flex">
+							<div class="filler"></div>
+							<input class="margin-bottom-10" id="chat_message" type="text" placeholder="Type message">
+							<button class="myButton margin-left-10" id="chat_send">Send Message</button>
+							<div class="filler"></div>
+						</div>
+			
+						<div id="chat_comment"></div>
+			
+						<div class="flex margin-top-10">
+							<div class="filler"></div>
+							<div id="chat_output"></div>
+							<div class="filler"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-2">
+						
+					<button type="button" class="btn btn-success">
+						Button
+					</button>
+				</div>
+				<div class="col-md-8">
+				</div>
+				<div class="col-md-2">
+						
+					<button type="button" class="btn btn-success">
+						Button
+					</button>
+				</div>
 			</div>
 		</div>
-
-
 	</body>
 
-	<!-- JQuery 3.2.1 hosted by Google API -->
-	<script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<!-- bootstrap 4 -->
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+	
 	<!-- main game code -->
-	<script	type="module" src="../GnavSim.js"></script>	
+	<script	type="module" src="../GnavSim.js"></script>
+	<link rel="stylesheet" href="css/main.css">
 
 </html>

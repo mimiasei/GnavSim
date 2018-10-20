@@ -11,6 +11,7 @@ export default class Speaker {
 		this._info = $("#" + "info");
 		this._value = -1;
 		this._statsElems = [];
+		this._elemId = 0;
 	}
 
 	get output() { return this._output }
@@ -35,16 +36,21 @@ export default class Speaker {
 		this._output.html('');
 	}
 
-	say(what, type) {
+	createElem(txt, type, className) {
+		txt = txt || '';
 		type = type || 'div';
-		let $elem = $( "<" + type + ">", { id: this.makeid(), text: what } );
-		// $elem.hover(
-		// 	function () { $(this).addClass('hover'); },
-		// 	function () { $(this).removeClass('hover'); }
-		// )
-		// $elem.click( function() {
-		// 	console.log($elem[0]);
-		// });
+		className = className || '';
+		let $elem = $( "<" + type + ">", { id: this.makeid(), text: txt } );
+		if (className) {
+			$elem.addClass(className);
+		}
+		return $elem;
+	}
+
+	say(what, type, className) {
+		type = type || 'div';
+		className = className || '';
+		let $elem = this.createElem(what, type, className);
 		this._output.append($elem);
 	}
 
@@ -79,20 +85,22 @@ export default class Speaker {
 		
 		for (let answer of answers) {
 			let element = document.createElement("button"); //create button element
-			let text = document.createTextNode(answer.text); //create button text
-			element.appendChild(text);
+			element.appendChild(document.createTextNode(answer.text)); //add button text
 			element.type = 'button';
-			element.name = 'btn_' + answer.text + '_' + this.makeid();
+			element.name = this.makeid(answer.text, element.type.substr(0, 3));
 			element.value = answer.value;
+			element.className = 'myButton';
 			element.onclick = callbackFn;
 			this._output.append(element); //add button to output div
 		}
 	}
 
-	input(question) {
+	input(question, callbackFn) {
 		let randomName = this.makeid();
-		let $inputElem = $('<input type="text" class="fieldname" id="' + randomName + '"/>');
-		this._output.append($inputElem);
+		let group = this.createElem('', 'div', 'flex'); //create empty flex div
+		let $inputElem = $('<input type="text" id="inp_' + randomName + '"/>');
+		group.append($inputElem);
+		this._output.append(group);
 	}
 
 	addToStats(name) {
@@ -115,16 +123,15 @@ export default class Speaker {
 	}
 
 	makeid(text, type) {
-		let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		let rnd = "";
-		for (let i = 0; i < 7; i++) {
-			rnd += possible.charAt(Math.floor(Math.random() * possible.length));
-	    }
-
-		text = text || rnd;
+		// let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		// let rnd = "";
+		// for (let i = 0; i < 5; i++) {
+		// 	rnd += possible.charAt(Math.floor(Math.random() * possible.length));
+	    // }
+		text = text || 'elem';
 		type = type || 'div';
 
-		return type + '_' + text;
+		return type + '_' + text + this._elemId++;
 	}
 
 	getValue() {
