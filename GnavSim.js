@@ -143,7 +143,24 @@ function playGame(speaker) {
 	//max_rounds = MAX_ROUNDS
 	let players = [];
 
-	// speaker.ask("Play X rounds or first to reach Score", ["x", "s"]);
+	let choice = -1;
+	let callBack = function(event) {
+		let value = parseInt(event.toElement.value);
+		switch (value) {
+			case 0: callBack = function(event) {
+						winType = parseInt(event.toElement.value);
+						speaker.ask("Play X rounds or first to reach Score", ["x", "s"], callBack);
+					}
+					break;
+			case 1: playGame(speaker);
+					break;
+			default:
+					console.log("default");
+					break;
+		}
+	}
+
+	speaker.ask("Play X rounds or first to reach Score", ["x", "s"], callBack);
 	let choice = -1;
 	let maxValue = 0;
 	if (choice === 0) {
