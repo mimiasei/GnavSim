@@ -7,11 +7,6 @@ body {
   line-height: 1.4;
 }
 
-.flex {
-  display: flex;
-  align-content: space-between;
-}
-
 #playerStats {
   border: 2px;
   background: rgba(7, 79, 87, 1); /*midnight green*/
@@ -43,50 +38,19 @@ body {
 
 p {
   color: orange;
-  white-space: pre-wrap;
-}
-
-div {
-  color: whitesmoke;
-  white-space: pre-wrap;
-}
-
-div.filler {
-  width: 25%;
 }
 
 img {
   border-radius: 50%;
 }
 
-.myButton {
-	background-color:#bababa;
-	-moz-border-radius:12px;
-	-webkit-border-radius:12px;
-	border-radius:12px;
-	display:inline-block;
-	cursor:pointer;
-	color:#4e4e4e;
-	font-family:Arial;
-	font-size:13px;
-	padding: 4px 12px;
-  text-decoration:none;
-  outline: none;
-}
-.myButton:hover {
-  background-color:#e7e7e7;
-  color:#9b9b9b;
-}
-.myButton:active {
-  color:#8d8d5f;
-}
-
 input {
-  border-radius: 6px;
-  width: 33%;
-  height: 18px;
+  border-radius: 8px;
+  width: 40%;
+  height: 32px;
   padding: 3px;
   outline: none;
+  color: black;
 }
 
 .hover {
