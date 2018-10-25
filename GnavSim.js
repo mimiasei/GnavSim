@@ -50,6 +50,7 @@ $(document).ready(function() {
 	$('#chat_section').hide();
 
 	$('#btn_startGame').click(() => {
+		$('#start_buttons').hide();
 		startGame();
 	});
 
@@ -117,9 +118,10 @@ function startGame() {
 	speaker.clear();
 
 	// let player = new Player();
-	speaker.say("<<< Welcome to Gnav The Card Game >>>", "h3");
-	
-	let callBack = function(event) {
+	speaker.addSpace(2);
+	speaker.say("Welcome to Gnav The Card Game", "h4");
+
+	speaker.ask("Play multiplayer game?", 0, function(event) {
 		let value = parseInt(event.toElement.value);
 		switch (value) {
 			case 0: alert ("You clicked button returning value " + value + ". Multiplayer not ready yet.");
@@ -130,9 +132,7 @@ function startGame() {
 					console.log("default");
 					break;
 		}
-	}
-
-	speaker.ask("Play multiplayer game?", 0, callBack);
+	});
 }
 
 function playGame(speaker) {
@@ -160,19 +160,19 @@ function playGame(speaker) {
 		}
 	}
 
-	speaker.ask("Play X rounds or first to reach Score", ["x", "s"], callBack);
-	let choice = -1;
-	let maxValue = 0;
-	if (choice === 0) {
-		maxValue = parseInt(speaker.input("Enter number of rounds to play: "));
-	}
-	else if (choice === 1) {
-		maxValue = parseInt(speaker.input("Enter score to reach: "));
-	}
-	else {
-		choice = 0;
-		maxValue = 10;
-	}
+	// speaker.ask("Play X rounds or first to reach Score", ["x", "s"], callBack);
+	// let choice = -1;
+	// let maxValue = 0;
+	// if (choice === 0) {
+	// 	maxValue = parseInt(speaker.input("Enter number of rounds to play: "));
+	// }
+	// else if (choice === 1) {
+	// 	maxValue = parseInt(speaker.input("Enter score to reach: "));
+	// }
+	// else {
+	// 	choice = 0;
+	// 	maxValue = 10;
+	// }
 	let isHuman = false;
 	let callback = function() {
 		

@@ -40,7 +40,7 @@ export default class Speaker {
 		txt = txt || '';
 		type = type || 'div';
 		className = className || '';
-		let $elem = $( "<" + type + ">", { id: this.makeid(), text: txt } );
+		let $elem = $( "<" + type + ">", { id: this.makeid('', type), text: txt } );
 		if (className) {
 			$elem.addClass(className);
 		}
@@ -54,8 +54,11 @@ export default class Speaker {
 		this._output.append($elem);
 	}
 
-	addSpace() {
-		this.say("", "br");
+	addSpace(n) {
+		n = n || 1;
+		n = n > 4 ? 4 : n;
+
+		this.say('', 'div', 'row margin-top-' + n * 10);
 	}
 
 	ask(question, answers, callbackFn) {
@@ -80,19 +83,22 @@ export default class Speaker {
 				},
 			];
 		}
-
-		this.say(question);
 		
+		let div = this.createElem(null, null, 'row margin-top-10'); //create button group div as bootstrap row
+		div.append(this.say(question, 'span', 'margin-right-10'));
+
 		for (let answer of answers) {
 			let element = document.createElement("button"); //create button element
 			element.appendChild(document.createTextNode(answer.text)); //add button text
 			element.type = 'button';
 			element.name = this.makeid(answer.text, element.type.substr(0, 3));
 			element.value = answer.value;
-			element.className = 'myButton';
+			element.className = 'btn btn-primary margin-right-10';
 			element.onclick = callbackFn;
-			this._output.append(element); //add button to output div
+			div.append(element);
 		}
+
+		this._output.append(div); //add button group to output div
 	}
 
 	input(question, callbackFn) {
