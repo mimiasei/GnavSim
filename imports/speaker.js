@@ -47,11 +47,16 @@ export default class Speaker {
 		return $elem;
 	}
 
-	say(what, type, className) {
+	say(what, type, className, addToOutput) {
 		type = type || 'div';
 		className = className || '';
+		addToOutput = addToOutput || true;
 		let $elem = this.createElem(what, type, className);
-		this._output.append($elem);
+		if (addToOutput) {
+			this._output.append($elem);
+		} else {
+			return $elem;
+		}
 	}
 
 	addSpace(n) {
@@ -61,58 +66,76 @@ export default class Speaker {
 		this.say('', 'div', 'row margin-top-' + n * 10);
 	}
 
+	static answerObj(arrayText, arrayValues) {
+		arrayValues = arrayValues || [];
+		let array = [];
+		for (let i = 0; i < arrayText.length; i++) {
+			if (typeof arrayValues[i] === 'undefined') {
+				arrayValues[i] = i;
+			}
+			array.push({
+				text: arrayText[i],
+				value: arrayValues[i]
+			});
+		}
+		return array;
+	}
+
 	ask(question, answers, callbackFn) {
 		/*
 		answers = -1 : auto press any key (i.e. no questions, all answers accepted)
 		answers = 0 : auto y/n answers
 		*/
-		//answers = answers || -1;	
-		let noChoice = false;
-	
-		if (answers === -1) {
-			noChoice = true;
-		} else if (answers === 0) {
-			answers = [
-				{
-					text : 'Yes',
-					value : 0
-				},
-				{			
-					text : 'No',
-					value : 1
-				},
-			];
-		}
+		answers = answers || [
+								{
+									text : 'Yes',
+									value : 0
+								},
+								{			
+									text : 'No',
+									value : 1
+								},
+							];
 		
-		let div = this.createElem(null, null, 'row margin-top-10'); //create button group div as bootstrap row
+		let div = this.createElem(null, null, 'margin-top-10'); //create button group div
 		div.append(this.say(question, 'span', 'margin-right-10'));
 
 		for (let answer of answers) {
-			let element = document.createElement("button"); //create button element
-			element.appendChild(document.createTextNode(answer.text)); //add button text
-			element.type = 'button';
-			element.name = this.makeid(answer.text, element.type.substr(0, 3));
-			element.value = answer.value;
-			element.className = 'btn btn-primary margin-right-10';
-			element.onclick = callbackFn;
+			let element = this.createBtn(answer.text, callbackFn);
 			div.append(element);
 		}
 
 		this._output.append(div); //add button group to output div
 	}
 
+	createBtn(name, callbackFn) {
+		let element = document.createElement("button"); //create button element
+
+			element.appendChild(document.createTextNode(name)); //add button text
+			element.type = 'button';
+			element.name = this.makeid(name, 'btn');
+			element.value = 1;
+			element.className = 'btn btn-primary margin-left-10';
+			element.onclick = callbackFn;
+		return element;
+	}
+
 	input(question, callbackFn) {
-		let randomName = this.makeid();
+		let div = this.createElem(null, null, 'margin-top-10'); //create button group div
+		div.append(this.say(question, 'span', 'margin-right-10', false));
 		let group = this.createElem('', 'div', 'flex'); //create empty flex div
-		let $inputElem = $('<input type="text" id="inp_' + randomName + '"/>');
+		let $inputElem = $('<input type="text"/>');
+		$inputElem.id = this.makeid(question.split(' ')[0], 'inp');
 		group.append($inputElem);
+		let element = this.createBtn('Enter', callbackFn);
+		group.append(element);
 		this._output.append(group);
 	}
 
-	addToStats(name) {
+	addToStats(name, type) {
 		type = type || 'div';
 		let $elem = $( "<" + type + ">", { id: this.makeid(name, type), text: name } );
-		statsElems.push($elem);
+		this._statsElems.push($elem);
 		this._stats.append($elem);
 	}
 
@@ -138,9 +161,5 @@ export default class Speaker {
 		type = type || 'div';
 
 		return type + '_' + text + this._elemId++;
-	}
-
-	getValue() {
-		return this.value;
 	}
 }

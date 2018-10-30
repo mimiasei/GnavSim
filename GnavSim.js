@@ -137,6 +137,12 @@ function startGame() {
 
 function playGame(speaker) {
 
+	//Create default game object
+	let game = new Game();
+
+	//Create watch for game object
+	//game.watch()
+
 	//clear main output element
 	speaker.clear();
 	
@@ -144,47 +150,41 @@ function playGame(speaker) {
 	let players = [];
 
 	let choice = -1;
-	let callBack = function(event) {
+	let maxValue = 0;
+	speaker.ask("Play n rounds or first to reach score", Speaker.answerObj(["Rounds", "Score"]), function(event) {
 		let value = parseInt(event.toElement.value);
 		switch (value) {
-			case 0: callBack = function(event) {
-						winType = parseInt(event.toElement.value);
-						speaker.ask("Play X rounds or first to reach Score", ["x", "s"], callBack);
-					}
+			case 0: speaker.input("How many rounds? ", function(event) {
+						maxValue = parseInt(event.toElement.value);
+					});
 					break;
-			case 1: playGame(speaker);
+			case 1: speaker.input("Enter score to reach: ", function(event) {
+						maxValue = parseInt(event.toElement.value);
+					});
 					break;
 			default:
 					console.log("default");
 					break;
 		}
-	}
+	});
 
-	// speaker.ask("Play X rounds or first to reach Score", ["x", "s"], callBack);
-	// let choice = -1;
-	// let maxValue = 0;
-	// if (choice === 0) {
-	// 	maxValue = parseInt(speaker.input("Enter number of rounds to play: "));
-	// }
-	// else if (choice === 1) {
-	// 	maxValue = parseInt(speaker.input("Enter score to reach: "));
-	// }
-	// else {
-	// 	choice = 0;
-	// 	maxValue = 10;
-	// }
 	let isHuman = false;
-	let callback = function() {
-		
-	}
-	if (speaker.ask("Play against computer", 0) === 0) {
-		let humanName = speaker.input("Please enter your name: ");
-		let human = new Human(humanName, tools.PLAYERS.length + 1, speaker);
-		players.push(human);
-		isHuman = true;
-	}
 
-	let game = new Game(choice, maxValue, isHuman);
+	speaker.ask("Play against computer", 0, function(event) {
+		let value = parseInt(event.toElement.value);
+		switch (value) {
+			case 0: speaker.input("How many rounds? ", function(event) {
+						maxValue = parseInt(event.toElement.value);
+						let humanName = speaker.input("Please enter your name: ");
+						let human = new Human(humanName, tools.PLAYERS.length + 1, speaker);
+						players.push(human);
+						isHuman = true;
+					});
+					break;
+		}
+	});
+
+	
 
 	// speaker.output.append(getRandomImgElem("cat closeup"));
 	// speaker.output.append(getRandomImgElem("house"));

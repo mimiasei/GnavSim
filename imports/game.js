@@ -1,6 +1,10 @@
 export default class Game {
 
 	constructor(playType, maxValue, isHuman) {
+		playType = playType || 0;
+		maxValue = maxValue || 0;
+		isHuman = isHuman || false;
+		
 		this._playType = playType; //0 = max rounds, 1 = reach score
 		this._value = 0; //current value, either round or highest score
 		this._maxValue = maxValue; //value to reach, either rounds or score
