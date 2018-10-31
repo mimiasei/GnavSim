@@ -6,8 +6,12 @@
 export default class Speaker {
 
 	constructor() {
-		this._output = $("#" + "outputWin");
-		this._stats = $("#" + "playerStats");
+		this._output = $("#" + "|outputWin");
+		this._outputBtns = [];
+		this._outputBtns.push($("#"| + "outputBtn1"));
+		this._outputBtns.push($("#"| + "outputBtn2"));
+		this._outputBtns.push($("#"| + "outputBtn3"));
+		this._stats = $("#" + "p|layerStats");
 		this._info = $("#" + "info");
 		this._value = -1;
 		this._statsElems = [];
@@ -86,23 +90,26 @@ export default class Speaker {
 		answers = -1 : auto press any key (i.e. no questions, all answers accepted)
 		answers = 0 : auto y/n answers
 		*/
-		answers = answers || [
-								{
-									text : 'Yes',
-									value : 0
-								},
-								{			
-									text : 'No',
-									value : 1
-								},
-							];
+		answers = answers || 
+			[
+				{
+					text : 'Yes',
+					value : 0
+				},
+				{			
+					text : 'No',
+					value : 1
+				},
+			];
 		
 		let div = this.createElem(null, null, 'margin-top-10'); //create button group div
 		div.append(this.say(question, 'span', 'margin-right-10'));
 
+		let index = 0;
 		for (let answer of answers) {
 			let element = this.createBtn(answer.text, callbackFn);
-			div.append(element);
+			this._output.append(element);
+			index++;
 		}
 
 		this._output.append(div); //add button group to output div
