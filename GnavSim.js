@@ -19,31 +19,7 @@ import Game from './imports/game.js';
 
 import Speaker from './imports/speaker.js';
 
-import * as tools from './imports/gnavtools.js';
-
-// class GnavGame {
-
-// 	constructor(playType, maxValue, isHuman) {
-// 		this.playType = playType; //0 = max rounds, 1 = reach score
-// 		this.value = 0; //current value, either round or highest score
-// 		this.maxValue = maxValue; //value to reach, either rounds or score
-// 		this.isHuman = isHuman;
-// 	}
-
-// 	isGameOver() {
-// 		return (this.value >= this.maxValue);
-// 	}
-
-// 	incValue() {
-// 		this.value++;
-// 	}
-
-// 	setValue(value) {
-// 		this.value = value;
-// 	}
-// }
-
-// ------------- End of classes ---------------		
+import * as tools from './imports/gnavtools.js';	
 
 $(document).ready(function() {
 	console.log("document is ready");
@@ -62,66 +38,19 @@ $(document).ready(function() {
 	});
 });
 
-function chat(active_chat) {
-	if (active_chat) {
-		console.log("starting chat");
-		var $input_handle = $('#chat_handle');
-		var $input_msg = $('#chat_message');
-		var $btn_send = $('#chat_send');
-		var $output = $('#chat_output');
-		var $comment = $('#chat_comment');
-		
-		$('#chat_section').show();
-		
-		var socket = io.connect(HOST + ':' + PORT);
-		
-		//Emit events
-		$btn_send.on('click', function() {
-			socket.emit('chat', {
-				handle: $input_handle.val(),
-				message: $input_msg.val(),
-			});
-			$input_msg.val(''); //clear message field
-		});
-
-		$input_msg.on('keypress', function() {
-			socket.emit('typing', $input_handle.val());
-		});
-
-		$input_msg.on('keyup', function(event) {
-			if (event.keyCode === 13) {
-				$btn_send.click();
-			}
-		});
-
-		//Listen for events
-		socket.on('chat', function(data) {
-			$output.append('<p><strong>' + data.handle + ': </strong>' + data.message + '</p>');
-		});
-
-		socket.on('typing', function(data) {
-			$comment.html('<p><em>' + data + ' is typing...</em></p>');
-		});
-
-
-	} else {
-		$('#chat_section').hide();
-	}
-}
-
-function startGame() {
+async function startGame() {
 	$('#chat_section').hide();
 
 	let speaker = new Speaker();
 
 	//clear main output element
-	speaker.clear();
+	await speaker.clear();
 
 	// let player = new Player();
 	speaker.addSpace(2);
-	speaker.say("Welcome to Gnav The Card Game", "h4");
+	await speaker.say("Welcome to Gnav The Card Game", "h4");
 
-	speaker.ask("Play multiplayer game?", 0, function(event) {
+	await speaker.ask("Play multiplayer game?", 0, function(event) {
 		let value = parseInt(event.toElement.value);
 		switch (value) {
 			case 0: alert ("You clicked button returning value " + value + ". Multiplayer not ready yet.");
@@ -135,7 +64,7 @@ function startGame() {
 	});
 }
 
-function playGame(speaker) {
+async function playGame(speaker) {
 
 	//Create default game object
 	let game = new Game();
@@ -149,28 +78,29 @@ function playGame(speaker) {
 	//max_rounds = MAX_ROUNDS
 	let players = [];
 
-	let choice = -1;
 	let maxValue = 0;
-	speaker.ask("Play n rounds or first to reach score", Speaker.answerObj(["Rounds", "Score"]), function(event) {
+	await speaker.ask("Play n rounds or first to reach score", await Speaker.answerObj(["Rounds", "Score"]), function (event) {
 		let value = parseInt(event.toElement.value);
 		switch (value) {
-			case 0: speaker.input("How many rounds? ", function(event) {
-						maxValue = parseInt(event.toElement.value);
-					});
-					break;
-			case 1: speaker.input("Enter score to reach: ", function(event) {
-						maxValue = parseInt(event.toElement.value);
-					});
-					break;
+			case 0:
+				speaker.input("How many rounds? ", function (event) {
+					maxValue = parseInt(event.toElement.value);
+				});
+				break;
+			case 1:
+				speaker.input("Enter score to reach: ", function (event) {
+					maxValue = parseInt(event.toElement.value);
+				});
+				break;
 			default:
-					console.log("default");
-					break;
+				console.log("default");
+				break;
 		}
 	});
 
 	let isHuman = false;
 
-	speaker.ask("Play against computer", 0, function(event) {
+	await speaker.ask("Play against computer", 0, function(event) {
 		let value = parseInt(event.toElement.value);
 		switch (value) {
 			case 0: speaker.input("How many rounds? ", function(event) {
@@ -183,16 +113,6 @@ function playGame(speaker) {
 					break;
 		}
 	});
-
-	
-
-	// speaker.output.append(getRandomImgElem("cat closeup"));
-	// speaker.output.append(getRandomImgElem("house"));
-	// speaker.output.append(getRandomImgElem("horse"));
-	// speaker.output.append(getRandomImgElem("pot"));
-	// speaker.output.append(getRandomImgElem("fool"));
-	// speaker.output.append(getRandomImgElem("cavalry"));
-	// speaker.output.append(getRandomImgElem("bird"));
 
 	tools.PLAYERS.forEach(function (name, index) {
 		let newPlayer = new Player(name, index, speaker);
@@ -346,7 +266,7 @@ function playGame(speaker) {
 	}
 	//End of game loop while
 
-	proclaimWinner(highestScore[0], game, round, speaker);
+	//proclaimWinner(highestScore[0], game, round, speaker);
 }
 
 function updateStats(speaker, players) {
@@ -422,4 +342,51 @@ function proclaimWinner(player, game, round, speaker) {
 function getRandomImgElem(search) {
 	let imageUrl = 'https://source.unsplash.com/100x100/?' + search;
 	return $( "<img>", { id: search + "_img", src: imageUrl, title: search } );
+}
+
+function chat(active_chat) {
+	if (active_chat) {
+		console.log("starting chat");
+		var $input_handle = $('#chat_handle');
+		var $input_msg = $('#chat_message');
+		var $btn_send = $('#chat_send');
+		var $output = $('#chat_output');
+		var $comment = $('#chat_comment');
+		
+		$('#chat_section').show();
+		
+		var socket = io.connect(HOST + ':' + PORT);
+		
+		//Emit events
+		$btn_send.on('click', function() {
+			socket.emit('chat', {
+				handle: $input_handle.val(),
+				message: $input_msg.val(),
+			});
+			$input_msg.val(''); //clear message field
+		});
+
+		$input_msg.on('keypress', function() {
+			socket.emit('typing', $input_handle.val());
+		});
+
+		$input_msg.on('keyup', function(event) {
+			if (event.keyCode === 13) {
+				$btn_send.click();
+			}
+		});
+
+		//Listen for events
+		socket.on('chat', function(data) {
+			$output.append('<p><strong>' + data.handle + ': </strong>' + data.message + '</p>');
+		});
+
+		socket.on('typing', function(data) {
+			$comment.html('<p><em>' + data + ' is typing...</em></p>');
+		});
+
+
+	} else {
+		$('#chat_section').hide();
+	}
 }

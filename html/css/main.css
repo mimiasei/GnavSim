@@ -12,8 +12,9 @@ body {
   background: rgba(7, 79, 87, 1); /*midnight green*/
 }
 
-#outputWin {
+.outputSection {
   border: 2px;
+  border-color: white;
   background: rgba(7, 79, 87, 1); /*midnight green*/
 }
 

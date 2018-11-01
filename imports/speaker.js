@@ -1,3 +1,4 @@
+
 'use strict';
 
 /**
@@ -6,13 +7,13 @@
 export default class Speaker {
 
 	constructor() {
-		this._output = $("#" + "|outputWin");
+		this._output = $("#outputWin");
 		this._outputBtns = [];
-		this._outputBtns.push($("#"| + "outputBtn1"));
-		this._outputBtns.push($("#"| + "outputBtn2"));
-		this._outputBtns.push($("#"| + "outputBtn3"));
-		this._stats = $("#" + "p|layerStats");
-		this._info = $("#" + "info");
+		this._outputBtns.push($("#outputBtn1"));
+		this._outputBtns.push($("#outputBtn2"));
+		this._outputBtns.push($("#outputBtn3"));
+		this._stats = $("#playerStats");
+		this._info = $("#info");
 		this._value = -1;
 		this._statsElems = [];
 		this._elemId = 0;
@@ -36,11 +37,14 @@ export default class Speaker {
 		return cloned;
 	}
 
-	clear() {
+	async clear() {
 		this._output.html('');
+		for (let btn of this._outputBtns) {
+			await btn.html('');
+		}
 	}
 
-	createElem(txt, type, className) {
+	async createElem(txt, type, className) {
 		txt = txt || '';
 		type = type || 'div';
 		className = className || '';
@@ -51,26 +55,26 @@ export default class Speaker {
 		return $elem;
 	}
 
-	say(what, type, className, addToOutput) {
+	async say(what, type, className, addToOutput) {
 		type = type || 'div';
 		className = className || '';
 		addToOutput = addToOutput || true;
-		let $elem = this.createElem(what, type, className);
+		let $elem = await this.createElem(what, type, className);
 		if (addToOutput) {
-			this._output.append($elem);
+			await this._output.append($elem);
 		} else {
 			return $elem;
 		}
 	}
 
-	addSpace(n) {
+	async addSpace(n) {
 		n = n || 1;
 		n = n > 4 ? 4 : n;
 
-		this.say('', 'div', 'row margin-top-' + n * 10);
+		await this.say('', 'div', 'margin-top-' + n * 10);
 	}
 
-	static answerObj(arrayText, arrayValues) {
+	static async answerObj(arrayText, arrayValues) {
 		arrayValues = arrayValues || [];
 		let array = [];
 		for (let i = 0; i < arrayText.length; i++) {
@@ -85,13 +89,15 @@ export default class Speaker {
 		return array;
 	}
 
-	ask(question, answers, callbackFn) {
+	async ask(question, answers, callbackFn) {
+		await this.clear(); //clear all output sections
+		console.log("coming in...");
+		console.log(answers);
 		/*
-		answers = -1 : auto press any key (i.e. no questions, all answers accepted)
-		answers = 0 : auto y/n answers
+			answers = 0 : auto y/n answers
 		*/
-		answers = answers || 
-			[
+		if (answers === 0) {
+			answers = [
 				{
 					text : 'Yes',
 					value : 0
@@ -101,21 +107,22 @@ export default class Speaker {
 					value : 1
 				},
 			];
-		
-		let div = this.createElem(null, null, 'margin-top-10'); //create button group div
-		div.append(this.say(question, 'span', 'margin-right-10'));
-
-		let index = 0;
-		for (let answer of answers) {
-			let element = this.createBtn(answer.text, callbackFn);
-			this._output.append(element);
-			index++;
 		}
 
-		this._output.append(div); //add button group to output div
+		let div = await this.createElem(null, null, 'margin-top-10'); //create group div
+		div.append(await this.say(question, 'span', 'margin-right-10'));
+		this._output.append(div); //add group to output div
+		console.log("coming out...");
+		console.log(answers);
+		let index = 0;
+		for await (const answer of answers) {
+			let element = await this.createBtn(answer.text, callbackFn);
+			this._outputBtns[index].append(element);
+			index++;
+		}
 	}
 
-	createBtn(name, callbackFn) {
+	async createBtn(name, callbackFn) {
 		let element = document.createElement("button"); //create button element
 
 			element.appendChild(document.createTextNode(name)); //add button text
@@ -127,7 +134,7 @@ export default class Speaker {
 		return element;
 	}
 
-	input(question, callbackFn) {
+	async input(question, callbackFn) {
 		let div = this.createElem(null, null, 'margin-top-10'); //create button group div
 		div.append(this.say(question, 'span', 'margin-right-10', false));
 		let group = this.createElem('', 'div', 'flex'); //create empty flex div
@@ -139,31 +146,26 @@ export default class Speaker {
 		this._output.append(group);
 	}
 
-	addToStats(name, type) {
+	async addToStats(name, type) {
 		type = type || 'div';
 		let $elem = $( "<" + type + ">", { id: this.makeid(name, type), text: name } );
 		this._statsElems.push($elem);
 		this._stats.append($elem);
 	}
 
-	getStatsElem(name) {
+	async getStatsElem(name) {
 		return this._statsElems.find((e) => {
 			return e.text = name; 
 		});
 	}
 
-	sayFromStats(what, type) {
+	async sayFromStats(what, type) {
 		type = type || 'div';
 		let $elem = $( "<" + type + ">", { id: this.makeid(what.split(' ')[0], type), text: what } );
 		this._stats.append($elem);
 	}
 
-	makeid(text, type) {
-		// let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		// let rnd = "";
-		// for (let i = 0; i < 5; i++) {
-		// 	rnd += possible.charAt(Math.floor(Math.random() * possible.length));
-	    // }
+	async makeid(text, type) {
 		text = text || 'elem';
 		type = type || 'div';
 
