@@ -9,13 +9,14 @@
 		<!--main game section-->
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-xs-12">
-					<h4>GnavSim Multiplayer online card game</h4>
+				<div class="col-xs-12" id="headline">
+					<h2 class="pull-left">GnavSim</h2>
+					<h4 class="pull-left">Multiplayer online card game</h4>
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-xs-3">
-					<table class="table table-sm">
+				<div class="col-xs-3" id="stats_section">
+					<table class="table table-sm" id="stats_table" >
 						<thead>
 							<tr class="outputSection">
 								<th class="outputSection">
@@ -40,65 +41,42 @@
 					</div>
 
 					<div id="settings">
-						<form name="settingsForm" id="settingsForm" novalidate autocomplete="on">
-							<input type="hidden" name="method" value="validateForm">
-							<input type="hidden" id="serverValidationFields" name="serverValidationFields" value="">
-							
-							<div class="form-group f1 required" data-fid="f1">
-								<label class="control-label" for="f1">Player name</label>
-								<div class="input-group">
-									<span class="input-group-addon left">
-										<i class="glyphicon glyphicon-user"></i> 
-									</span>
-									<input type="text" class="form-control" id="f1" name="f1" value="" placeholder="Enter name here" data-rule-required="true" data-rule-minlength="3"/>
-								</div>
+
+							<div class="form-group">
+								<label for="form_name" class="pull-left">Player name</label>		
+								<input type="text" class="form-control" id="form_name" value="" placeholder="Enter name here" />
 							</div>
 							
-							<div class="form-group f5  col-1" data-fid="f5">
-								<div class="checkbox">
-									<input id="f5_1" name="f5[]" type="checkbox" value="Let computer play against itself">
-									<label for="f5_1">Let computer play against itself</label>
-								</div>
+							<div class="form-group block">
+								<label>
+									<input id="form_computerOnly" type="checkbox" class="wide-checkbox">
+									Let computer play against itself
+								</label>
 							</div>
 							
-							<div class="form-group f6  col-1" data-fid="f6">
-								<div class="checkbox">
-									<input  id="f6_1" name="f6[]"  type="checkbox" value="Play multiplayer online">
-									<label  for="f6_1">Play multiplayer online</label>
-								</div>
+							<div class="form-group block">
+								<label>
+									<input id="form_multiplayer" type="checkbox" class="wide-checkbox">
+									Play multiplayer online
+								</label>
 							</div>
 							
-							<div class="form-group f7 " data-fid="f7">
-								<label class="control-label" for="f7">Winning condition</label>
-								<select class="form-control" id="f7" name="f7">
+							<div class="form-group">
+								<label class="pull-left" for="f7">Winning condition</label>
+								<select class="form-control" id="form_winType">
 									<option selected value="Score">Score</option>
-							  		<option  value="Rounds">Rounds</option>
+							  		<option value="Rounds">Rounds</option>
 							  	</select>
 							</div>
 							
-							<div class="form-group f9 " data-fid="f9">
-								<label class="control-label" for="f9">Value to win</label>
-								<input type="text" class="form-control" id="f9" name="f9" value="" data-rule-number="true" data-rule-min="1" />
+							<div class="form-group">
+								<label class="pull-left" for="f9">Value to win</label>
+								<input type="text" class="form-control" id="form_winValue" value="10" />
 							</div>
 							
-							<div class="form-group submit f0 " data-fid="f0" style="position: relative;">
-								<label class="control-label sr-only" for="f0" style="display: block;">Submit Button</label>
-								<div class="progress" style="display: none; z-index: -1; position: absolute;">
-									<div class="progress-bar progress-bar-striped active" role="progressbar" style="width:100%"></div>
-							  	</div>
-							
-								<button type="submit" class="btn btn-primary btn-lg" style="z-index: 1;">Start Game</button>
-							
+							<div class="form-group">							
+								<button class="btn btn-primary btn-lg" id="startGame" onclick="submitSettings();">Start Game</button>							
 							</div>
-							
-							<div class="clearfix"></div>
-							
-							<div class="submit">
-							  	<p class="error bg-warning" style="display:none;">Please check the required fields.</p>
-							</div>
-							
-							<div class="clearfix"></div>
-						</form>
 					</div>
 
 					<div class="row outputSection margin-top-10">

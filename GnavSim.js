@@ -15,8 +15,6 @@ import Horse from './imports/horse.js';
 import House from './imports/house.js';		
 import Fool from './imports/fool.js';	
 import Game from './imports/game.js';	
-
-
 import Speaker from './imports/speaker.js';
 
 import * as tools from './imports/gnavtools.js';	
@@ -24,8 +22,8 @@ import * as tools from './imports/gnavtools.js';
 $(document).ready(function() {
 	console.log("document is ready");
 	$('#chat_section').hide();
-
-	$('#settingsForm').on('submit', submitSettings);
+	$('#stats_table').hide();
+	$('#settingsForm').hide();
 
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
@@ -40,24 +38,32 @@ $(document).ready(function() {
 	});
 });
 
+var scope_settings = {
+	name : '',
+	justComputer : false,
+	multiplayer : false,
+	winType : 0,
+	winValue : 10
+}
+
 function submitSettings() {
-	console.log("submitted!");
-	console.log(document.forms[0].elements[0].value);
-	console.log(document.forms[0].elements[1].value);
-	console.log(document.forms[0].elements[2].value);
+	scope_settings.name = document.settingsForm.form_name.value;
+
+	alert (scope_settings);
 }
 
 async function startGame() {
 	$('#chat_section').hide();
+	$('#settingsForm').show();
 
 	let speaker = new Speaker();
 
 	//clear main output element
-	await speaker.clear();
+	speaker.clear();
 
 	// let player = new Player();
 	speaker.addSpace(2);
-	await speaker.say("Welcome to Gnav The Card Game", "h4");
+	speaker.say("Welcome to Gnav The Card Game", "h4");
 
 	await speaker.ask("Play multiplayer game?", 0, function(event) {
 		let value = parseInt(event.toElement.value);

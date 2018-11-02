@@ -7,6 +7,14 @@ body {
   line-height: 1.4;
 }
 
+#headline {
+  height: 80px;
+}
+
+#stats_section {
+  width: 25%;
+}
+
 #playerStats {
   border: 2px;
   background: rgba(7, 79, 87, 1); /*midnight green*/
@@ -46,14 +54,26 @@ img {
   border-radius: 50%;
 }
 
-input {
+.block {
+  display: block;
+}
+
+.wide-checkbox {
+  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+  outline: none;
+}
+
+/* input {
   border-radius: 8px;
   width: 40%;
   height: 32px;
   padding: 3px;
   outline: none;
   color: black;
-}
+} */
 
 .hover {
 	cursor: pointer;
