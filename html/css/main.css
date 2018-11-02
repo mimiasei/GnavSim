@@ -13,8 +13,9 @@ body {
 }
 
 .outputSection {
-  border: 2px;
-  border-color: white;
+  border: 1px;
+  border-style: solid;
+  border-color: seagreen;
   background: rgba(7, 79, 87, 1); /*midnight green*/
 }
 

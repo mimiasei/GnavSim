@@ -25,6 +25,8 @@ $(document).ready(function() {
 	console.log("document is ready");
 	$('#chat_section').hide();
 
+	$('#settingsForm').on('submit', submitSettings);
+
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
 		startGame();
@@ -37,6 +39,13 @@ $(document).ready(function() {
 		chat(active_chat);
 	});
 });
+
+function submitSettings() {
+	console.log("submitted!");
+	console.log(document.forms[0].elements[0].value);
+	console.log(document.forms[0].elements[1].value);
+	console.log(document.forms[0].elements[2].value);
+}
 
 async function startGame() {
 	$('#chat_section').hide();
