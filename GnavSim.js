@@ -27,7 +27,7 @@ $(document).ready(function() {
 
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
-		startGame();
+		settingsPart();
 	});
 
 	var active_chat = false;
@@ -46,16 +46,24 @@ var scope_settings = {
 	winValue : 10
 }
 
-function submitSettings() {
-	scope_settings.name = document.settingsForm.form_name.value;
-
-	alert (scope_settings);
-}
-
-async function startGame() {
+function settingsPart() {
 	$('#chat_section').hide();
 	$('#settingsForm').show();
 
+	$('#btn_playGame').click(() => {
+		$('#settingsForm').hide();
+		submitSettings();
+		// startGame();
+	});
+}
+
+function submitSettings() {
+	scope_settings.name = $('#form_name').value;
+
+	$('#outputWin').html(scope_settings.name);
+}
+
+async function startGame() {
 	let speaker = new Speaker();
 
 	//clear main output element
