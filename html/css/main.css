@@ -1,14 +1,22 @@
 body {
-  color: white;
+  color: lightgray;
   background-color: rgba(7, 79, 87, 1);  /*midnight green*/
-  text-align: center;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 13px;
   line-height: 1.4;
 }
 
+p {
+  color: #b9c17b;
+}
+
+img {
+  border-radius: 50%; /*round images*/
+}
+
 #headline {
   height: 80px;
+  letter-spacing: 8px;
 }
 
 #stats_section {
@@ -18,6 +26,10 @@ body {
 #playerStats {
   border: 2px;
   background: rgba(7, 79, 87, 1); /*midnight green*/
+}
+
+#settingsForm {
+  width: 50%;
 }
 
 .outputSection {
@@ -44,14 +56,6 @@ body {
 
 #chat_comment {
   color: darkslategray;
-}
-
-p {
-  color: orange;
-}
-
-img {
-  border-radius: 50%;
 }
 
 .block {
