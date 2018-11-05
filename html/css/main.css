@@ -10,12 +10,21 @@ body {
     * {
       font-size: calc(28px - 1vmax); /*mobile*/
     }
+    .form-control {
+      height: calc(70px - 1vmin) !important;
+    }
+    #settingsForm {
+      width: 75%;
+    }
 }
 
 @media only screen 
   and (min-width : 840px) {
   * {
     font-size: calc(24px - 1vmin); /*desktop*/
+  }
+  #settingsForm {
+    width: 50%;
   }
 }
 
@@ -24,6 +33,10 @@ body {
   border-style: solid;
   border-color: seagreen;
 } */
+
+input:disabled {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==) repeat;
+}
 
 p {
   color: #b9c17b;
@@ -45,10 +58,6 @@ img {
 #playerStats {
   border: 2px;
   background: rgba(7, 79, 87, 1); /*midnight green*/
-}
-
-#settingsForm {
-  width: 50%;
 }
 
 #info {

@@ -50,6 +50,16 @@ function settingsPart() {
 	$('#chat_section').hide();
 	$('#settingsForm').show();
 
+	$('#form_computerOnly').click(() => {
+		if ($('#form_computerOnly').is(':checked')) {
+			$('#form_name').prop('disabled', true);
+			$('#form_multiplayer').prop('disabled', true);
+		} else {
+			$('#form_name').prop('disabled', false);
+			$('#form_multiplayer').prop('disabled', false);
+		}
+	});
+
 	$('#btn_playGame').click(() => {
 		$('#settingsForm').hide();
 		submitSettings();
