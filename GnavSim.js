@@ -38,9 +38,9 @@ $(document).ready(function() {
 	});
 });
 
-var scope_settings = {
+var _scope_settings = {
 	name : '',
-	justComputer : false,
+	computerOnly : false,
 	multiplayer : false,
 	winType : 0,
 	winValue : 10
@@ -63,14 +63,18 @@ function settingsPart() {
 	$('#btn_playGame').click(() => {
 		$('#settingsForm').hide();
 		submitSettings();
-		// startGame();
+		startGame();
 	});
 }
 
 function submitSettings() {
-	scope_settings.name = $('#form_name').value;
+	_scope_settings.name = $('#form_name').val();
+	_scope_settings.computerOnly = $('#form_computerOnly').is(':checked');
+	_scope_settings.multiplayer = $('#form_multiplayer').is(':checked');
+	_scope_settings.winType = $('#form_winType').val();
+	_scope_settings.winValue = $('#form_winValue').val();
 
-	$('#outputWin').html(scope_settings.name);
+	// $('#outputWin').html(JSON.stringify(_scope_settings));
 }
 
 async function startGame() {
@@ -83,69 +87,29 @@ async function startGame() {
 	speaker.addSpace(2);
 	speaker.say("Welcome to Gnav The Card Game", "h4");
 
-	await speaker.ask("Play multiplayer game?", 0, function(event) {
-		let value = parseInt(event.toElement.value);
-		switch (value) {
-			case 0: alert ("You clicked button returning value " + value + ". Multiplayer not ready yet.");
-					break;
-			case 1: playGame(speaker);
-					break;
-			default:
-					console.log("default");
-					break;
-		}
-	});
+	if (_scope_settings.multiplayer) {
+		alert ("Multiplayer not implemented yet.");
+	} else {
+		await playGame(speaker);
+		// alert ("Game over!");
+	}
 }
 
 async function playGame(speaker) {
-
-	//Create default game object
-	let game = new Game();
-
-	//Create watch for game object
-	//game.watch()
-
+	
 	//clear main output element
 	speaker.clear();
-	
-	//max_rounds = MAX_ROUNDS
+
 	let players = [];
+	let isHuman = !_scope_settings.multiplayer;
 
-	let maxValue = 0;
-	await speaker.ask("Play n rounds or first to reach score", await Speaker.answerObj(["Rounds", "Score"]), function (event) {
-		let value = parseInt(event.toElement.value);
-		switch (value) {
-			case 0:
-				speaker.input("How many rounds? ", function (event) {
-					maxValue = parseInt(event.toElement.value);
-				});
-				break;
-			case 1:
-				speaker.input("Enter score to reach: ", function (event) {
-					maxValue = parseInt(event.toElement.value);
-				});
-				break;
-			default:
-				console.log("default");
-				break;
-		}
-	});
+	//Create default game object
+	let game = new Game( _scope_settings.winType, _scope_settings.winValue, isHuman);
 
-	let isHuman = false;
-
-	await speaker.ask("Play against computer", 0, function(event) {
-		let value = parseInt(event.toElement.value);
-		switch (value) {
-			case 0: speaker.input("How many rounds? ", function(event) {
-						maxValue = parseInt(event.toElement.value);
-						let humanName = speaker.input("Please enter your name: ");
-						let human = new Human(humanName, tools.PLAYERS.length + 1, speaker);
-						players.push(human);
-						isHuman = true;
-					});
-					break;
-		}
-	});
+	if (isHuman && _scope_settings.name) {
+		let human = new Human(_scope_settings.name, tools.PLAYERS.length + 1, speaker);
+		players.push(human);
+	}
 
 	tools.PLAYERS.forEach(function (name, index) {
 		let newPlayer = new Player(name, index, speaker);
@@ -163,7 +127,7 @@ async function playGame(speaker) {
 	let round = 1;
 	let sortedPlayers = [];
 	let highestScore = [];
-
+	
 	while (!game.isGameOver()) {
 		speaker.say(`Round: ${round} ===> Card pile length: ${deck.cards.length} -----------------------`);
 		speaker.say("Current dealer is: " + players[0].name);
@@ -294,8 +258,6 @@ async function playGame(speaker) {
 			speaker.ask("Press ENTER to continue", -1);
 			speaker.addSpace();
 		}
-		//else:
-			//time.sleep(1)
 	}
 	//End of game loop while
 

@@ -40,7 +40,7 @@ export default class Speaker {
 	async clear() {
 		this._output.html('');
 		for (let btn of this._outputBtns) {
-			await btn.html('');
+			btn.html('');
 		}
 	}
 
@@ -59,9 +59,9 @@ export default class Speaker {
 		type = type || 'div';
 		className = className || '';
 		addToOutput = addToOutput || true;
-		let $elem = await this.createElem(what, type, className);
+		let $elem = this.createElem(what, type, className);
 		if (addToOutput) {
-			await this._output.append($elem);
+			this._output.append($elem);
 		} else {
 			return $elem;
 		}
@@ -71,7 +71,7 @@ export default class Speaker {
 		n = n || 1;
 		n = n > 4 ? 4 : n;
 
-		await this.say('', 'div', 'margin-top-' + n * 10);
+		this.say('', 'div', 'margin-top-' + n * 10);
 	}
 
 	static async answerObj(arrayText, arrayValues) {
@@ -90,7 +90,7 @@ export default class Speaker {
 	}
 
 	async ask(question, answers, callbackFn) {
-		await this.clear(); //clear all output sections
+		this.clear(); //clear all output sections
 		console.log("coming in...");
 		console.log(answers);
 		/*
@@ -109,14 +109,14 @@ export default class Speaker {
 			];
 		}
 
-		let div = await this.createElem(null, null, 'margin-top-10'); //create group div
-		div.append(await this.say(question, 'span', 'margin-right-10'));
+		let div = this.createElem(null, null, 'margin-top-10'); //create group div
+		div.append(this.say(question, 'span', 'margin-right-10'));
 		this._output.append(div); //add group to output div
 		console.log("coming out...");
 		console.log(answers);
 		let index = 0;
-		for await (const answer of answers) {
-			let element = await this.createBtn(answer.text, callbackFn);
+		for (const answer of answers) {
+			let element = this.createBtn(answer.text, callbackFn);
 			this._outputBtns[index].append(element);
 			index++;
 		}

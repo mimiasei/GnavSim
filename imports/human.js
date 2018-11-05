@@ -14,7 +14,7 @@ export default class Human extends Player {
 
 	set human(value) { this._human = value; }
 	set heldCard(value) {
-		super.heldCard = value;
+		super._heldCard = value;
 		this.printGotCard(this._heldCard.name);
  	}
 
@@ -30,9 +30,10 @@ export default class Human extends Player {
 		this._speaker.say (this.sayTo(toPlayer, 0) + quote(tools.TXT_WANT_TO_SWAP));
 	}
 
-	printGotCard(cardName = "") {
-		card = cardName === "" ? this._heldCard.name : cardName;
-		this._speaker.say ("Player ${his.name}, you got the card ${card}.");
+	printGotCard(cardName) {
+		cardName = cardName || '';
+		card = cardName === '' ? this._heldCard.name : cardName;
+		this._speaker.say (`Player ${this.name}, you got the card ${card}.`);
 	}
 
 	testForSwap(toPlayer) {
@@ -40,7 +41,7 @@ export default class Human extends Player {
 		if (toPlayer == "deck") {
 			text += "draw from the deck";
 		} else {
-			text += "swap cards with ${toPlayer.name}";
+			text += `swap cards with ${toPlayer.name}`;
 		}
 		return this._speaker.ask(text, 0) === 0;	
 	}
