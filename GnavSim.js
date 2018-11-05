@@ -150,45 +150,17 @@ async function playGame(speaker) {
 		console.log("playing round...");
 
 		//Play round
-		for (let i = 0; i < players.length; i++) {
 
-			updateStats(players[i], speaker);
+		// for (let i = 0; i < players.length; i++) {
+		// 	updateStats(players[i], speaker);
+		// 	let wantsToSwap = wantsToSwapTest(i);
+		// }
 
-			let wantsToSwap = false;
-			let sayPass = players[i].sayPass();
-			if (i !== players.len - 1) {
-				if( players[i + 1] && players[i + 1].heldCard && players[i + 1].heldCard.value === 4) { //If the other player has Narren...
-					if (!players[i].testForSwap(players[i + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
-						sayPass += players[i].sayNoFool(players[i + 1]);
-						console.log(players[i].sayNoFool(players[i + 1]));
-					} else {
-						wantsToSwap = true;
-					}
-				} else {
-					if (!players[i].neverSwapsWithDeck && players[i].testForSwap(players[i + 1])) { //Only ask to swap if card is 4 or less.
-						wantsToSwap = true;
-					} else {
-						if (players[i].neverSwapsWithDeck) {
-							speaker.say (players[i].name + " never swaps!");
-						}
-					}
-				}
-				if (wantsToSwap) {
-					if (!askPlayers(i, players[i], players, deck, speaker)) { //Check if Staa for gjok! is called.
-						break;
-					}
-				} else {
-					speaker.say (sayPass);
-				}
-			} else {
-				if (players[i].testForSwap("deck")) { //Only swap if card is 4 or less.
-					speaker.say (players[i].name + " draws from the deck.");
-					players[i].drawFromDeck(deck); //Draw from deck if noone else to swap with.
-				} else {
-					speaker.say (sayPass);
-				}
-			}
-		}
+		const promiseArray = players.map(function(ply) { 
+			updateStats(ply, speaker);
+			wantsToSwapTest(ply);
+		});
+		await Promise.All(promiseArray);
 
 		speaker.addSpace();
 		speaker.say ("End of round: " + round);
@@ -259,13 +231,53 @@ async function playGame(speaker) {
 			speaker.addSpace();
 		}
 	}
+
+	function wantsToSwapTest(i) {
+		let wantsToSwap = false;
+		let sayPass = players[i].sayPass();
+
+		if (i !== players.len - 1) {
+			if( players[i + 1] && players[i + 1].heldCard && players[i + 1].heldCard.value === 4) { //If the other player has Narren...
+				if (!players[i].testForSwap(players[i + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
+					sayPass += players[i].sayNoFool(players[i + 1]);
+					console.log(players[i].sayNoFool(players[i + 1]));
+				} else {
+					wantsToSwap = true;
+				}
+			} else {
+				if (!players[i].neverSwapsWithDeck && players[i].testForSwap(players[i + 1])) { //Only ask to swap if card is 4 or less.
+					wantsToSwap = true;
+				} else {
+					if (players[i].neverSwapsWithDeck) {
+						speaker.say (players[i].name + " never swaps!");
+					}
+				}
+			}
+			if (wantsToSwap) {
+				if (!askPlayers(i, players[i], players, deck, speaker)) { //Check if Staa for gjok! is called.
+					break;
+				}
+			} else {
+				speaker.say (sayPass);
+			}
+		} else {
+			if (players[i].testForSwap("deck")) { //Only swap if card is 4 or less.
+				speaker.say (players[i].name + " draws from the deck.");
+				players[i].drawFromDeck(deck); //Draw from deck if noone else to swap with.
+			} else {
+				speaker.say (sayPass);
+			}
+		}
+		// return wantsToSwap;
+	}
 	//End of game loop while
 
 	//proclaimWinner(highestScore[0], game, round, speaker);
 }
 
 function updateStats(speaker, players) {
-	for (let elem of speaker.statsElems) {
+	let elem = null;
+	for (elem of speaker.statsElems) {
 
 	}
 }

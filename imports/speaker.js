@@ -90,11 +90,9 @@ export default class Speaker {
 	}
 
 	async ask(question, answers, callbackFn) {
-		this.clear(); //clear all output sections
-		console.log("coming in...");
-		console.log(answers);
+		//this.clear(); //clear all output sections
 		/*
-			answers = 0 : auto y/n answers
+			answers = 0 : default yes/no answers
 		*/
 		if (answers === 0) {
 			answers = [
@@ -112,8 +110,6 @@ export default class Speaker {
 		let div = this.createElem(null, null, 'margin-top-10'); //create group div
 		div.append(this.say(question, 'span', 'margin-right-10'));
 		this._output.append(div); //add group to output div
-		console.log("coming out...");
-		console.log(answers);
 		let index = 0;
 		for (const answer of answers) {
 			let element = this.createBtn(answer.text, callbackFn);
@@ -124,13 +120,12 @@ export default class Speaker {
 
 	async createBtn(name, callbackFn) {
 		let element = document.createElement("button"); //create button element
-
-			element.appendChild(document.createTextNode(name)); //add button text
-			element.type = 'button';
-			element.name = this.makeid(name, 'btn');
-			element.value = 1;
-			element.className = 'btn btn-primary margin-left-10';
-			element.onclick = callbackFn;
+		element.appendChild(document.createTextNode(name)); //add button text
+		element.type = 'button';
+		element.name = this.makeid(name, 'btn');
+		element.value = 1;
+		element.className = 'btn btn-primary margin-left-10';
+		element.onclick = callbackFn;
 		return element;
 	}
 
@@ -147,8 +142,7 @@ export default class Speaker {
 	}
 
 	async addToStats(name, type) {
-		type = type || 'div';
-		let $elem = $( "<" + type + ">", { id: this.makeid(name, type), text: name } );
+		let $elem = this.createElem(name, type);
 		this._statsElems.push($elem);
 		this._stats.append($elem);
 	}
@@ -161,7 +155,7 @@ export default class Speaker {
 
 	async sayFromStats(what, type) {
 		type = type || 'div';
-		let $elem = $( "<" + type + ">", { id: this.makeid(what.split(' ')[0], type), text: what } );
+		let $elem = this.createElem(what, type);
 		this._stats.append($elem);
 	}
 
@@ -169,6 +163,6 @@ export default class Speaker {
 		text = text || 'elem';
 		type = type || 'div';
 
-		return type + '_' + text + this._elemId++;
+		return type + '_' + text.split(' ')[0] + this._elemId++;
 	}
 }

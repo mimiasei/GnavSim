@@ -1,6 +1,7 @@
 'use strict';
 
 import Player from './player.js';
+import Card from './card.js';
 
 export default class Human extends Player {
 
@@ -10,12 +11,11 @@ export default class Human extends Player {
 	}
 
 	get human() { return this._human; }
-	get name() { return super.name; }
 
 	set human(value) { this._human = value; }
 	set heldCard(value) {
-		super._heldCard = value;
-		this.printGotCard(this._heldCard.name);
+		super.heldCard = value;
+		this.printGotCard(super.heldCard.name);
  	}
 
 	knockOnTable() {
@@ -32,7 +32,7 @@ export default class Human extends Player {
 
 	printGotCard(cardName) {
 		cardName = cardName || '';
-		card = cardName === '' ? this._heldCard.name : cardName;
+		let card = cardName === '' ? this._heldCard.name : cardName;
 		this._speaker.say (`Player ${this.name}, you got the card ${card}.`);
 	}
 
