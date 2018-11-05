@@ -1,9 +1,22 @@
 body {
   color: lightgray;
   background-color: rgba(7, 79, 87, 1);  /*midnight green*/
-  font-family: Arial, sans-serif;
-  font-size: 1.5vw; /*responsive font size*/
+  font-family: Helvetica, sans-serif;
   line-height: 1.4;
+}
+
+@media only screen 
+  and (max-width: 839px) { 
+    * {
+      font-size: calc(28px - 1vmax); /*mobile*/
+    }
+}
+
+@media only screen 
+  and (min-width : 840px) {
+  * {
+    font-size: calc(24px - 1vmin); /*desktop*/
+  }
 }
 
 /* * {
@@ -32,11 +45,6 @@ img {
 #playerStats {
   border: 2px;
   background: rgba(7, 79, 87, 1); /*midnight green*/
-}
-
-#start_buttons {
-  display: flex;
-  justify-content: space-between;
 }
 
 #settingsForm {
