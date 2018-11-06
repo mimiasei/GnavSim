@@ -12,8 +12,12 @@ import Fool from './fool.js';
 export default class Deck {
 
 	constructor() {
-		this.buildDeck();
-		this.shuffleDeck();
+		// (async () => {
+		// 	let promises = [];
+		// 	promises.push(this.buildDeck());
+		// 	promises.push(this.shuffleDeck());
+		// 	await Promise.all(promises);
+		// });
 	}
 
 	get cards() { return this._cards }
@@ -22,11 +26,20 @@ export default class Deck {
 	set cards(value) { this._cards = Array.from(value) }
 	set discardPile(value) { this._discardPile = Array.from(value) }
 
-	buildDeck() {
+	async init() {
+		let promises = [];
+		promises.push(this.buildDeck());
+		promises.push(this.shuffleDeck());
+		await Promise.all(promises);
+	}
+
+	async buildDeck() {
 		this._cards = [];
 		this._discardPile = [];
 		let card = null;
-		for(let i = 0; i < Card.typesSize; i++) {
+
+		// for(let i = 0; i < Card.typesSize; i++) {
+		for (const i of tools.range(0, Card.typesSize - 1)) {
 			switch (i) {
 				case 0:
 					card = new Cuckoo();
@@ -51,14 +64,15 @@ export default class Deck {
 					break;
 			}
 			
-			this._cards.push(card);
+			this._cards.push(card); //need two of same card type
 			this._cards.push(card);
 		}
 	}
 
-	shuffleDeck() {
-		console.log ("*** INFO: The deck is shuffled.");
-		this._cards = tools.shuffle(this._cards);
+	async shuffleDeck() {
+		console.log ("*** INFO: The deck is being shuffled.");
+		const cardsPromise = tools.shuffle(this._cards);
+		this._cards = await cardsPromise;
 	}
 
 	draw() {

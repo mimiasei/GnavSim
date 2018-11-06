@@ -141,13 +141,13 @@ export default class Speaker {
 		this._output.append(group);
 	}
 
-	async addToStats(name, type) {
+	addToStats(name, type) {
 		let $elem = this.createElem(name, type);
 		this._statsElems.push($elem);
 		this._stats.append($elem);
 	}
 
-	async getStatsElem(name) {
+	getStatsElem(name) {
 		return this._statsElems.find((e) => {
 			return e.text = name; 
 		});

@@ -6,9 +6,9 @@ import * as tools from './gnavtools.js';
 
 export default class Player {
 
-	constructor(name, pid, speaker) {
+	constructor(name, speaker) {
 		this._name = name || '';
-		this._pid = pid || 0;
+		this._pid = this.getIndex();
 		this._speaker = speaker || null;
 		this._score = 5;
 		this._heldCard = null;
@@ -27,7 +27,7 @@ export default class Player {
 	get neverSwapsWithDeck() { return this._neverSwapsWithDeck; }
 
 	set name(value) { this._name = value }
-	set pid(value) { this._pid = value }
+	// set pid(value) { this._pid = value }
 	set speaker(value) { this._speaker = value }
 	set score(value) { this._score = value }
 	set heldCard(value) { this._heldCard = Card.clone(value) }
@@ -46,6 +46,10 @@ export default class Player {
 		cloned.losses = player.losses;
 		cloned.neverSwapsWithDeck = player.neverSwapsWithDeck;
 		return cloned;
+	}
+
+	getIndex() {
+		return this.index++;
 	}
 
 	drawFromDeck(deck) {

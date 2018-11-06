@@ -61,14 +61,20 @@ export function highlight(strings, ...values) {
 	return str;
 }
 
+export function* range(start, end) {
+	for (let i = start; i <= end; i++) {
+		yield i;
+	}
+}
+
 /**
  * Shuffles array in placey placey. ES6 version
- * @param {Array} a items An array containing the items.
+ * @param {Array} array items An array containing the items.
  */
-export function shuffle(a) {
-	for (let i = a.length - 1; i > 0; i--) {
+export async function shuffle(array) {
+	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
-		[a[i], a[j]] = [a[j], a[i]];
+		[array[i], array[j]] = [array[j], array[i]];
 	}
-	return a;
+	return array; //returns Promise with shuffled array
 }

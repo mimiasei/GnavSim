@@ -5,8 +5,8 @@ import Card from './card.js';
 
 export default class Human extends Player {
 
-	constructor(name, pid, speaker) {
-		super(name, pid, speaker);
+	constructor(name, speaker) {
+		super(name, speaker);
 		this._human = true;
 	}
 

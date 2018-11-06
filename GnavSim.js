@@ -25,6 +25,8 @@ $(document).ready(function() {
 	$('#stats_table').hide();
 	$('#settingsForm').hide();
 
+	Player.index = 0;
+
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
 		settingsPart();
@@ -73,8 +75,6 @@ function submitSettings() {
 	_scope_settings.multiplayer = $('#form_multiplayer').is(':checked');
 	_scope_settings.winType = $('#form_winType').val();
 	_scope_settings.winValue = $('#form_winValue').val();
-
-	// $('#outputWin').html(JSON.stringify(_scope_settings));
 }
 
 async function startGame() {
@@ -107,23 +107,28 @@ async function playGame(speaker) {
 	let game = new Game( _scope_settings.winType, _scope_settings.winValue, isHuman);
 
 	if (isHuman && _scope_settings.name) {
-		let human = new Human(_scope_settings.name, tools.PLAYERS.length + 1, speaker);
+		let human = new Human(_scope_settings.name, speaker);
 		players.push(human);
 	}
 
-	tools.PLAYERS.forEach(function (name, index) {
-		let newPlayer = new Player(name, index, speaker);
+	for (const name of tools.PLAYERS) {
+		let newPlayer = new Player(name, speaker);
+
 		//Test, make Johannes a player that never swaps with anyone nor the deck
-		if (index === 2) {
-			newPlayer.neverSwapsWithDeck = false;
-		}
+		// if (index === 2) {
+		// 	newPlayer.neverSwapsWithDeck = false;
+		// }
+
 		players.push(newPlayer);
-
 		speaker.addToStats(name); //Add score elem to speaker stats array
-	});
+	}
 
-	players = tools.shuffle(players);
+	let playersPromise = tools.shuffle(players);
+	players = await playersPromise; //wait for shuffle to finish
+
 	let deck = new Deck();
+	await deck.init(); //async
+
 	let round = 1;
 	let sortedPlayers = [];
 	let highestScore = [];
@@ -148,6 +153,10 @@ async function playGame(speaker) {
 		}
 
 		console.log("playing round...");
+
+		for (let elem of speaker.statsElems) {
+			console.log(elem);
+		}
 
 		//Play round
 
@@ -232,7 +241,7 @@ async function playGame(speaker) {
 		}
 	}
 
-	function wantsToSwapTest(i) {
+	async function wantsToSwapTest(i) {
 		let wantsToSwap = false;
 		let sayPass = players[i].sayPass();
 
@@ -275,10 +284,10 @@ async function playGame(speaker) {
 	//proclaimWinner(highestScore[0], game, round, speaker);
 }
 
-function updateStats(speaker, players) {
+async function updateStats(speaker, players) {
 	let elem = null;
 	for (elem of speaker.statsElems) {
-
+		await console.log(elem);
 	}
 }
 
