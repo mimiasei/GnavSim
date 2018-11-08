@@ -11,6 +11,7 @@ export default class Human extends Player {
 	}
 
 	get human() { return this._human; }
+	get heldCard() { return super.heldCard; }
 
 	set human(value) { this._human = value; }
 	set heldCard(value) {

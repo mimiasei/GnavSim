@@ -158,7 +158,6 @@ async function playGame(speaker) {
 		//Play round
 		let promiseArray = [];
 		for (const [index, player] of players.entries()) {
-			console.log(player);
 			promiseArray.push(updateStats(player, speaker));
 			promiseArray.push(wantsToSwapTest(index));
 		}
@@ -171,6 +170,11 @@ async function playGame(speaker) {
 
 		//Calculate scores and stats
 		sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
+		// sortedPlayers = players.sort(tools.sort_by('heldCard', 'value'));
+		console.log("sorted players:");
+		for (let ply of sortedPlayers) {
+			console.log(ply.heldCard.value);
+		}
 
 		let winner = sortedPlayers[0];
 		winner.wins++;
@@ -222,7 +226,7 @@ async function playGame(speaker) {
 			game.incValue();
 		} else {
 			speaker.say("INFO: Setting " + highestScore[0].score + " as new best score value for game.");
-			game.setValue(highestScore[0].score);
+			game.value = highestScore[0].score;
 		}
 
 		speaker.addSpace();
