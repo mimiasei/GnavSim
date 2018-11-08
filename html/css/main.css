@@ -127,6 +127,18 @@ img {
   margin-right: 10px;
 }
 
+.print-round {
+  color: rgba(252, 240, 204, 1); /*blanched almond*/
+  background-color: rgba(7, 113, 135, 1); /*metallic seaweed*/
+  border-radius: 6px;
+  border: solid rgba(252, 240, 204, 1); /*blanched almond*/
+  border-width: 2px;
+  height: 28px;
+  vertical-align: center;
+  padding: 4px;
+  width: 50%;
+}
+
 /* RGB
 $color1: rgba(7, 79, 87, 1); //midnight green
 $color2: rgba(7, 113, 135, 1); //metallic seaweed

@@ -134,7 +134,8 @@ async function playGame(speaker) {
 	let highestScore = [];
 	
 	while (!game.isGameOver()) {
-		speaker.say(`Round: ${round} ===> Card pile length: ${deck.cards.length} -----------------------`);
+		speaker.printRound(round, deck.cards.length);
+		speaker.addSpace();
 		speaker.say("Current dealer is: " + players[0].name);
 
 		//Pop out top player as dealer and insert at end
@@ -154,22 +155,14 @@ async function playGame(speaker) {
 
 		console.log("playing round...");
 
-		for (let elem of speaker.statsElems) {
-			console.log(elem);
-		}
-
 		//Play round
-
-		// for (let i = 0; i < players.length; i++) {
-		// 	updateStats(players[i], speaker);
-		// 	let wantsToSwap = wantsToSwapTest(i);
-		// }
-
-		const promiseArray = players.map(function(ply) { 
-			updateStats(ply, speaker);
-			wantsToSwapTest(ply);
-		});
-		await Promise.All(promiseArray);
+		let promiseArray = [];
+		for (const [index, player] of players.entries()) {
+			console.log(player);
+			promiseArray.push(updateStats(player, speaker));
+			promiseArray.push(wantsToSwapTest(index));
+		}
+		await Promise.all(promiseArray);
 
 		speaker.addSpace();
 		speaker.say ("End of round: " + round);
@@ -177,7 +170,6 @@ async function playGame(speaker) {
 		//End of round
 
 		//Calculate scores and stats
-		console.log("End of round: " + round);
 		sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
 
 		let winner = sortedPlayers[0];
@@ -241,42 +233,44 @@ async function playGame(speaker) {
 		}
 	}
 
-	async function wantsToSwapTest(i) {
+	async function wantsToSwapTest(index) {
 		let wantsToSwap = false;
-		let sayPass = players[i].sayPass();
+		let sayPass = players[index].sayPass();
+		let running = true;
 
-		if (i !== players.len - 1) {
-			if( players[i + 1] && players[i + 1].heldCard && players[i + 1].heldCard.value === 4) { //If the other player has Narren...
-				if (!players[i].testForSwap(players[i + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
-					sayPass += players[i].sayNoFool(players[i + 1]);
-					console.log(players[i].sayNoFool(players[i + 1]));
+		if (running && index !== players.len - 1) {
+			if( players[index + 1] && players[index + 1].heldCard && players[index + 1].heldCard.value === 4) { //If the other player has Narren...
+				if (!players[index].testForSwap(players[index + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
+					sayPass += players[index].sayNoFool(players[index + 1]);
+					console.log(players[index].sayNoFool(players[index + 1]));
 				} else {
 					wantsToSwap = true;
 				}
 			} else {
-				if (!players[i].neverSwapsWithDeck && players[i].testForSwap(players[i + 1])) { //Only ask to swap if card is 4 or less.
+				if (!players[index].neverSwapsWithDeck && players[index].testForSwap(players[index + 1])) { //Only ask to swap if card is 4 or less.
 					wantsToSwap = true;
 				} else {
-					if (players[i].neverSwapsWithDeck) {
-						speaker.say (players[i].name + " never swaps!");
+					if (players[index].neverSwapsWithDeck) {
+						speaker.say (players[index].name + " never swaps!");
 					}
 				}
 			}
 			if (wantsToSwap) {
-				if (!askPlayers(i, players[i], players, deck, speaker)) { //Check if Staa for gjok! is called.
-					break;
+				if (!askPlayers(index, players[index], players, deck, speaker)) { //Check if Staa for gjok! is called.
+					running = false;
 				}
 			} else {
 				speaker.say (sayPass);
 			}
 		} else {
-			if (players[i].testForSwap("deck")) { //Only swap if card is 4 or less.
-				speaker.say (players[i].name + " draws from the deck.");
-				players[i].drawFromDeck(deck); //Draw from deck if noone else to swap with.
+			if (players[index].testForSwap("deck")) { //Only swap if card is 4 or less.
+				speaker.say (players[index].name + " draws from the deck.");
+				players[index].drawFromDeck(deck); //Draw from deck if noone else to swap with.
 			} else {
 				speaker.say (sayPass);
 			}
 		}
+		console.log("exiting wantsToSwapTest for ", players[index].name);
 		// return wantsToSwap;
 	}
 	//End of game loop while
@@ -285,10 +279,13 @@ async function playGame(speaker) {
 }
 
 async function updateStats(speaker, players) {
-	let elem = null;
-	for (elem of speaker.statsElems) {
-		await console.log(elem);
+	if (speaker.statsElems) {
+		let elem = null;
+		for (elem of Object.keys(speaker.statsElems)) {
+			console.log(elem);
+		}
 	}
+	console.log("exiting updateStats");
 }
 
 function askPlayers(nbr, player, players, deck, speaker) {

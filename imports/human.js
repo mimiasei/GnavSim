@@ -37,12 +37,17 @@ export default class Human extends Player {
 	}
 
 	testForSwap(toPlayer) {
-		let text = "Do you want to ";
-		if (toPlayer == "deck") {
-			text += "draw from the deck";
+		if (toPlayer) {
+			let text = "Do you want to ";
+			if (toPlayer == "deck") {
+				text += "draw from the deck";
+			} else {
+				text += `swap cards with ${toPlayer.name}`;
+			}
+			return this._speaker.ask(text, 0) === 0;
 		} else {
-			text += `swap cards with ${toPlayer.name}`;
+			console.log('toPlayer is undefined!');
+			return false;
 		}
-		return this._speaker.ask(text, 0) === 0;	
 	}
 }

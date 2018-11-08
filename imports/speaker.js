@@ -37,14 +37,14 @@ export default class Speaker {
 		return cloned;
 	}
 
-	async clear() {
+	clear() {
 		this._output.html('');
 		for (let btn of this._outputBtns) {
 			btn.html('');
 		}
 	}
 
-	async createElem(txt, type, className) {
+	createElem(txt, type, className) {
 		txt = txt || '';
 		type = type || 'div';
 		className = className || '';
@@ -55,7 +55,7 @@ export default class Speaker {
 		return $elem;
 	}
 
-	async say(what, type, className, addToOutput) {
+	say(what, type, className, addToOutput) {
 		type = type || 'div';
 		className = className || '';
 		addToOutput = addToOutput || true;
@@ -67,7 +67,11 @@ export default class Speaker {
 		}
 	}
 
-	async addSpace(n) {
+	printRound(round, cardLength) {
+		this.say(`Round: ${round}. Card pile length: ${cardLength}`, 'span', 'print-round');
+	}
+
+	addSpace(n) {
 		n = n || 1;
 		n = n > 4 ? 4 : n;
 
