@@ -1,6 +1,6 @@
 'use strict';
 
-export const PLAYERS = ["Kristoffer", "Matias", "Johannes"]; //, "Miriam", "Mikkel", "Emil", "Oivind", "Ask"];
+export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Oivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"];
 export const MAX_ROUNDS = 1;
 export const SWAP_THRESHOLDNUMBER = 4;
 export const SWAP_FUZZINESS = 0.03; //Simulates human error. 0.1 = 10% chance of making a mistake.
@@ -77,4 +77,51 @@ export async function shuffle(array) {
 	 	[array[i], array[j]] = [array[j], array[i]];
 	}
 	return array; //returns Promise with shuffled array
+}
+
+export async function extreme(array, attr, findMin) {
+	attr = attr || null;
+	findMin = findMin || false;
+	if (array.length < 1) {
+		return -1;
+	}
+	
+	let obj = {
+		most : findMin ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER,
+		mostIndex : 0,
+		currentIndex : 0,
+		findMin : findMin,
+		attr : attr
+	}
+	let promises = [];
+
+	for (let index = 0; index < array.length; index++) {
+		console.log("array at index: ", array[index]);
+		const parts = attr ? attr.split('.') : null;
+		const value = parts ? (parts.length > 1 ? array[index][parts[0]][parts[1]] : array[index][parts[0]]) : array[index];
+		console.log("value: ", value);
+		obj.currentIndex = index;
+		promises.push(compare(value, obj));
+	}
+
+	const result = await Promise.all(promises);
+	console.log("promise all result: ");
+	console.log(result);
+
+	return Array.isArray(result) ? result[0] : result;
+
+	async function compare(value, obj) {
+		if (obj.findMin) {
+			if (value < obj.most) {
+				obj.most = value;
+				obj.mostIndex = obj.currentIndex;
+			}
+		} else {
+			if (value > obj.most) {
+				obj.most = value;
+				obj.mostIndex = obj.currentIndex;
+			}
+		}
+		return obj;
+	}
 }

@@ -168,6 +168,14 @@ async function playGame(speaker) {
 		speaker.addSpace();
 		//End of round
 
+		console.time("extreme");
+		let maxVal = await tools.extreme(players, 'heldCard.value');
+		console.timeEnd("extreme");
+		console.log("returned maxVal obj:");
+		console.log(maxVal);
+		console.log("Player with highest valued card is: ", players[maxVal.mostIndex].name);
+		console.log("who has the card: ", players[maxVal.mostIndex].heldCard.name);
+
 		//Calculate scores and stats
 		sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
 		// sortedPlayers = players.sort(tools.sort_by('heldCard', 'value'));
@@ -203,7 +211,14 @@ async function playGame(speaker) {
 
 		deck.testLengthSum();
 
+		console.time("wins extreme");
+		maxVal = await tools.extreme(players, 'wins');
+		console.timeEnd("wins extreme");
+		console.log("Player with most wins is: ", players[maxVal.mostIndex].name);
+
+		console.time("sort wins");
 		let mostWins = Array.from(players.sort((a, b) => (a.wins < b.wins) ? 1 : ((a.wins > b.wins) ? -1 : 0)));
+		console.timeEnd("sort wins");
 		let mostLosses = Array.from(players.sort((a, b) => (a.losses < b.losses) ? 1 : ((a.losses > b.losses) ? -1 : 0)));
 		highestScore = Array.from(players.sort((a, b) => (a.score < b.score) ? 1 : ((a.score > b.score) ? -1 : 0)));
 
