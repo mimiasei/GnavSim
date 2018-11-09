@@ -97,7 +97,7 @@ export default class Speaker {
 		return array;
 	}
 
-	ask(question, answers, callbackFn) {
+	async ask(question, answers, callbackFn) {
 		//answers = 0 : default yes/no answers
 		if (answers === 0) {
 			answers = [
@@ -122,13 +122,21 @@ export default class Speaker {
 	}
 
 	createBtn(name, callbackFn) {
-		let element = document.createElement("button"); //create button element
-		element.appendChild(document.createTextNode(name)); //add button text
-		element.type = 'button';
-		element.name = this.makeid(name, 'btn');
-		element.value = 1;
-		element.className = 'btn btn-primary margin-left-10';
-		element.onclick = (async () => callbackFn);
+		// let element = document.createElement("button"); //create button element
+		let element = $(`<button type="button" class="btn btn-primary margin-left-10">${name}</button>`);
+		element.click(function(e, callbackFn) {
+			console.log(typeof callbackFn);
+			if (typeof callbackFn === "function") {
+				console.log("clicked inside!");
+				callbackFn(true);
+			} 
+		});
+		// element.appendChild(document.createTextNode(name)); //add button text
+		// element.type = 'button';
+		// element.name = this.makeid(name, 'btn');
+		// element.value = 1;
+		// element.className = 'btn btn-primary margin-left-10';
+		// element.onclick = typeof callback === "function" ? callbackFn(true) : () => { callbackFn };
 		return element;
 	}
 

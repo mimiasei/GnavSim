@@ -247,9 +247,11 @@ async function playGame(game) {
 		console.log("nextturn is: ", game.nextTurn);
 
 		if (game.isHuman) {
-			speaker.ask("", [{ text : 'Next Turn', value : 0 }], (e) => {
+			speaker.ask("", [{ text : 'Next Turn', value : 0 }], (e, result) => {
 				console.log("clicking the shit out of...");
 				console.log(e);
+				console.log("result: ", result);
+				game.nextTurn = result;
 			});
 			speaker.addSpace();
 		}
