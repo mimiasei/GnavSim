@@ -178,7 +178,6 @@ async function playGame(speaker) {
 
 		//Calculate scores and stats
 		sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
-		// sortedPlayers = players.sort(tools.sort_by('heldCard', 'value'));
 		console.log("sorted players:");
 		for (let ply of sortedPlayers) {
 			console.log(ply.heldCard.value);

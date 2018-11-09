@@ -96,18 +96,13 @@ export async function extreme(array, attr, findMin) {
 	let promises = [];
 
 	for (let index = 0; index < array.length; index++) {
-		console.log("array at index: ", array[index]);
 		const parts = attr ? attr.split('.') : null;
 		const value = parts ? (parts.length > 1 ? array[index][parts[0]][parts[1]] : array[index][parts[0]]) : array[index];
-		console.log("value: ", value);
 		obj.currentIndex = index;
 		promises.push(compare(value, obj));
 	}
 
 	const result = await Promise.all(promises);
-	console.log("promise all result: ");
-	console.log(result);
-
 	return Array.isArray(result) ? result[0] : result;
 
 	async function compare(value, obj) {
