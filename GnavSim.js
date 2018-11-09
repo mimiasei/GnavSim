@@ -178,10 +178,10 @@ async function playGame(speaker) {
 
 		//Calculate scores and stats
 		sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
-		console.log("sorted players:");
-		for (let ply of sortedPlayers) {
-			console.log(ply.heldCard.value);
-		}
+		// console.log("sorted players:");
+		// for (let ply of sortedPlayers) {
+		// 	console.log(ply.heldCard.value);
+		// }
 
 		let winner = sortedPlayers[0];
 		winner.wins++;
@@ -288,7 +288,8 @@ async function playGame(speaker) {
 				speaker.say (sayPass);
 			}
 		}
-		console.log("exiting wantsToSwapTest for ", players[index].name);
+		// console.log("exiting wantsToSwapTest for ", players[index].name);
+
 		// return wantsToSwap;
 	}
 	//End of game loop while
@@ -303,7 +304,7 @@ async function updateStats(speaker, players) {
 			console.log(elem);
 		}
 	}
-	console.log("exiting updateStats");
+	// console.log("exiting updateStats");
 }
 
 function askPlayers(nbr, player, players, deck, speaker) {
