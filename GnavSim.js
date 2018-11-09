@@ -78,7 +78,11 @@ function submitSettings() {
 }
 
 async function startGame() {
-	let speaker = new Speaker();
+	//Create default game object
+	let isHuman = !_scope_settings.multiplayer;
+	let game = new Game( _scope_settings.winType, _scope_settings.winValue, isHuman);
+
+	let speaker = game.speaker;
 
 	//clear main output element
 	speaker.clear();
@@ -90,23 +94,20 @@ async function startGame() {
 	if (_scope_settings.multiplayer) {
 		alert ("Multiplayer not implemented yet.");
 	} else {
-		await playGame(speaker);
+		await playGame(game);
 		// alert ("Game over!");
 	}
 }
 
-async function playGame(speaker) {
+async function playGame(game) {
+	let speaker = game.speaker;
 	
 	//clear main output element
 	speaker.clear();
 
 	let players = [];
-	let isHuman = !_scope_settings.multiplayer;
 
-	//Create default game object
-	let game = new Game( _scope_settings.winType, _scope_settings.winValue, isHuman);
-
-	if (isHuman && _scope_settings.name) {
+	if (game.isHuman && _scope_settings.name) {
 		let human = new Human(_scope_settings.name, speaker);
 		players.push(human);
 	}
@@ -120,7 +121,6 @@ async function playGame(speaker) {
 		// }
 
 		players.push(newPlayer);
-		speaker.addToStats(name); //Add score elem to speaker stats array
 	}
 
 	let playersPromise = tools.shuffle(players);
@@ -134,6 +134,11 @@ async function playGame(speaker) {
 	let highestScore = [];
 	
 	while (!game.isGameOver()) {
+		game.stopTurn();
+
+		//refresh table of player stats
+		speaker.refreshStatsTable(players);
+
 		speaker.printRound(round, deck.cards.length);
 		speaker.addSpace();
 		speaker.say("Current dealer is: " + players[0].name);
@@ -178,11 +183,6 @@ async function playGame(speaker) {
 
 		//Calculate scores and stats
 		sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
-		// console.log("sorted players:");
-		// for (let ply of sortedPlayers) {
-		// 	console.log(ply.heldCard.value);
-		// }
-
 		let winner = sortedPlayers[0];
 		winner.wins++;
 
@@ -244,9 +244,13 @@ async function playGame(speaker) {
 		}
 
 		speaker.addSpace();
+		console.log("nextturn is: ", game.nextTurn);
 
 		if (game.isHuman) {
-			speaker.ask("Press ENTER to continue", -1);
+			speaker.ask("", [{ text : 'Next Turn', value : 0 }], (e) => {
+				console.log("clicking the shit out of...");
+				console.log(e);
+			});
 			speaker.addSpace();
 		}
 	}

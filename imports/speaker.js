@@ -6,7 +6,7 @@
  */
 export default class Speaker {
 
-	constructor() {
+	constructor(parent) {
 		this._output = $("#outputWin");
 		this._outputBtns = [];
 		this._outputBtns.push($("#outputBtn1"));
@@ -14,9 +14,12 @@ export default class Speaker {
 		this._outputBtns.push($("#outputBtn3"));
 		this._stats = $("#playerStats");
 		this._info = $("#info");
+		this._statsTable = $("#stats_table");
+		this._statsTableBody = $("#stats_table tbody");
 		this._value = -1;
 		this._statsElems = [];
 		this._elemId = 0;
+		this._parent = parent;
 	}
 
 	get output() { return this._output }
@@ -24,6 +27,7 @@ export default class Speaker {
 	get info() { return this._info }
 	get value() { return this._value }
 	get statsElems() { return this._statsElems }
+	get parent() { return this._parent }
 
 	set output(value) { this._output = jQuery.extend(true, {}, value) }
 	set stats(value) { this._stats = jQuery.extend(true, {}, value) }
@@ -93,11 +97,8 @@ export default class Speaker {
 		return array;
 	}
 
-	async ask(question, answers, callbackFn) {
-		//this.clear(); //clear all output sections
-		/*
-			answers = 0 : default yes/no answers
-		*/
+	ask(question, answers, callbackFn) {
+		//answers = 0 : default yes/no answers
 		if (answers === 0) {
 			answers = [
 				{
@@ -114,22 +115,20 @@ export default class Speaker {
 		let div = this.createElem(null, null, 'margin-top-10'); //create group div
 		div.append(this.say(question, 'span', 'margin-right-10'));
 		this._output.append(div); //add group to output div
-		let index = 0;
-		for (const answer of answers) {
+		for (const [index, answer] of answers.entries()) {
 			let element = this.createBtn(answer.text, callbackFn);
-			this._outputBtns[index].append(element);
-			index++;
+			this._outputBtns[index].html(element);
 		}
 	}
 
-	async createBtn(name, callbackFn) {
+	createBtn(name, callbackFn) {
 		let element = document.createElement("button"); //create button element
 		element.appendChild(document.createTextNode(name)); //add button text
 		element.type = 'button';
 		element.name = this.makeid(name, 'btn');
 		element.value = 1;
 		element.className = 'btn btn-primary margin-left-10';
-		element.onclick = callbackFn;
+		element.onclick = (async () => callbackFn);
 		return element;
 	}
 
@@ -151,6 +150,25 @@ export default class Speaker {
 		this._stats.append($elem);
 	}
 
+	refreshStatsTable(players) {
+		const $rows = $('tr', this._statsTableBody);
+		for (let i = 0; i < players.length; i++) {
+			let newRow = `<td>${i + 1}</td><td>${players[i].name}</td><td>${players[i].score}</td>`;
+			let $row = $rows.eq(i);
+			if ($row.length > 0) { //row at index is found
+				console.log("row");
+				console.log($row[0]);
+				let rowContent = $row.val();
+				rowContent.replaceWith(newRow);
+			} else {
+				$('<tr>', {
+					'html' : newRow
+				}).appendTo(this._statsTableBody);
+			} 
+		}
+		this._statsTable.show();
+	}
+
 	getStatsElem(name) {
 		return this._statsElems.find((e) => {
 			return e.text = name; 
@@ -163,7 +181,7 @@ export default class Speaker {
 		this._stats.append($elem);
 	}
 
-	async makeid(text, type) {
+	makeid(text, type) {
 		text = text || 'elem';
 		type = type || 'div';
 

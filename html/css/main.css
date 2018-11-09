@@ -46,6 +46,22 @@ img {
   border-radius: 50%; /*round images*/
 }
 
+/* nth-child(1) = the first td in each tr */
+td:nth-child(1) {
+  width: 10%;
+  }
+
+/* the second */
+td:nth-child(2) {
+  width: 80%;
+}
+
+/* the third */
+td:nth-child(3) {
+  width: 10%;
+  text-align: center;
+ }
+
 #headline {
   height: 80px;
   letter-spacing: 3px;
@@ -55,9 +71,9 @@ img {
   width: 25%;
 }
 
-#playerStats {
-  border: 2px;
+#stats_table {
   background: rgba(7, 79, 87, 1); /*midnight green*/
+  color: rgba(187, 219, 180, 1); /*light moss green*/
 }
 
 #info {
