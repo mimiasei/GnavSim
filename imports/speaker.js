@@ -1,4 +1,3 @@
-
 'use strict';
 
 /**
@@ -16,6 +15,7 @@ export default class Speaker {
 		this._info = $("#info");
 		this._statsTable = $("#stats_table");
 		this._statsTableBody = $("#stats_table tbody");
+		this._nextTurnButton = $("#btnNextTurn");
 		this._value = -1;
 		this._statsElems = [];
 		this._elemId = 0;
@@ -28,6 +28,7 @@ export default class Speaker {
 	get value() { return this._value }
 	get statsElems() { return this._statsElems }
 	get parent() { return this._parent }
+	get nextTurnButton() { return this._nextTurnButton }
 
 	set output(value) { this._output = jQuery.extend(true, {}, value) }
 	set stats(value) { this._stats = jQuery.extend(true, {}, value) }
@@ -39,6 +40,19 @@ export default class Speaker {
 		cloned.output = speaker.output;
 		cloned.value = speaker.value;
 		return cloned;
+	}
+
+	initialize(callbackFn) {
+		this._nextTurnButton.click(() => { callbackFn(true); });
+	}
+
+	hideNextTurnButton(show) {
+		show = show || false;
+		if (show) {
+			this._nextTurnButton.show();
+		} else {
+			this._nextTurnButton.hide();
+		}
 	}
 
 	clear() {
@@ -122,25 +136,8 @@ export default class Speaker {
 	}
 
 	createBtn(name, callbackFn) {
-		console.log(`"${typeof callbackFn}"`);
-		let callback = () => { callbackFn(true); };
-		// if (typeof callbackFn == "function") {
-		// 	let callback = (e, callbackFn) => {
-		// 		if (typeof callbackFn == "function") {
-		// 			console.log("clicked inside!");
-		// 			callbackFn(true);
-		// 		}
-		// 	}
-		// }
-		// let element = document.createElement("button"); //create button element
 		let element = $(`<button type="button" class="btn btn-primary margin-left-10">${name}</button>`);
-		element.click(callback);
-		// element.appendChild(document.createTextNode(name)); //add button text
-		// element.type = 'button';
-		// element.name = this.makeid(name, 'btn');
-		// element.value = 1;
-		// element.className = 'btn btn-primary margin-left-10';
-		// element.onclick = typeof callback === "function" ? callbackFn(true) : () => { callbackFn };
+		element.click(() => { callbackFn(true); });
 		return element;
 	}
 
@@ -170,8 +167,10 @@ export default class Speaker {
 			if ($row.length > 0) { //row at index is found
 				console.log("row");
 				console.log($row[0]);
-				let rowContent = $row.val();
-				rowContent.replaceWith(newRow);
+				console.log("row end");
+				$row[0].replaceWith($('<tr>', {
+					'html' : newRow
+				}));
 			} else {
 				$('<tr>', {
 					'html' : newRow

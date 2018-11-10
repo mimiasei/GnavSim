@@ -6,14 +6,14 @@ const PORT = 8000;
 import Player from '/imports/player.js';
 import Human from './imports/human.js';
 
-import Card from './imports/card.js';		
+// import Card from './imports/card.js';		
 import Deck from './imports/deck.js';		
-import Cuckoo from './imports/cuckoo.js';		
-import Dragoon from './imports/dragoon.js';		
-import Cat from './imports/cat.js';		
-import Horse from './imports/horse.js';		
-import House from './imports/house.js';		
-import Fool from './imports/fool.js';	
+// import Cuckoo from './imports/cuckoo.js';		
+// import Dragoon from './imports/dragoon.js';		
+// import Cat from './imports/cat.js';		
+// import Horse from './imports/horse.js';		
+// import House from './imports/house.js';		
+// import Fool from './imports/fool.js';	
 import Game from './imports/game.js';	
 import Speaker from './imports/speaker.js';
 
@@ -24,6 +24,7 @@ $(document).ready(function() {
 	$('#chat_section').hide();
 	$('#stats_table').hide();
 	$('#settingsForm').hide();
+	$('#btnNextTurn').hide();
 
 	Player.index = 0;
 
@@ -95,15 +96,13 @@ async function startGame() {
 		alert ("Multiplayer not implemented yet.");
 	} else {
 		await playGame(game);
-		// alert ("Game over!");
 	}
 }
 
 async function playGame(game) {
 	let speaker = game.speaker;
-	
-	//clear main output element
-	speaker.clear();
+	console.log("speaker:");
+	console.log(speaker);
 
 	let players = [];
 
@@ -130,34 +129,31 @@ async function playGame(game) {
 	await deck.init(); //async
 
 	let round = 1;
-	let sortedPlayers = [];
+
 	let highestScore = [];
 
-	//test
-	const onChange = require('on-change');
+	let nextTurnCallback = (async (e) => {
+		console.log("clicking the next turn button...");
+		console.log("result: ", e);
+		game.nextTurn = e;
+		speaker.hideNextTurnButton();
+		await gameLoop(game, deck, players, highestScore);
+	});
 
-	const object = {
-		trigger: game.nextTurn
-	};
-
-	let i = 0;
-	const logger = () => console.log('Object changed:', ++i);
-
-	const watchedObject = onChange(object, logger);
-
-	watchedObject.foo = true;
-	//=> 'Object changed: 1'
-
-	watchedObject.a.b[0].c = true;
-	//test end
+	speaker.initialize(nextTurnCallback);
 
 	if (game.nextTurn) {
-		await gameLoop();
+		await gameLoop(game, deck, players, speaker, highestScore);
 	}
 	
 	// while (!game.isGameOver()) {
-	async function gameLoop() {
-		game.stopTurn();
+	async function gameLoop(game, deck, players, highestScore) {
+		let speaker = game.speaker;
+
+		//clear main output element
+		speaker.clear();
+
+		// game.stopTurn();
 
 		//refresh table of player stats
 		speaker.refreshStatsTable(players);
@@ -205,7 +201,7 @@ async function playGame(game) {
 		console.log("who has the card: ", players[maxVal.mostIndex].heldCard.name);
 
 		//Calculate scores and stats
-		sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
+		let sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
 		let winner = sortedPlayers[0];
 		winner.wins++;
 
@@ -269,12 +265,12 @@ async function playGame(game) {
 		speaker.addSpace();
 		console.log("nextturn is: ", game.nextTurn);
 
+		if (game.isGameOver()) {
+			return true; //exit loop function
+		}
+
 		if (game.isHuman) {
-			speaker.ask("", [{ text : 'Next Turn', value : 0 }], (e) => {
-				console.log("clicking the shit out of...");
-				console.log("result: ", e);
-				game.nextTurn = e;
-			});
+			speaker.hideNextTurnButton(true); //show next turn button
 			speaker.addSpace();
 		}
 	}
