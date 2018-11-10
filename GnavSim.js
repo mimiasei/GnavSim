@@ -132,8 +132,31 @@ async function playGame(game) {
 	let round = 1;
 	let sortedPlayers = [];
 	let highestScore = [];
+
+	//test
+	const onChange = require('on-change');
+
+	const object = {
+		trigger: game.nextTurn
+	};
+
+	let i = 0;
+	const logger = () => console.log('Object changed:', ++i);
+
+	const watchedObject = onChange(object, logger);
+
+	watchedObject.foo = true;
+	//=> 'Object changed: 1'
+
+	watchedObject.a.b[0].c = true;
+	//test end
+
+	if (game.nextTurn) {
+		await gameLoop();
+	}
 	
-	while (!game.isGameOver()) {
+	// while (!game.isGameOver()) {
+	async function gameLoop() {
 		game.stopTurn();
 
 		//refresh table of player stats
@@ -247,11 +270,10 @@ async function playGame(game) {
 		console.log("nextturn is: ", game.nextTurn);
 
 		if (game.isHuman) {
-			speaker.ask("", [{ text : 'Next Turn', value : 0 }], (e, result) => {
+			speaker.ask("", [{ text : 'Next Turn', value : 0 }], (e) => {
 				console.log("clicking the shit out of...");
-				console.log(e);
-				console.log("result: ", result);
-				game.nextTurn = result;
+				console.log("result: ", e);
+				game.nextTurn = e;
 			});
 			speaker.addSpace();
 		}

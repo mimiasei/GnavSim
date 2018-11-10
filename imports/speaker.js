@@ -122,15 +122,19 @@ export default class Speaker {
 	}
 
 	createBtn(name, callbackFn) {
+		console.log(`"${typeof callbackFn}"`);
+		let callback = () => { callbackFn(true); };
+		// if (typeof callbackFn == "function") {
+		// 	let callback = (e, callbackFn) => {
+		// 		if (typeof callbackFn == "function") {
+		// 			console.log("clicked inside!");
+		// 			callbackFn(true);
+		// 		}
+		// 	}
+		// }
 		// let element = document.createElement("button"); //create button element
 		let element = $(`<button type="button" class="btn btn-primary margin-left-10">${name}</button>`);
-		element.click(function(e, callbackFn) {
-			console.log(typeof callbackFn);
-			if (typeof callbackFn === "function") {
-				console.log("clicked inside!");
-				callbackFn(true);
-			} 
-		});
+		element.click(callback);
 		// element.appendChild(document.createTextNode(name)); //add button text
 		// element.type = 'button';
 		// element.name = this.makeid(name, 'btn');
