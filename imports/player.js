@@ -49,7 +49,7 @@ export default class Player {
 	}
 
 	getIndex() {
-		return this.index++;
+		return Player.index++;
 	}
 
 	drawFromDeck(deck) {

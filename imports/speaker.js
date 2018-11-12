@@ -189,7 +189,7 @@ export default class Speaker {
 
 		for (let i = 0; i < players.length; i++) {
 			let obj = { 
-				id: i + 1, 
+				id: players[i].pid, 
 				name: players[i].name,
 				score: players[i].score,
 				wins: players[i].wins,
@@ -197,8 +197,6 @@ export default class Speaker {
 			};
 			this._tableData.push(obj);
 		}
-		console.log("table data: ");
-		console.log(this._tableData);
 		
 		this._statsTable.clearData();
 		this._statsTable.replaceData(this._tableData).then(() => {

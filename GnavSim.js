@@ -26,7 +26,7 @@ $(document).ready(function() {
 	$('#settingsForm').hide();
 	$('#btnNextTurn').hide();
 
-	Player.index = 0;
+	Player.index = 1;
 
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
@@ -143,15 +143,20 @@ async function playGame(game) {
 	// while (!game.isGameOver()) {
 	async function gameLoop(game, deck, players, highestScore) {
 		let speaker = game.speaker;
-
+		
 		//clear main output element
 		speaker.clear();
-
+		
 		//refresh table of player stats
 		speaker.refreshStatsTable(players);
-
+		
 		speaker.printRound(round, deck.cards.length);
 		speaker.addSpace();
+		
+		// const imageSearches = ['infantry', 'cat', 'horse', 'bird', 'villa', 'jester', 'pot', 'owl'];
+		// speaker.output.append(getRandomImgElem(imageSearches[round % 8], 80));
+		// speaker.output.append(imageSearches[round % 8]);
+
 		speaker.say("Current dealer is: " + players[0].name);
 
 		//Pop out top player as dealer and insert at end
@@ -220,6 +225,8 @@ async function playGame(game) {
 		deck.testLengthSum();
 
 		maxVal = await tools.extreme(players, 'wins');
+		maxVal = await tools.extreme(players, 'losses');
+		maxVal = await tools.extreme(players, 'score');
 		console.log("Player with most wins is: ", players[maxVal.mostIndex].name);
 
 		let mostWins = Array.from(players.sort((a, b) => (a.wins < b.wins) ? 1 : ((a.wins > b.wins) ? -1 : 0)));
@@ -380,8 +387,8 @@ function proclaimWinner(player, game, round, speaker) {
 	speaker.say ('<'.repeat(text.length / 2) + '>'.repeat(text.length / 2));
 }
 
-function getRandomImgElem(search) {
-	let imageUrl = 'https://source.unsplash.com/100x100/?' + search;
+function getRandomImgElem(search, width) {
+	let imageUrl = 'https://source.unsplash.com/' + width + 'x' + width + '/?' + search;
 	return $( "<img>", { id: search + "_img", src: imageUrl, title: search } );
 }
 
