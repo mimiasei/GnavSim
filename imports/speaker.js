@@ -13,7 +13,8 @@ export default class Speaker {
 		this._outputBtns.push($("#outputBtn3"));
 		this._stats = $("#playerStats");
 		this._info = $("#info");
-		this._statsTable = $("#stats_table");
+		this._statsTable = null;
+		this._tableData = [];
 		this._statsTableBody = $("#stats_table tbody");
 		this._nextTurnButton = $("#btnNextTurn");
 		this._value = -1;
@@ -29,6 +30,8 @@ export default class Speaker {
 	get statsElems() { return this._statsElems }
 	get parent() { return this._parent }
 	get nextTurnButton() { return this._nextTurnButton }
+	get statsTable() { return this._statsTable }
+	get tableData() { return this._tableData }
 
 	set output(value) { this._output = jQuery.extend(true, {}, value) }
 	set stats(value) { this._stats = jQuery.extend(true, {}, value) }
@@ -44,6 +47,28 @@ export default class Speaker {
 
 	initialize(callbackFn) {
 		this._nextTurnButton.click(() => { callbackFn(true); });
+		this._statsTable = new Tabulator('#stats_table', {
+			columnHeaderSortMulti: false,
+			autoResize: false,
+			layout: "fitColumns",
+			// data: this._tableData,
+			columns: [
+				{ title: 'Id', field: 'id', headerSort: false, width: 5 },
+				{ title: 'Name', field: 'name', headerSort: false, width: 84 },
+				{ title: 'Score', field: 'score', align: 'center', headerSort: false, width: 20 },
+				{ title: 'Wins', field: 'wins', align: 'center', headerSort: false, width: 20 },
+				{ title: 'Losses', field: 'losses', align: 'center', headerSort: false, width: 20 },
+			],
+			rowClick: (e, row) => {
+				alert(
+					'Player: ' + row.getData().name + '\n\n' +
+					'score: ' + row.getData().score + '\n' +
+					'wins: ' + row.getData().wins + '\n' +
+					'losses: ' + row.getData().losses
+				);
+			}
+		});
+		$('#stats_table').show();
 	}
 
 	hideNextTurnButton(show) {
@@ -160,24 +185,26 @@ export default class Speaker {
 	}
 
 	refreshStatsTable(players) {
-		const $rows = $('tr', this._statsTableBody);
+		this._tableData = [];
+
 		for (let i = 0; i < players.length; i++) {
-			let newRow = `<td>${i + 1}</td><td>${players[i].name}</td><td>${players[i].score}</td>`;
-			let $row = $rows.eq(i);
-			if ($row.length > 0) { //row at index is found
-				console.log("row");
-				console.log($row[0]);
-				console.log("row end");
-				$row[0].replaceWith($('<tr>', {
-					'html' : newRow
-				}));
-			} else {
-				$('<tr>', {
-					'html' : newRow
-				}).appendTo(this._statsTableBody);
-			} 
+			let obj = { 
+				id: i + 1, 
+				name: players[i].name,
+				score: players[i].score,
+				wins: players[i].wins,
+				losses: players[i].losses,
+			};
+			this._tableData.push(obj);
 		}
-		this._statsTable.show();
+		console.log("table data: ");
+		console.log(this._tableData);
+		
+		this._statsTable.clearData();
+		this._statsTable.replaceData(this._tableData).then(() => {
+			this._statsTable.redraw();
+			console.log("table updated!");
+		});
 	}
 
 	getStatsElem(name) {

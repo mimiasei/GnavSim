@@ -101,9 +101,6 @@ async function startGame() {
 
 async function playGame(game) {
 	let speaker = game.speaker;
-	console.log("speaker:");
-	console.log(speaker);
-
 	let players = [];
 
 	if (game.isHuman && _scope_settings.name) {
@@ -129,12 +126,10 @@ async function playGame(game) {
 	await deck.init(); //async
 
 	let round = 1;
-
 	let highestScore = [];
 
+	//function for when next turn button is clicked
 	let nextTurnCallback = (async (e) => {
-		console.log("clicking the next turn button...");
-		console.log("result: ", e);
 		game.nextTurn = e;
 		speaker.hideNextTurnButton();
 		await gameLoop(game, deck, players, highestScore);
@@ -142,9 +137,8 @@ async function playGame(game) {
 
 	speaker.initialize(nextTurnCallback);
 
-	if (game.nextTurn) {
-		await gameLoop(game, deck, players, speaker, highestScore);
-	}
+	//play first turn
+	await gameLoop(game, deck, players, speaker, highestScore);
 	
 	// while (!game.isGameOver()) {
 	async function gameLoop(game, deck, players, highestScore) {
@@ -152,8 +146,6 @@ async function playGame(game) {
 
 		//clear main output element
 		speaker.clear();
-
-		// game.stopTurn();
 
 		//refresh table of player stats
 		speaker.refreshStatsTable(players);
@@ -176,8 +168,6 @@ async function playGame(game) {
 				}
 			}
 		}
-
-		console.log("playing round...");
 
 		//Play round
 		let promiseArray = [];
@@ -229,14 +219,10 @@ async function playGame(game) {
 
 		deck.testLengthSum();
 
-		console.time("wins extreme");
 		maxVal = await tools.extreme(players, 'wins');
-		console.timeEnd("wins extreme");
 		console.log("Player with most wins is: ", players[maxVal.mostIndex].name);
 
-		console.time("sort wins");
 		let mostWins = Array.from(players.sort((a, b) => (a.wins < b.wins) ? 1 : ((a.wins > b.wins) ? -1 : 0)));
-		console.timeEnd("sort wins");
 		let mostLosses = Array.from(players.sort((a, b) => (a.losses < b.losses) ? 1 : ((a.losses > b.losses) ? -1 : 0)));
 		highestScore = Array.from(players.sort((a, b) => (a.score < b.score) ? 1 : ((a.score > b.score) ? -1 : 0)));
 
@@ -263,7 +249,6 @@ async function playGame(game) {
 		}
 
 		speaker.addSpace();
-		console.log("nextturn is: ", game.nextTurn);
 
 		if (game.isGameOver()) {
 			return true; //exit loop function

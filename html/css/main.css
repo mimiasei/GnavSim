@@ -72,8 +72,15 @@ td:nth-child(3) {
 }
 
 #stats_table {
-  background: rgba(7, 79, 87, 1); /*midnight green*/
+  background-color: rgba(7, 79, 87, 1); /*midnight green*/
   color: rgba(187, 219, 180, 1); /*light moss green*/
+  border: 0;
+}
+
+#stats_table .tabulator-row .tabulator-tableHolder .tabulator-table {
+  background-color: rgba(7, 79, 87, 1); /*midnight green*/
+  color: rgba(187, 219, 180, 1); /*light moss green*/
+  border: none;
 }
 
 #info {
