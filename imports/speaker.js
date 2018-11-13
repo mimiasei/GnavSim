@@ -49,15 +49,15 @@ export default class Speaker {
 		this._nextTurnButton.click(() => { callbackFn(true); });
 		this._statsTable = new Tabulator('#stats_table', {
 			columnHeaderSortMulti: false,
-			autoResize: false,
 			layout: "fitColumns",
-			// data: this._tableData,
+			responsiveLayout: "hide",
+			tooltipsHeader: false,
 			columns: [
-				{ title: 'Id', field: 'id', headerSort: false, width: 5 },
-				{ title: 'Name', field: 'name', headerSort: false, width: 84 },
-				{ title: 'Score', field: 'score', align: 'center', headerSort: false, width: 20 },
-				{ title: 'Wins', field: 'wins', align: 'center', headerSort: false, width: 20 },
-				{ title: 'Losses', field: 'losses', align: 'center', headerSort: false, width: 20 },
+				{ title: 'Id', field: 'id', headerSort: false, align: 'center', width: 30, responsive: 2 },
+				{ title: 'Name', field: 'name', headerSort: false, widthGrow: 2, responsive: 0, minWidth: 60 },
+				{ title: 'Score', field: 'score', align: 'center', headerSort: false, minWidth: 50 },
+				{ title: 'Wins', field: 'wins', align: 'center', headerSort: false, responsive: 3, minWidth: 50 },
+				{ title: 'Losses', field: 'losses', align: 'center', headerSort: false, responsive: 4, minWidth: 50 },
 			],
 			rowClick: (e, row) => {
 				alert(

@@ -43,10 +43,10 @@ $(document).ready(function() {
 
 var _scope_settings = {
 	name : '',
-	computerOnly : false,
+	// computerOnly : false,
 	multiplayer : false,
-	winType : 0,
-	winValue : 10
+	// winType : 0,
+	// winValue : 10
 }
 
 function settingsPart() {
@@ -63,49 +63,52 @@ function settingsPart() {
 		}
 	});
 
-	$('#btn_playGame').click(() => {
+	//Temporary warning until multiplayer is implemented
+	$('#form_multiplayer').click(() => {
+		if ($('#form_multiplayer').is(':checked')) {
+			alert("Multiplayer not yet implemented!");
+		}
+	});
+
+	$('#btn_playGame').click(async () => {
 		$('#settingsForm').hide();
-		submitSettings();
-		startGame();
+		await startGame(await submitSettingsAndReturnGame());
 	});
 }
 
-function submitSettings() {
+async function submitSettingsAndReturnGame() {
 	_scope_settings.name = $('#form_name').val();
-	_scope_settings.computerOnly = $('#form_computerOnly').is(':checked');
 	_scope_settings.multiplayer = $('#form_multiplayer').is(':checked');
-	_scope_settings.winType = $('#form_winType').val();
-	_scope_settings.winValue = $('#form_winValue').val();
+
+	//Create default game object
+	let game = new Game( 
+		$('#form_winType').val(), 
+		$('#form_winValue').val(), 
+		!$('#form_computerOnly').is(':checked')
+	);
+	
+	return game;
 }
 
-async function startGame() {
-	//Create default game object
-	let isHuman = !_scope_settings.multiplayer;
-	let game = new Game( _scope_settings.winType, _scope_settings.winValue, isHuman);
-
+async function startGame(game) {
 	let speaker = game.speaker;
 
 	//clear main output element
 	speaker.clear();
 
-	// let player = new Player();
-	speaker.addSpace(2);
-	speaker.say("Welcome to Gnav The Card Game", "h4");
-
 	if (_scope_settings.multiplayer) {
-		alert ("Multiplayer not implemented yet.");
+		//todo: implement multiplayer code
 	} else {
 		await playGame(game);
 	}
 }
 
 async function playGame(game) {
-	let speaker = game.speaker;
-	let players = [];
+	let speaker = game.speaker; //create reference
 
 	if (game.isHuman && _scope_settings.name) {
 		let human = new Human(_scope_settings.name, speaker);
-		players.push(human);
+		game.players.push(human);
 	}
 
 	for (const name of tools.PLAYERS) {
@@ -116,8 +119,10 @@ async function playGame(game) {
 		// 	newPlayer.neverSwapsWithDeck = false;
 		// }
 
-		players.push(newPlayer);
+		game.players.push(newPlayer);
 	}
+
+	let players = game.players; //create reference
 
 	let playersPromise = tools.shuffle(players);
 	players = await playersPromise; //wait for shuffle to finish
@@ -126,22 +131,21 @@ async function playGame(game) {
 	await deck.init(); //async
 
 	let round = 1;
-	let highestScore = [];
+	let highestScorePlayers = [players[0], players[1]]; //set players as best and second best score
 
 	//function for when next turn button is clicked
 	let nextTurnCallback = (async (e) => {
 		game.nextTurn = e;
 		speaker.hideNextTurnButton();
-		await gameLoop(game, deck, players, highestScore);
+		await gameLoop(game, deck, players, highestScorePlayers);
 	});
 
 	speaker.initialize(nextTurnCallback);
 
 	//play first turn
-	await gameLoop(game, deck, players, speaker, highestScore);
+	await gameLoop(game, deck, players, highestScorePlayers);
 	
-	// while (!game.isGameOver()) {
-	async function gameLoop(game, deck, players, highestScore) {
+	async function gameLoop(game, deck, players, highestScorePlayers) {
 		let speaker = game.speaker;
 		
 		//clear main output element
@@ -174,33 +178,26 @@ async function playGame(game) {
 			}
 		}
 
-		//Play round
+		// ********* Play round *********
 		let promiseArray = [];
 		for (const [index, player] of players.entries()) {
 			promiseArray.push(updateStats(player, speaker));
 			promiseArray.push(wantsToSwapTest(index));
 		}
 		await Promise.all(promiseArray);
-
-		speaker.addSpace();
-		speaker.say ("End of round: " + round);
-		speaker.addSpace();
-		//End of round
-
-		console.time("extreme");
-		let maxVal = await tools.extreme(players, 'heldCard.value');
-		console.timeEnd("extreme");
-		console.log("returned maxVal obj:");
-		console.log(maxVal);
-		console.log("Player with highest valued card is: ", players[maxVal.mostIndex].name);
-		console.log("who has the card: ", players[maxVal.mostIndex].heldCard.name);
-
+		// ******** End of round ********
+		
 		//Calculate scores and stats
-		let sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
-		let winner = sortedPlayers[0];
+
+		// let sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
+		// let winner = sortedPlayers[0];
+		let maxVal = await tools.extreme(players, 'heldCard.value'); //maxval is default when not passing 3rd param
+		let winner = players[maxVal.mostIndex];
 		winner.wins++;
 
-		let loser = sortedPlayers[sortedPlayers.length - 1];
+		// let loser = sortedPlayers[sortedPlayers.length - 1];
+		let minVal = await tools.extreme(players, 'heldCard.value', tools.MINVAL); //tools.MINVAL === true
+		let loser = players[minVal.mostIndex];
 		loser.losses++;
 
 		speaker.say ("Winner of this round is " + winner.name + " with the card " + winner.heldCard.name);
@@ -209,50 +206,57 @@ async function playGame(game) {
 		speaker.say ("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name);
 		loser.addToScore(-1);
 
-		//Search for Narren among players
+		//All players toss their card in the discard pile and search for Narren
 		for (let player of players) {
 			if (player.heldCard.value === 4) {
 				speaker.say ("Unfortunately, " + player.name + "'s card at end of round is Narren.");
 				player.addToScore(-1);
 			}
-		}
-
-		//All players toss their cards in the discard pile
-		for (let player of players) {
-			player.discard(deck);
+			player.discard(deck); //toss card to deck's discard pile
 		}
 
 		deck.testLengthSum();
 
 		maxVal = await tools.extreme(players, 'wins');
+		let ply_mostWins = players[maxVal.mostIndex];
 		maxVal = await tools.extreme(players, 'losses');
+		let ply_mostLosses = players[maxVal.mostIndex];
 		maxVal = await tools.extreme(players, 'score');
-		console.log("Player with most wins is: ", players[maxVal.mostIndex].name);
+		let highestScore = players[maxVal.mostIndex];
 
-		let mostWins = Array.from(players.sort((a, b) => (a.wins < b.wins) ? 1 : ((a.wins > b.wins) ? -1 : 0)));
-		let mostLosses = Array.from(players.sort((a, b) => (a.losses < b.losses) ? 1 : ((a.losses > b.losses) ? -1 : 0)));
-		highestScore = Array.from(players.sort((a, b) => (a.score < b.score) ? 1 : ((a.score > b.score) ? -1 : 0)));
+		// let mostWins = Array.from(players.sort((a, b) => (a.wins < b.wins) ? 1 : ((a.wins > b.wins) ? -1 : 0)));
+		// let mostLosses = Array.from(players.sort((a, b) => (a.losses < b.losses) ? 1 : ((a.losses > b.losses) ? -1 : 0)));
+		// highestScore = Array.from(players.sort((a, b) => (a.score < b.score) ? 1 : ((a.score > b.score) ? -1 : 0)));
 
-		let scoreLine = "-------> Scores: "
+		let scoreLine = '';
 
 		for (let player of players) {
 			let thisPly = player.name;
-			if (player.pid === highestScore[0].pid) {
+			if (player.pid === highestScorePlayers.pid) {
 				thisPly = "**" + thisPly.toUpperCase() + "**";
 			}
 			scoreLine += thisPly + ": " + player.score + ", ";
 		}
 		speaker.addSpace();
 		speaker.say (scoreLine.slice(0, scoreLine.len - 2));
-		speaker.say ("GAME STATS: Most wins -> " + mostWins[0].name + ": " + mostWins[0].wins + ", most losses -> " + mostLosses[0].name + ": " + mostLosses[0].losses);
+		speaker.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
 
+		//Make it next round
 		round++;
+
+		console.log("highest score players:");
+		console.log(highestScorePlayers);
+		console.log("highest score players end");
 
 		if (game.playType === 0) {
 			game.incValue();
 		} else {
-			speaker.say("INFO: Setting " + highestScore[0].score + " as new best score value for game.");
-			game.value = highestScore[0].score;
+			if (highestScore > highestScorePlayers[0]) {
+				highestScorePlayers.pop(); //remove last item
+				highestScorePlayers.unshift(highestScore); //set current highest score player as first item
+				speaker.say("INFO: Setting " + highestScorePlayers[0].score + " as new best score value for game.");
+			}
+			game.value = highestScorePlayers[0].score;
 		}
 
 		speaker.addSpace();
