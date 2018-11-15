@@ -67,6 +67,16 @@ td:nth-child(3) {
   letter-spacing: 3px;
 }
 
+#btnNextTurn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+}
+
+#btnNextTurn:focus, button:focus {
+  outline: none;
+}
+
 #stats_section {
   width: 25%;
 }
@@ -109,7 +119,7 @@ td:nth-child(3) {
 }
 
 .outputSection {
-  background: rgba(7, 79, 87, 1); /*midnight green*/
+  background: #416165;  /*deep space sparkle*/
 }
 
 .block {
@@ -166,6 +176,44 @@ td:nth-child(3) {
   vertical-align: center;
   padding: 4px;
   width: 50%;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 25%;
+  top: 25%;
+  width: 50%; /* Full width */
+  height: 50%; /* Full height */
+  overflow: hidden; /* Enable scroll if needed */
+}
+
+/* Modal Content */
+.modal-content {
+  position: relative;
+  color: white;
+  background-color: rgba(116, 165, 127, 1); /*shiny shamrock*/
+  border-radius: 5px;
+  margin: auto;
+  padding: 0;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: rgba(252, 240, 204, 1); /*blanched almond*/
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color:rgb(61, 58, 49); /*dark blanched almond*/
+  text-decoration: none;
+  cursor: pointer;
 }
 
 /* RGB

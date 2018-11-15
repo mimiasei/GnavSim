@@ -179,12 +179,12 @@ async function playGame(game) {
 		}
 
 		// ********* Play round *********
-		let promiseArray = [];
+		// let promiseArray = [];
 		for (const [index, player] of players.entries()) {
-			promiseArray.push(updateStats(player, speaker));
-			promiseArray.push(wantsToSwapTest(index));
+			await updateStats(player, speaker);
+			await wantsToSwapTest(index);
 		}
-		await Promise.all(promiseArray);
+		// await Promise.all(promiseArray);
 		// ******** End of round ********
 		
 		//Calculate scores and stats

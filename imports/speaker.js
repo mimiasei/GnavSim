@@ -8,11 +8,9 @@ export default class Speaker {
 	constructor(parent) {
 		this._output = $("#outputWin");
 		this._outputBtns = [];
-		this._outputBtns.push($("#outputBtn1"));
-		this._outputBtns.push($("#outputBtn2"));
-		this._outputBtns.push($("#outputBtn3"));
 		this._stats = $("#playerStats");
 		this._info = $("#info");
+		this._modal = $("#modalWindow")[0];
 		this._statsTable = null;
 		this._tableData = [];
 		this._statsTableBody = $("#stats_table tbody");
@@ -54,10 +52,10 @@ export default class Speaker {
 			tooltipsHeader: false,
 			columns: [
 				{ title: 'Id', field: 'id', headerSort: false, align: 'center', width: 30, responsive: 2 },
-				{ title: 'Name', field: 'name', headerSort: false, widthGrow: 2, responsive: 0, minWidth: 60 },
-				{ title: 'Score', field: 'score', align: 'center', headerSort: false, minWidth: 50 },
-				{ title: 'Wins', field: 'wins', align: 'center', headerSort: false, responsive: 3, minWidth: 50 },
-				{ title: 'Losses', field: 'losses', align: 'center', headerSort: false, responsive: 4, minWidth: 50 },
+				{ title: 'Name', field: 'name', headerSort: false, widthGrow: 2, responsive: 0, minWidth: 70 },
+				{ title: 'Score', field: 'score', align: 'center', headerSort: false, minWidth: 40 },
+				{ title: 'Wins', field: 'wins', align: 'center', headerSort: false, responsive: 3, minWidth: 40 },
+				{ title: 'Losses', field: 'losses', align: 'center', headerSort: false, responsive: 4, minWidth: 40 },
 			],
 			rowClick: (e, row) => {
 				alert(
@@ -69,6 +67,27 @@ export default class Speaker {
 			}
 		});
 		$('#stats_table').show();
+	}
+
+	openModal(question, answers, callbackFn) {
+		//display modal
+		this._modal.style.display = "block";
+		
+		//setup close button
+		let closeBtn = $("#modalCloseBtn");
+		closeBtn.click((e) => {
+			this._modal.style.display = "none";
+		});
+
+		$("#modalHeader").text(question);
+
+		for (let i = 0; i < answers.lenght; i++) {
+			$btn = $(`#modalBtn_${i}`);
+			$btn.text(answers[i].text);
+			$btn.click((e) => {
+				callbackFn(answers[i].value);
+			});
+		}
 	}
 
 	hideNextTurnButton(show) {
@@ -151,13 +170,14 @@ export default class Speaker {
 			];
 		}
 
-		let div = this.createElem(null, null, 'margin-top-10'); //create group div
-		div.append(this.say(question, 'span', 'margin-right-10'));
-		this._output.append(div); //add group to output div
-		for (const [index, answer] of answers.entries()) {
-			let element = this.createBtn(answer.text, callbackFn);
-			this._outputBtns[index].html(element);
-		}
+		// let div = this.createElem(null, null, 'margin-top-10'); //create group div
+		// div.append(this.say(question, 'span', 'margin-right-10'));
+		// this._output.append(div); //add group to output div
+		// for (const [index, answer] of answers.entries()) {
+		// 	let element = this.createBtn(answer.text, callbackFn);
+		// 	this._outputBtns[index].html(element);
+		// }
+		this.openModal(question, answers, callbackFn);
 	}
 
 	createBtn(name, callbackFn) {
