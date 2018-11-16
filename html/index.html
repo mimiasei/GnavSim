@@ -101,31 +101,30 @@
 		</div>
 
 		<!-- Modal window -->
-		<div id="modalWindow" class="modal">
-			<div class="modal-content">
-				<div id="modalHeader" class="modal-header">
-					<span id="modalCloseBtn" class="close">&times;</span>
-				</div>
-				<div class="row modal-body">
-					<div class="col-xs-4">
-						<button type="button" class="btn btn-primary" id="modalBtn_0"></button>
+		<div class="modal" id="modalWindow" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header no-border">
+						<button id="modalCloseBtn" type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span>&times;</span>
+						</button>
+						<h4 class="modal-title" id="modalTitle"></h4>
 					</div>
-					<div class="col-xs-4">
-						<button type="button" class="btn btn-success" id="modalBtn_2"></button>
+					<div class="modal-body no-border" id="modalBody"></div>
+					<div class="modal-footer no-border">
+						<button id="modalBtn_0" type="button" class="btn btn-success"></button>
+						<button id="modalBtn_1" type="button" class="btn btn-danger"></button>
+						<button id="modalBtn_2" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					</div>
-					<div class="col-xs-4">
-						<button type="button" class="btn btn-primary" id="modalBtn_1"></button>
-					</div>
-				</div>
-				<div class="modal-footer">
 				</div>
 			</div>
 		</div>
+
 	</body>
 
 	<!-- jquery 3.2.1 -->
 	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-	<!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script> -->
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 
 	<!-- tabulator 4.1.1 -->
 	<link href="../node_modules/tabulator-tables/dist/css/tabulator_simple.min.css" rel="stylesheet">

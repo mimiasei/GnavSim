@@ -28,12 +28,6 @@ body {
   }
 }
 
-/* * {
-  border: 1px;
-  border-style: solid;
-  border-color: seagreen;
-} */
-
 input:disabled {
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==) repeat;
 }
@@ -44,6 +38,13 @@ p {
 
 img {
   border-radius: 50%; /*round images*/
+}
+
+.btn {
+  box-shadow: -1px 1px 1px rgba(255,255,255,0.5), /*bottom external highlight*/
+    1px -1px 1px rgba(0,0,0,0.25), /*top external shadow*/ 
+    inset 1px -1px 1px rgba(0,0,0,0.25), /*bottom internal shadow*/ 
+    inset -1px 1px 2px rgba(255,255,255,0.7); /*top internal highlight*/
 }
 
 /* nth-child(1) = the first td in each tr */
@@ -178,6 +179,10 @@ td:nth-child(3) {
   width: 50%;
 }
 
+.no-border {
+  border: none;
+}
+
 /* The Modal (background) */
 .modal {
   display: none; /* Hidden by default */
@@ -185,8 +190,8 @@ td:nth-child(3) {
   z-index: 1; /* Sit on top */
   left: 25%;
   top: 25%;
-  width: 50%; /* Full width */
-  height: 50%; /* Full height */
+  width: 50vw;
+  height: auto;
   overflow: hidden; /* Enable scroll if needed */
 }
 
@@ -196,9 +201,19 @@ td:nth-child(3) {
   color: white;
   background-color: rgba(116, 165, 127, 1); /*shiny shamrock*/
   border-radius: 5px;
-  margin: auto;
-  padding: 0;
+  margin: 0;
+  padding: 5px;
   width: 80%;
+}
+
+/* Modal header */
+/* .modal-header {
+  height: 10px;
+} */
+
+/* Modal body */
+.modal-body {
+  background-color: rgb(99, 141, 108); /*darker shiny shamrock*/
 }
 
 /* The Close Button */

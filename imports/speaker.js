@@ -10,7 +10,7 @@ export default class Speaker {
 		this._outputBtns = [];
 		this._stats = $("#playerStats");
 		this._info = $("#info");
-		this._modal = $("#modalWindow")[0];
+		this._modal = $("#modalWindow");
 		this._statsTable = null;
 		this._tableData = [];
 		this._statsTableBody = $("#stats_table tbody");
@@ -69,27 +69,7 @@ export default class Speaker {
 		$('#stats_table').show();
 	}
 
-	openModal(question, answers, callbackFn) {
-		//display modal
-		this._modal.style.display = "block";
-		
-		//setup close button
-		let closeBtn = $("#modalCloseBtn");
-		closeBtn.click((e) => {
-			this._modal.style.display = "none";
-		});
-
-		$("#modalHeader").text(question);
-
-		for (let i = 0; i < answers.lenght; i++) {
-			$btn = $(`#modalBtn_${i}`);
-			$btn.text(answers[i].text);
-			$btn.click((e) => {
-				callbackFn(answers[i].value);
-			});
-		}
-	}
-
+	
 	hideNextTurnButton(show) {
 		show = show || false;
 		if (show) {
@@ -98,14 +78,14 @@ export default class Speaker {
 			this._nextTurnButton.hide();
 		}
 	}
-
+	
 	clear() {
 		this._output.html('');
 		for (let btn of this._outputBtns) {
 			btn.html('');
 		}
 	}
-
+	
 	createElem(txt, type, className) {
 		txt = txt || '';
 		type = type || 'div';
@@ -116,7 +96,7 @@ export default class Speaker {
 		}
 		return $elem;
 	}
-
+	
 	say(what, type, className, addToOutput) {
 		type = type || 'div';
 		className = className || '';
@@ -128,18 +108,18 @@ export default class Speaker {
 			return $elem;
 		}
 	}
-
+	
 	printRound(round, cardLength) {
 		this.say(`Round: ${round}. Card pile length: ${cardLength}`, 'span', 'print-round');
 	}
-
+	
 	addSpace(n) {
 		n = n || 1;
 		n = n > 4 ? 4 : n;
-
+		
 		this.say('', 'div', 'margin-top-' + n * 10);
 	}
-
+	
 	static async answerObj(arrayText, arrayValues) {
 		arrayValues = arrayValues || [];
 		let array = [];
@@ -154,7 +134,7 @@ export default class Speaker {
 		}
 		return array;
 	}
-
+	
 	async ask(question, answers, callbackFn) {
 		//answers = 0 : default yes/no answers
 		if (answers === 0) {
@@ -169,7 +149,7 @@ export default class Speaker {
 				},
 			];
 		}
-
+		
 		// let div = this.createElem(null, null, 'margin-top-10'); //create group div
 		// div.append(this.say(question, 'span', 'margin-right-10'));
 		// this._output.append(div); //add group to output div
@@ -177,7 +157,58 @@ export default class Speaker {
 		// 	let element = this.createBtn(answer.text, callbackFn);
 		// 	this._outputBtns[index].html(element);
 		// }
-		this.openModal(question, answers, callbackFn);
+		this.hideNextTurnButton();
+		//test
+		callbackFn = (result) => {
+			console.log("result: ", result);
+			this.hideNextTurnButton(true);
+		};
+		//test end
+		this.hideNextTurnButton();
+		await this.openModal(question, answers, callbackFn);
+	}
+	
+	async openModal(question, answers, callbackFn, useCloseBtn) {
+		useCloseBtn = useCloseBtn || false;
+		console.log("opening modal...");
+
+		//display modal
+		// this._modal[0].style.display = "block";
+		this._modal.show();
+
+		this._modal.draggable({
+			handle: ".modal-header"
+		});
+		
+		//setup close buttons
+		let closeBtn = $("#modalCloseBtn");
+		closeBtn.click((e) => {
+			// this._modal[0].style.display = "none";
+			this._modal.hide();
+		});
+
+		if (useCloseBtn) {
+			$('#modalBtn_2').click((e) => {
+				// this._modal[0].style.display = "none";
+				this._modal.hide();
+			});
+		} else {
+			$('#modalBtn_2').hide();
+		}
+
+		$("#modalTitle").text("Swap card");
+		$("#modalBody").text(question + '?');
+
+		for (let i = 0; i < answers.length; i++) {
+			console.log(`#modalBtn_${i}`);
+			let $btn = $(`#modalBtn_${i}`);
+			$btn.text(answers[i].text);
+			$btn.click((e) => {
+				// this._modal[0].style.display = "none";
+				this._modal.hide();
+				callbackFn(answers[i].value);
+			});
+		}
 	}
 
 	createBtn(name, callbackFn) {
