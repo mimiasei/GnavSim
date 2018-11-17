@@ -196,7 +196,7 @@ async function playGame(game) {
 		winner.wins++;
 
 		// let loser = sortedPlayers[sortedPlayers.length - 1];
-		let minVal = await tools.extreme(players, 'heldCard.value', tools.MINVAL); //tools.MINVAL === true
+		let minVal = await tools.extreme(players, 'heldCard.value', tools.FIND_MIN); //tools.FIND_MIN === true
 		let loser = players[minVal.mostIndex];
 		loser.losses++;
 

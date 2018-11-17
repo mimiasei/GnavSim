@@ -73,8 +73,10 @@ export default class Speaker {
 	hideNextTurnButton(show) {
 		show = show || false;
 		if (show) {
+			console.log("showing next turn button...");
 			this._nextTurnButton.show();
 		} else {
+			console.log("hiding next turn button...");
 			this._nextTurnButton.hide();
 		}
 	}
@@ -173,7 +175,6 @@ export default class Speaker {
 		console.log("opening modal...");
 
 		//display modal
-		// this._modal[0].style.display = "block";
 		this._modal.show();
 
 		this._modal.draggable({
@@ -183,13 +184,11 @@ export default class Speaker {
 		//setup close buttons
 		let closeBtn = $("#modalCloseBtn");
 		closeBtn.click((e) => {
-			// this._modal[0].style.display = "none";
 			this._modal.hide();
 		});
 
 		if (useCloseBtn) {
 			$('#modalBtn_2').click((e) => {
-				// this._modal[0].style.display = "none";
 				this._modal.hide();
 			});
 		} else {
@@ -204,7 +203,6 @@ export default class Speaker {
 			let $btn = $(`#modalBtn_${i}`);
 			$btn.text(answers[i].text);
 			$btn.click((e) => {
-				// this._modal[0].style.display = "none";
 				this._modal.hide();
 				callbackFn(answers[i].value);
 			});

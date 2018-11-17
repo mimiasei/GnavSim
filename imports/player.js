@@ -68,17 +68,17 @@ export default class Player {
 	}
 	
 	requestSwap(toPlayer) {
-		this._speaker.say (this.sayTo(toPlayer, 0) + quote(tools.TXT_WANT_TO_SWAP));
+		this._speaker.say (this.sayTo(toPlayer, 0) + tools.quote(tools.TXT_WANT_TO_SWAP));
 	}
 
 	answerSwap(fromPlayer) {
 		let val = this._heldCard.value;
 		if (val <= 16) {
-			this._speaker.say (this.sayTo(fromPlayer, 1) + quote(tools.TXT_ACCEPT_SWAP));
+			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(tools.TXT_ACCEPT_SWAP));
 		}
 		else {
 			let reply = val < 21 ? Card.statement(val) : Card.statement(val).toUpperCase();
-			this._speaker.say (this.sayTo(fromPlayer, 1) + quote(reply));
+			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(reply));
 		}
 		return val;
 	}
@@ -94,6 +94,12 @@ export default class Player {
 	}
 
 	processAnswer(returnedCardValue) {
+		/*
+		this.statement = "Hogg av!";
+		this.isMatador = true;
+		this.causeNoMoreSwap = true;
+		this.causeLosePoint = true;
+		*/
 		if (returnedCardValue > 16) { //If one of the matador cards (better than (12))
 			if (returnedCardValue == 17 || returnedCardValue == 18) { //huset, hesten
 				return 1; //must ask next player.
@@ -111,13 +117,14 @@ export default class Player {
 
 	addToScore(value) {
 		this._score += value;
+		console.log(this._name, this._score);
 		let verb = value > 0 ? "added" : "subtracted";
 		let prepos = value > 0 ? "to" : "from";
 		this._speaker.say (`${this.name} ${verb} ${Math.abs(value)} ${prepos} score.`);
 	}
 
 	sayTo(toPlayer, typ) {
-		let verb = typ == 0 ? ' asks ' : ' answers ';
+		let verb = typ === 0 ? ' asks ' : ' answers ';
 		return this._name + verb + toPlayer.name + ": ";
 	}
 

@@ -11,6 +11,8 @@ export const TXT_KNOCK = " banker tre ganger på bordet. <BANK, BANK, BANK>";
 export const TXT_PASSES = " sier 'Jeg står'";
 export const TXT_NO_WAY_FOOL = [" and thinks 'Aldri i livet, ", "", " har jo narren!'"];
 
+export const FIND_MIN = true;
+
 export function ask(question, answers = []) {
 	/*
 	answers = -1 : auto press any key (i.e. no questions, all answers accepted)
