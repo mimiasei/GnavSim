@@ -72,15 +72,17 @@ export default class Player {
 	}
 
 	answerSwap(fromPlayer) {
-		let val = this._heldCard.value;
-		if (val <= 16) {
+		// let val = this._heldCard.value;
+		// if (val <= 16) {
+		if (!this._heldCard.isMatador) {
 			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(tools.TXT_ACCEPT_SWAP));
 		}
 		else {
-			let reply = val < 21 ? Card.statement(val) : Card.statement(val).toUpperCase();
-			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(reply));
+			// let reply = val < 21 ? Card.statement(val) : Card.statement(val).toUpperCase();
+			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(this._heldCard.statement)); //reply
 		}
-		return val;
+		// return val;
+		return this._heldCard;
 	}
 
 	swapWithPlayer(fromPlayer) {

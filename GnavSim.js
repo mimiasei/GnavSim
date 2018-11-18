@@ -171,7 +171,7 @@ async function playGame(game) {
 		for (let i = 0; i < players.length; i++) {
 			players[i].drawFromDeck(deck);
 
-			if (players[i].heldCard && players[i].heldCard.value === 4) { //If player receives Narren
+			if (players[i].heldCard && players[i].heldCard.isFool) { //If player receives Narren
 				if (players[i].knockOnTable()) {
 					players[i].addToScore(1);
 				}
@@ -277,10 +277,10 @@ async function playGame(game) {
 		let running = true;
 
 		if (running && index !== players.len - 1) {
-			if( players[index + 1] && players[index + 1].heldCard && players[index + 1].heldCard.value === 4) { //If the other player has Narren...
+			if( players[index + 1] && players[index + 1].heldCard && players[index + 1].heldCard.isFool) { //If the other player has Narren...
 				if (!players[index].testForSwap(players[index + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
 					sayPass += players[index].sayNoFool(players[index + 1]);
-					console.log(players[index].sayNoFool(players[index + 1]));
+					// console.log(players[index].sayNoFool(players[index + 1]));
 				} else {
 					wantsToSwap = true;
 				}
