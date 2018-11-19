@@ -74,34 +74,15 @@ export default class Player {
 	answerSwap(fromPlayer) {
 		// let val = this._heldCard.value;
 		// if (val <= 16) {
-		let quote = this._heldCard.isMatador ? this._heldCard.statement : tools.TXT_ACCEPT_SWAP;
-
-		this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(quote));
-		
+		if (!this._heldCard.isMatador) {
+			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(tools.TXT_ACCEPT_SWAP));
+		}
+		else {
+			// let reply = val < 21 ? Card.statement(val) : Card.statement(val).toUpperCase();
+			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(this._heldCard.statement)); //reply
+		}
 		// return val;
 		return this._heldCard;
-	}
-
-	processAnswer(returnedCardValue) {
-		/*
-		this.statement = "Hogg av!";
-		this.isMatador = true;
-		this.causeNoMoreSwap = true;
-		this.causeLosePoint = true;
-		*/
-		if (returnedCardValue > 16) { //If one of the matador cards (better than (12))
-			if (returnedCardValue == 17 || returnedCardValue == 18) { //huset, hesten
-				return 1; //must ask next player.
-			} else if (returnedCardValue == 19) { //katten
-				return 2; //Loses 1 score and must ask next player.
-			} else if (returnedCardValue == 20) { //dragonen
-				return 3; //Loses 1 score.
-			} else if (returnedCardValue == 21) { //gjoeken
-				return 4; //Turn is over for all players.
-			}
-		} else {
-			return 0; //Nothing happens.
-		}
 	}
 
 	swapWithPlayer(fromPlayer) {
@@ -112,6 +93,37 @@ export default class Player {
 		this._heldCard = jQuery.extend(true, {}, fromPlayer.heldCard);
 		console.log(this._heldCard);
 		fromPlayer.heldCard = jQuery.extend(true, {}, card);
+	}
+
+	// processAnswer(returnedCardValue) {
+	// 	if (returnedCardValue > 16) { //If one of the matador cards (better than (12))
+	// 		if (returnedCardValue == 17 || returnedCardValue == 18) { //huset, hesten
+	// 			return 1; //must ask next player.
+	// 		} else if (returnedCardValue == 19) { //katten
+	// 			return 2; //Loses 1 score and must ask next player.
+	// 		} else if (returnedCardValue == 20) { //dragonen
+	// 			return 3; //Loses 1 score.
+	// 		} else if (returnedCardValue == 21) { //gjoeken
+	// 			return 4; //Turn is over for all players.
+	// 		}
+	// 	} else {
+	// 		return 0; //Nothing happens.
+	// 	}
+	// }
+
+	processAnswer(returnedCard) {
+		if (returnedCard.isMatador) { //If one of the matador cards
+			switch (returnedCard.constructor.name) {
+				case 'House':
+				case 'Horse':	return 1;
+				case 'Cat': 	return 2;
+				case 'Dragoon':	return 3;
+				case 'Cuckoo':	return 4;
+				default:		return 0;
+			}
+		} else {
+			return 0;
+		}
 	}
 
 	addToScore(value) {
@@ -141,9 +153,7 @@ export default class Player {
 		return true;
 	}
 
-	async testForSwap(obj) {
-		console.log("Player.testforswap:");
-		console.log(obj);
+	testForSwap(toPlayer = null) {
 		if (this._heldCard) {
 			let value = this._heldCard.value;
 			let swap = tools.SWAP_THRESHOLDNUMBER + 4;
@@ -155,10 +165,8 @@ export default class Player {
 			}
 
 			if (value > swap) {
-				obj.result = 'no';
 				return false; //Player doesn't want to swap and will say pass.
 			} else {
-				obj.result = 'yes';
 				return true; //Player wants to swap.
 			}
 		} else {

@@ -156,246 +156,253 @@ async function playGame(game) {
 	let deck = new Deck();
 	await deck.init(); //async
 
-	let highestScorePlayers = [players[0], players[1]]; //set players as best and second best score
+	let highestScorePlayers = [game.players[0], game.players[1]]; //set players as best and second best score
 
 	//function for when next turn button is clicked
 	let nextTurnCallback = (async (e) => {
 		game.nextTurn = e;
 		speaker.hideNextTurnButton();
-		await gameLoop(game, deck, players, highestScorePlayers);
+		await gameLoop(game, deck, game.players, highestScorePlayers);
 	});
 
 	speaker.initialize(nextTurnCallback);
 
 	//play first turn
-	await gameLoop(game, deck, players, highestScorePlayers);
+	await gameLoop(game, deck, game.players, highestScorePlayers);
 	
-	async function gameLoop(game, deck, players, highestScorePlayers) {
-		let speaker = game.speaker;
-		
+	async function gameLoop(game, deck, players, highestScorePlayers) {		
 		//clear main output element
-		speaker.clear();
+		game.speaker.clear();
 		
 		//refresh table of player stats
-		speaker.refreshStatsTable(players);
+		game.speaker.refreshStatsTable(game.players);
 		
-		speaker.printRound(game.value, deck.cards.length);
-		speaker.addSpace();
+		game.speaker.printRound(game.value, deck.cards.length);
+		game.speaker.addSpace();
 		
 		// const imageSearches = ['infantry', 'cat', 'horse', 'bird', 'villa', 'jester', 'pot', 'owl'];
-		// speaker.output.append(getRandomImgElem(imageSearches[round % 8], 80));
-		// speaker.output.append(imageSearches[round % 8]);
+		// game.speaker.output.append(getRandomImgElem(imageSearches[round % 8], 80));
+		// game.speaker.output.append(imageSearches[round % 8]);
 
-		speaker.say("Current dealer is: " + players[0].name);
+		game.speaker.say("Current dealer is: " + game.players[0].name);
 
 		//Pop out top player as dealer and insert at end
-		let oldDealer = players.shift(); //Pop out first player in list, to act as dealer
-		players.push(oldDealer); //Reinsert the dealer at the end of list
+		let oldDealer = game.players.shift(); //Pop out first player in list, to act as dealer
+		game.players.push(oldDealer); //Reinsert the dealer at the end of list
 
 		//Draw cards for each player
-		for (let i = 0; i < players.length; i++) {
-			players[i].drawFromDeck(deck);
+		for (let i = 0; i < game.players.length; i++) {
+			game.players[i].drawFromDeck(deck);
 
-			if (players[i].heldCard && players[i].heldCard.isFool) { //If player receives Narren
-				if (players[i].knockOnTable()) {
-					players[i].addToScore(1);
+			if (game.players[i].heldCard && game.players[i].heldCard.isFool) { //If player receives Narren
+				if (game.players[i].knockOnTable()) {
+					game.players[i].addToScore(1);
 				}
 			}
 		}
 
 		// ********* Play round *********
-		for (const [index, player] of players.entries()) {
-			await updateStats(player, speaker);
-			await wantsToSwapTest(index);
+		for (const [index, player] of game.players.entries()) {
+			await updateStats(player, game);
+			await wantsToSwapTest(game, deck, index);
 		}
 		// ******** End of round ********
 		
 		//Calculate scores and stats
-
-		// let sortedPlayers = players.sort((a, b) => (a.heldCard.value < b.heldCard.value) ? 1 : ((a.heldCard.value > b.heldCard.value) ? -1 : 0));
-		// let winner = sortedPlayers[0];
-		let maxVal = await tools.extreme(players, 'heldCard.value'); //maxval is default when not passing 3rd param
-		let winner = players[maxVal.mostIndex];
-		winner.wins++;
-
-		// let loser = sortedPlayers[sortedPlayers.length - 1];
-		let minVal = await tools.extreme(players, 'heldCard.value', tools.FIND_MIN); //tools.FIND_MIN === true
-		let loser = players[minVal.mostIndex];
-		loser.losses++;
-
-		speaker.say ("Winner of this round is " + winner.name + " with the card " + winner.heldCard.name);
-		winner.addToScore(1);
-
-		speaker.say ("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name);
-		loser.addToScore(-1);
-
-		//All players toss their card in the discard pile and search for Narren
-		for (let player of players) {
-			if (player.heldCard.value === 4) {
-				speaker.say ("Unfortunately, " + player.name + "'s card at end of round is Narren.");
-				player.addToScore(-1);
-			}
-			player.discard(deck); //toss card to deck's discard pile
-		}
-
-		deck.testLengthSum();
-
-		maxVal = await tools.extreme(players, 'wins');
-		let ply_mostWins = players[maxVal.mostIndex];
-		maxVal = await tools.extreme(players, 'losses');
-		let ply_mostLosses = players[maxVal.mostIndex];
-		maxVal = await tools.extreme(players, 'score');
-		let highestScore = players[maxVal.mostIndex];
-
-		// let mostWins = Array.from(players.sort((a, b) => (a.wins < b.wins) ? 1 : ((a.wins > b.wins) ? -1 : 0)));
-		// let mostLosses = Array.from(players.sort((a, b) => (a.losses < b.losses) ? 1 : ((a.losses > b.losses) ? -1 : 0)));
-		// highestScore = Array.from(players.sort((a, b) => (a.score < b.score) ? 1 : ((a.score > b.score) ? -1 : 0)));
-
-		let scoreLine = '';
-
-		for (let player of players) {
-			let thisPly = player.name;
-			if (player.pid === highestScorePlayers.pid) {
-				thisPly = "**" + thisPly.toUpperCase() + "**";
-			}
-			scoreLine += thisPly + ": " + player.score + ", ";
-		}
-		speaker.addSpace();
-		speaker.say (scoreLine.slice(0, scoreLine.len - 2));
-		speaker.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
-
-		//Make it next round
-		game.incValue();
-
-		console.log("highest score players:");
-		console.log(highestScorePlayers);
-		console.log("highest score players end");
-
-		//Set highest score
-		if (highestScore > highestScorePlayers[0]) {
-			highestScorePlayers.pop(); //remove last item
-			highestScorePlayers.unshift(highestScore); //set current highest score player as first item
-			speaker.say("INFO: Setting " + highestScorePlayers[0].score + " as new best score value for game.");
-		}
-		game.setHighestScore(highestScorePlayers[0].score);
-
-		speaker.addSpace();
+		await sumUpGameTurn(game.players, deck);
 
 		if (game.isGameOver()) {
 			return true; //exit loop function
 		}
 
 		if (game.isHuman) {
-			speaker.hideNextTurnButton(true); //show next turn button
-			speaker.addSpace();
+			game.speaker.hideNextTurnButton(true); //show next turn button
+			game.speaker.addSpace();
 		}
-	}
-
-	async function wantsToSwapTest(index) {
-
-		let wantsToSwap = false;
-		let sayPass = players[index].sayPass();
-		let running = true;
-		let obj = null;
-		
-		const watchCallback = (result) => {
-
-		}
-
-		if (running && index !== players.len - 1) {
-			
-			obj = {
-				name : players[index + 1].name,
-				result : null
-			}
-			
-			const watchedObj = tools.onChange(obj, logger);
-
-			let result = await players[index].testForSwap(watchedObj); //Do small chance check if player has forgotten someone knocked 3 times.
-
-			if( players[index + 1] && players[index + 1].heldCard && players[index + 1].heldCard.isFool) { //If the other player has Narren...
-				if (result) {
-					wantsToSwap = true;
-				} else {
-					sayPass += players[index].sayNoFool(players[index + 1]);
-				}
-			} else {
-				if (!players[index].neverSwapsWithDeck && players[index].testForSwap(players[index + 1])) { //Only ask to swap if card is 4 or less.
-					wantsToSwap = true;
-				} else {
-					if (players[index].neverSwapsWithDeck) {
-						speaker.say (players[index].name + " never swaps!");
-					}
-				}
-			}
-
-			if (wantsToSwap) {
-				if (!askPlayers(index, players[index], players, deck, speaker)) { //Check if Staa for gjok! is called.
-					running = false;
-				}
-			} else {
-				speaker.say (sayPass);
-			}
-
-		} else {
-			if (players[index].testForSwap("deck")) { //Only swap if card is 4 or less.
-				speaker.say (players[index].name + " draws from the deck.");
-				players[index].drawFromDeck(deck); //Draw from deck if noone else to swap with.
-			} else {
-				speaker.say (sayPass);
-			}
-		}
-		// return wantsToSwap;
 	}
 	//End of game loop while
 
 	//proclaimWinner(highestScore[0], game, round, speaker);
 }
 
-async function updateStats(speaker, players) {
-	if (speaker.statsElems) {
+async function wantsToSwapTest(game, deck, index) {
+
+	let wantsToSwap = false;
+	let sayPass = game.players[index].sayPass();
+	let running = true;
+
+	if (running && index !== game.players.len - 1) {
+		running = false;
+
+		const watchCallback = async (result) => {
+			running = true;
+			await swapCards(game, index, result, wantsToSwap, sayPass, deck, running);
+		}
+
+		let obj = {
+			name : game.players[index + 1] ? game.players[index + 1].name : '',
+			result : null
+		}
+		
+		const watchedObj = tools.onChange(obj, watchCallback);
+
+		await game.players[index].testForSwap(watchedObj); //Do small chance check if player has forgotten someone knocked 3 times.
+
+	} else {
+		if (game.players[index].testForSwap("deck")) { //Only swap if card is 4 or less.
+			speaker.say (game.players[index].name + " draws from the deck.");
+			game.players[index].drawFromDeck(deck); //Draw from deck if noone else to swap with.
+		} else {
+			game.speaker.say (sayPass);
+		}
+	}
+}
+
+async function swapCards(game, index, result, wantsToSwap, sayPass, deck, running) {
+	if (game.players[index + 1] && game.players[index + 1].heldCard && game.players[index + 1].heldCard.isFool) { //If the other player has Narren...
+		if (result) {
+			wantsToSwap = true;
+		}
+		else {
+			sayPass += game.players[index].sayNoFool(game.players[index + 1]);
+		}
+	}
+	else {
+		if (!game.players[index].neverSwapsWithDeck && game.players[index].testForSwap(game.players[index + 1])) { //Only ask to swap if card is 4 or less.
+			wantsToSwap = true;
+		}
+		else {
+			if (game.players[index].neverSwapsWithDeck) {
+				game.speaker.say(game.players[index].name + " never swaps!");
+			}
+		}
+	}
+	if (wantsToSwap) {
+		// if (!askPlayers(index, game.players[index], game.players, deck, speaker)) { //Check if Staa for gjok! is called.
+		if (!askPlayers(index, game, deck)) { //Check if Staa for gjok! is called.
+			running = false;
+		}
+	}
+	else {
+		game.speaker.say(sayPass);
+	}
+}
+
+async function sumUpGameTurn(game, deck) {
+	//find winner
+	let maxVal = await tools.extreme(game.players, 'heldCard.value'); //maxval is default when not passing 3rd param
+	let winner = game.players[maxVal.mostIndex];
+	winner.wins++;
+	
+	//find loser
+	let minVal = await tools.extreme(game.players, 'heldCard.value', tools.FIND_MIN); //tools.FIND_MIN === true
+	let loser = game.players[minVal.mostIndex];
+	loser.losses++;
+
+	game.speaker.say("Winner of this round is " + winner.name + " with the card " + winner.heldCard.name);
+	winner.addToScore(1);
+	game.speaker.say("Loser of this round is " + loser.name + " with the card " + loser.heldCard.name);
+	loser.addToScore(-1);
+
+	//All game.players toss their card in the discard pile and search for Narren
+	for (let player of game.players) {
+		if (player.heldCard.value === 4) {
+			game.speaker.say("Unfortunately, " + player.name + "'s card at end of round is Narren.");
+			player.addToScore(-1);
+		}
+		player.discard(deck); //toss card to deck's discard pile
+	}
+
+	deck.testLengthSum();
+
+	//most wins
+	maxVal = await tools.extreme(game.players, 'wins');
+	let ply_mostWins = game.players[maxVal.mostIndex];
+	//most losses
+	maxVal = await tools.extreme(game.players, 'losses');
+	let ply_mostLosses = game.players[maxVal.mostIndex];
+	// highest score
+	maxVal = await tools.extreme(game.players, 'score');
+	let highestScore = game.players[maxVal.mostIndex];
+
+	let scoreLine = '';
+
+	for (let player of game.players) {
+		let thisPly = player.name;
+		if (player.pid === highestScorePlayers.pid) {
+			thisPly = "**" + thisPly.toUpperCase() + "**";
+		}
+		scoreLine += thisPly + ": " + player.score + ", ";
+	}
+
+	game.speaker.addSpace();
+	game.speaker.say (scoreLine.slice(0, scoreLine.len - 2));
+	game.speaker.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
+
+	//Make it next round
+	game.incValue();
+
+	console.log("highest score players:");
+	console.log(highestScorePlayers);
+	console.log("highest score players end");
+
+	//Set highest score
+	if (highestScore > highestScorePlayers[0]) {
+		highestScorePlayers.pop(); //remove last item
+		highestScorePlayers.unshift(highestScore); //set current highest score player as first item
+
+		game.speaker.say("INFO: Setting " + highestScorePlayers[0].score + " as new best score value for game.");
+	}
+	game.setHighestScore(highestScorePlayers[0].score);
+
+	game.speaker.addSpace();
+}
+
+async function updateStats(player, game) {
+	if (game.speaker.statsElems) {
 		let elem = null;
-		for (elem of Object.keys(speaker.statsElems)) {
+		console.log("updateStats:");
+		for (elem of Object.keys(game.speaker.statsElems)) {
 			console.log(elem);
 		}
 	}
-	// console.log("exiting updateStats");
 }
 
-function askPlayers(nbr, player, players, deck, speaker) {
+function askPlayers(nbr, game, deck) {
 	let nextAdd = 1;
 	let hasSwapped = false;
 	let dragonen = false;
+	let returnedCard = null;
 
-	while (!hasSwapped && !dragonen && (nbr + nextAdd) < players.len) {
-		player.requestSwap(players[nbr + nextAdd]);
-		returnedCardValue = players[nbr + nextAdd].answerSwap(player);
+	while (!hasSwapped && !dragonen && (nbr + nextAdd) < game.players.len) {
+		game.players[index].requestSwap(game.players[nbr + nextAdd]);
+		returnedCard = game.players[nbr + nextAdd].answerSwap(game.players[index]);
 
-		if (returnedCardValue === 4) {
-			speaker.say ("Everyone starts laughing and says 'Men " + players[nbr + nextAdd].name + " har jo narren!'");
+		if (returnedCard.constructor.name === 'Fool') {
+			game.speaker.say ("Everyone starts laughing and says 'Men " + game.players[nbr + nextAdd].name + " har jo narren!'");
 		}
 
-		result = player.processAnswer(returnedCardValue);
+		result = game.players[index].processAnswer(returnedCard);
 
 		if (result === 1) { //Hesten or huset
 			nextAdd++;
 		} else if (result === 2) { //katten
-			player.addToScore(-1);
+			game.players[index].addToScore(-1);
 			nextAdd++;
 		} else if (result === 3) { //dragonen
 			dragonen = true;
-			player.addToScore(-1);
+			game.players[index].addToScore(-1);
 		} else if (result === 4) { //gjoeken
-			subractFromAllPlayers(players[nbr + nextAdd], players);
+			subractFromAllPlayers(game.players[nbr + nextAdd], game.players);
 			return false;
 		} else { //The two players Swap cards
-			player.swapWithPlayer(players[nbr + nextAdd]);
+			game.players[index].swapWithPlayer(game.players[nbr + nextAdd]);
 			hasSwapped = true;
 		}
 
 		if (!hasSwapped) { //If player still hasn't swapped after being last in round
-			speaker.say (player.name + " draws from the deck.");
-			player.drawFromDeck(deck);
+			game.speaker.say (game.players[index].name + " draws from the deck.");
+			game.players[index].drawFromDeck(deck);
 		}
 	}
 	return true;
@@ -409,8 +416,8 @@ function subractFromAllPlayers(player, players) {
 	}
 }
 
-function proclaimWinner(player, game, round, speaker) {
-	speaker.addSpace();
+function proclaimWinner(player, game, round) {
+	game.speaker.addSpace();
 	let text = "<<<<<<<<<<<<<<<<<< ";
 	if (game.playType === 0) {
 		text += `The winner of ${game.maxValue} rounds of GNAV is...`;
@@ -418,12 +425,12 @@ function proclaimWinner(player, game, round, speaker) {
 		text += `The winner after ${round} rounds reaching score ${game.maxValue} is...`;
 	}
 	text += " >>>>>>>>>>>>>>>>>>";
-	speaker.say (text);
-	speaker.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
+	game.speaker.say (text);
+	game.speaker.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
 	let spaces = ((text.length - 2) / 2) - (player.name.length / 2);
-	speaker.say ('<<' + (' '.repeat(spaces)) + player.name + (' '.repeat(spaces - 2)) + '>>');
-	speaker.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
-	speaker.say ('<'.repeat(text.length / 2) + '>'.repeat(text.length / 2));
+	game.speaker.say ('<<' + (' '.repeat(spaces)) + player.name + (' '.repeat(spaces - 2)) + '>>');
+	game.speaker.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
+	game.speaker.say ('<'.repeat(text.length / 2) + '>'.repeat(text.length / 2));
 }
 
 function getRandomImgElem(search, width) {

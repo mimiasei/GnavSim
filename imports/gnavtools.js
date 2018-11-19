@@ -82,6 +82,7 @@ export async function shuffle(array) {
 }
 
 export async function extreme(array, attr, findMin) {
+	array = array || [];
 	attr = attr || null;
 	findMin = findMin || false;
 	if (array.length < 1) {
