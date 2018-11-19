@@ -26,15 +26,15 @@ $(document).ready(function() {
 
 	Player.index = 1;
 
-	$('#btnMenu').click(() => {
-		hideAll();
-		settingsPart();
-	});
-
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
 		settingsPart();
 	});
+
+	// $('#btnMenu').click(() => {
+	// 	hideAll();
+	// 	settingsPart();
+	// });
 
 	var active_chat = false;
 
