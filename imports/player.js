@@ -74,25 +74,12 @@ export default class Player {
 	answerSwap(fromPlayer) {
 		// let val = this._heldCard.value;
 		// if (val <= 16) {
-		if (!this._heldCard.isMatador) {
-			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(tools.TXT_ACCEPT_SWAP));
-		}
-		else {
-			// let reply = val < 21 ? Card.statement(val) : Card.statement(val).toUpperCase();
-			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(this._heldCard.statement)); //reply
-		}
+		let quote = this._heldCard.isMatador ? this._heldCard.statement : tools.TXT_ACCEPT_SWAP;
+
+		this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(quote));
+		
 		// return val;
 		return this._heldCard;
-	}
-
-	swapWithPlayer(fromPlayer) {
-		console.log("swapping...");
-		this._speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
-		let card = jQuery.extend(true, {}, this._heldCard);
-		console.log(card);
-		this._heldCard = jQuery.extend(true, {}, fromPlayer.heldCard);
-		console.log(this._heldCard);
-		fromPlayer.heldCard = jQuery.extend(true, {}, card);
 	}
 
 	processAnswer(returnedCardValue) {
@@ -115,6 +102,16 @@ export default class Player {
 		} else {
 			return 0; //Nothing happens.
 		}
+	}
+
+	swapWithPlayer(fromPlayer) {
+		console.log("swapping...");
+		this._speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
+		let card = jQuery.extend(true, {}, this._heldCard);
+		console.log(card);
+		this._heldCard = jQuery.extend(true, {}, fromPlayer.heldCard);
+		console.log(this._heldCard);
+		fromPlayer.heldCard = jQuery.extend(true, {}, card);
 	}
 
 	addToScore(value) {
@@ -144,7 +141,9 @@ export default class Player {
 		return true;
 	}
 
-	testForSwap(toPlayer = null) {
+	async testForSwap(obj) {
+		console.log("Player.testforswap:");
+		console.log(obj);
 		if (this._heldCard) {
 			let value = this._heldCard.value;
 			let swap = tools.SWAP_THRESHOLDNUMBER + 4;
@@ -156,8 +155,10 @@ export default class Player {
 			}
 
 			if (value > swap) {
+				obj.result = 'no';
 				return false; //Player doesn't want to swap and will say pass.
 			} else {
+				obj.result = 'yes';
 				return true; //Player wants to swap.
 			}
 		} else {

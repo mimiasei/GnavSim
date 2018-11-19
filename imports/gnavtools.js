@@ -11,7 +11,7 @@ export const TXT_KNOCK = " banker tre ganger på bordet. <BANK, BANK, BANK>";
 export const TXT_PASSES = " sier 'Jeg står'";
 export const TXT_NO_WAY_FOOL = [" and thinks 'Aldri i livet, ", "", " har jo narren!'"];
 
-export const FIND_MIN = true;
+export const MINVAL = true;
 
 export function ask(question, answers = []) {
 	/*
@@ -122,3 +122,25 @@ export async function extreme(array, attr, findMin) {
 		return obj;
 	}
 }
+
+export function onChange(object, onChangeFn) {
+	const handler = {
+		get(target, property, receiver) {
+			try {
+				return new Proxy(target[property], handler);
+			} catch (err) {
+				return Reflect.get(target, property, receiver);
+			}
+		},
+		defineProperty(target, property, descriptor) {
+			onChangeFn();
+			return Reflect.defineProperty(target, property, descriptor);
+		},
+		deleteProperty(target, property) {
+			onChangeFn();
+			return Reflect.deleteProperty(target, property);
+		}
+	};
+
+	return new Proxy(object, handler);
+};

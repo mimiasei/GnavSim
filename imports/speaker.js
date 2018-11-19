@@ -15,6 +15,7 @@ export default class Speaker {
 		this._tableData = [];
 		this._statsTableBody = $("#stats_table tbody");
 		this._nextTurnButton = $("#btnNextTurn");
+		this._menuButton = $("#btnMenu");
 		this._value = -1;
 		this._statsElems = [];
 		this._elemId = 0;
@@ -30,6 +31,7 @@ export default class Speaker {
 	get nextTurnButton() { return this._nextTurnButton }
 	get statsTable() { return this._statsTable }
 	get tableData() { return this._tableData }
+	get menuButton() { return this._menuButton }
 
 	set output(value) { this._output = jQuery.extend(true, {}, value) }
 	set stats(value) { this._stats = jQuery.extend(true, {}, value) }
@@ -78,6 +80,15 @@ export default class Speaker {
 		} else {
 			console.log("hiding next turn button...");
 			this._nextTurnButton.hide();
+		}
+	}
+
+	hideMenuButton(show) {
+		show = show || false;
+		if (show) {
+			this._menuButton.show();
+		} else {
+			this._menuButton.hide();
 		}
 	}
 	
@@ -143,11 +154,11 @@ export default class Speaker {
 			answers = [
 				{
 					text : 'Yes',
-					value : 0
+					value : true
 				},
 				{			
 					text : 'No',
-					value : 1
+					value : false
 				},
 			];
 		}
@@ -159,13 +170,6 @@ export default class Speaker {
 		// 	let element = this.createBtn(answer.text, callbackFn);
 		// 	this._outputBtns[index].html(element);
 		// }
-		this.hideNextTurnButton();
-		//test
-		callbackFn = (result) => {
-			console.log("result: ", result);
-			this.hideNextTurnButton(true);
-		};
-		//test end
 		this.hideNextTurnButton();
 		await this.openModal(question, answers, callbackFn);
 	}

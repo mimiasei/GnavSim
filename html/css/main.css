@@ -1,14 +1,19 @@
+:root {
+  --body-font: 'Roboto';
+  --body-fontsize: '25px';
+}
+
 body {
   color: lightgray;
   background-color: #416165;  /*deep space sparkle*/
-  font-family: Helvetica, sans-serif;
-  line-height: 1.4;
+  font-family: var(--body-font);
+  line-height: 1.5;
 }
 
 @media only screen 
   and (max-width: 839px) { 
     * {
-      font-size: calc(28px - 1vmax); /*mobile*/
+      font-size: calc(var(--body-fontsize) - 1vmax); /*mobile*/
     }
     .form-control {
       height: calc(70px - 1vmin) !important;
@@ -21,7 +26,7 @@ body {
 @media only screen 
   and (min-width : 840px) {
   * {
-    font-size: calc(24px - 1vmin); /*desktop*/
+    font-size: calc(var(--body-fontsize) - 1vmin); /*desktop*/
   }
   #settingsForm {
     width: 50%;
@@ -85,12 +90,16 @@ td:nth-child(3) {
 .tabulator {
   background-color: rgba(7, 79, 87, 1); /*midnight green*/
   border: none;
+  padding: 0;
+  margin: 0;
 }
 
 .tabulator-row .tabulator-cell {
   background-color: rgba(7, 79, 87, 1); /*midnight green*/
   color: rgba(187, 219, 180, 1); /*light moss green*/
   border: none;
+  padding: 0;
+  margin: 0;
 }
 
 .tabulator .tabulator-header .tabulator-col {
@@ -98,6 +107,8 @@ td:nth-child(3) {
   color: rgba(187, 219, 180, 1); /*light moss green*/
   border: none;
   overflow: hidden;
+  padding: 0;
+  margin: 0;
 }
 
 .tabulator-tableHolder .tabulator-table .tabulator-row,
@@ -105,6 +116,8 @@ td:nth-child(3) {
   background-color: rgba(7, 79, 87, 1); /*midnight green*/
   color: rgba(187, 219, 180, 1); /*light moss green*/
   border: none;
+  padding: 0;
+  margin: 0;
 }
 
 #info {

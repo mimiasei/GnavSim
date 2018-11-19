@@ -37,17 +37,26 @@ export default class Human extends Player {
 		this._speaker.say (`Player ${this.name}, you got the card ${card}.`);
 	}
 
-	testForSwap(toPlayer) {
-		if (toPlayer) {
+	async testForSwap(obj) {
+		if (obj) {
 			let text = "Do you want to ";
-			if (toPlayer == "deck") {
+			if (obj.name == "deck") {
 				text += "draw from the deck";
 			} else {
-				text += `swap cards with ${toPlayer.name}`;
+				text += `swap cards with ${obj.name}`;
 			}
-			return this._speaker.ask(text, 0) === 0;
+
+			let callbackFn = (result) => {
+				console.log("human ask result: ", result);
+				this._speaker.hideNextTurnButton(true);
+				obj.result = result ? 'yes' : 'no';
+				return result;
+			};
+
+			this._speaker.ask(text, 0, callbackFn);
+
 		} else {
-			console.log('toPlayer is undefined!');
+			console.log('testForSwap obj is undefined!');
 			return false;
 		}
 	}

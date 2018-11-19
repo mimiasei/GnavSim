@@ -4,11 +4,12 @@ export default class Game {
 
 	constructor(playType, maxValue, isHuman) {
 		playType = playType || 0;
-		maxValue = maxValue || 0;
+		maxValue = maxValue || 1;
 		isHuman = isHuman || false;
 		
 		this._playType = playType; //0 = max ROUNDS, 1 = reach SCORE
-		this._value = 0; //current value, either ROUND or highest SCORE
+		this._value = 1; //current value, either ROUND or highest SCORE
+		this._highscore = 0;
 		this._maxValue = maxValue; //value to reach, either ROUNDS or SCORE
 		this._isHuman = isHuman;
 		this._speaker = new Speaker(this);
@@ -18,6 +19,7 @@ export default class Game {
 
 	get playType() { return this._playType }
 	get value() { return this._value }
+	get highscore() { return this._highscore }
 	get maxValue() { return this._maxValue }
 	get isHuman() { return this._isHuman }
 	get round() { return this._round }
@@ -33,6 +35,13 @@ export default class Game {
 
 	isGameOver() {
 		return (this._value >= this._maxValue);
+	}
+
+	setHighestScore(score) {
+		this._highscore = score;
+		if (this._playType > 0) {
+			this._value = score;
+		} 
 	}
 
 	incValue() {

@@ -21,12 +21,15 @@ import * as tools from './imports/gnavtools.js';
 
 $(document).ready(function() {
 	console.log("document is ready");
-	$('#chat_section').hide();
-	$('#stats_table').hide();
-	$('#settingsForm').hide();
-	$('#btnNextTurn').hide();
+
+	hideAll();
 
 	Player.index = 1;
+
+	$('#btnMenu').click(() => {
+		hideAll();
+		settingsPart();
+	});
 
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
@@ -49,6 +52,14 @@ var _scope_settings = {
 	// winValue : 10
 }
 
+function hideAll() {
+	$('#chat_section').hide();
+	$('#stats_table').hide();
+	$('#settingsForm').hide();
+	$('#btnNextTurn').hide();
+	$('#btnMenu').hide();
+}
+
 function settingsPart() {
 	$('#chat_section').hide();
 	$('#settingsForm').show();
@@ -68,6 +79,18 @@ function settingsPart() {
 		if ($('#form_multiplayer').is(':checked')) {
 			alert("Multiplayer not yet implemented!");
 		}
+	});
+
+	//handle font change
+	$('#form_font').change(() => {
+		const value = $( "#form_font option:selected" ).val();
+		document.querySelector('body').style.setProperty('--body-font', value);
+	});
+
+	//handle font size change
+	$('#form_fontSize').change(() => {
+		const value = $( "#form_fontSize" ).val();
+		document.querySelector('body').style.setProperty('--body-fontsize', value + 'px');
 	});
 
 	$('#btn_playGame').click(async () => {
@@ -106,6 +129,9 @@ async function startGame(game) {
 async function playGame(game) {
 	let speaker = game.speaker; //create reference
 
+	//show menu button
+	speaker.hideMenuButton(true);
+
 	if (game.isHuman && _scope_settings.name) {
 		let human = new Human(_scope_settings.name, speaker);
 		game.players.push(human);
@@ -130,7 +156,6 @@ async function playGame(game) {
 	let deck = new Deck();
 	await deck.init(); //async
 
-	let round = 1;
 	let highestScorePlayers = [players[0], players[1]]; //set players as best and second best score
 
 	//function for when next turn button is clicked
@@ -154,7 +179,7 @@ async function playGame(game) {
 		//refresh table of player stats
 		speaker.refreshStatsTable(players);
 		
-		speaker.printRound(round, deck.cards.length);
+		speaker.printRound(game.value, deck.cards.length);
 		speaker.addSpace();
 		
 		// const imageSearches = ['infantry', 'cat', 'horse', 'bird', 'villa', 'jester', 'pot', 'owl'];
@@ -179,12 +204,10 @@ async function playGame(game) {
 		}
 
 		// ********* Play round *********
-		// let promiseArray = [];
 		for (const [index, player] of players.entries()) {
 			await updateStats(player, speaker);
 			await wantsToSwapTest(index);
 		}
-		// await Promise.all(promiseArray);
 		// ******** End of round ********
 		
 		//Calculate scores and stats
@@ -242,22 +265,19 @@ async function playGame(game) {
 		speaker.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
 
 		//Make it next round
-		round++;
+		game.incValue();
 
 		console.log("highest score players:");
 		console.log(highestScorePlayers);
 		console.log("highest score players end");
 
-		if (game.playType === 0) {
-			game.incValue();
-		} else {
-			if (highestScore > highestScorePlayers[0]) {
-				highestScorePlayers.pop(); //remove last item
-				highestScorePlayers.unshift(highestScore); //set current highest score player as first item
-				speaker.say("INFO: Setting " + highestScorePlayers[0].score + " as new best score value for game.");
-			}
-			game.value = highestScorePlayers[0].score;
+		//Set highest score
+		if (highestScore > highestScorePlayers[0]) {
+			highestScorePlayers.pop(); //remove last item
+			highestScorePlayers.unshift(highestScore); //set current highest score player as first item
+			speaker.say("INFO: Setting " + highestScorePlayers[0].score + " as new best score value for game.");
 		}
+		game.setHighestScore(highestScorePlayers[0].score);
 
 		speaker.addSpace();
 
@@ -272,17 +292,32 @@ async function playGame(game) {
 	}
 
 	async function wantsToSwapTest(index) {
+
 		let wantsToSwap = false;
 		let sayPass = players[index].sayPass();
 		let running = true;
+		let obj = null;
+		
+		const watchCallback = (result) => {
+
+		}
 
 		if (running && index !== players.len - 1) {
+			
+			obj = {
+				name : players[index + 1].name,
+				result : null
+			}
+			
+			const watchedObj = tools.onChange(obj, logger);
+
+			let result = await players[index].testForSwap(watchedObj); //Do small chance check if player has forgotten someone knocked 3 times.
+
 			if( players[index + 1] && players[index + 1].heldCard && players[index + 1].heldCard.isFool) { //If the other player has Narren...
-				if (!players[index].testForSwap(players[index + 1])) { //Do small chance check if player has forgotten someone knocked 3 times.
-					sayPass += players[index].sayNoFool(players[index + 1]);
-					// console.log(players[index].sayNoFool(players[index + 1]));
-				} else {
+				if (result) {
 					wantsToSwap = true;
+				} else {
+					sayPass += players[index].sayNoFool(players[index + 1]);
 				}
 			} else {
 				if (!players[index].neverSwapsWithDeck && players[index].testForSwap(players[index + 1])) { //Only ask to swap if card is 4 or less.
@@ -293,6 +328,7 @@ async function playGame(game) {
 					}
 				}
 			}
+
 			if (wantsToSwap) {
 				if (!askPlayers(index, players[index], players, deck, speaker)) { //Check if Staa for gjok! is called.
 					running = false;
@@ -300,6 +336,7 @@ async function playGame(game) {
 			} else {
 				speaker.say (sayPass);
 			}
+
 		} else {
 			if (players[index].testForSwap("deck")) { //Only swap if card is 4 or less.
 				speaker.say (players[index].name + " draws from the deck.");
@@ -308,8 +345,6 @@ async function playGame(game) {
 				speaker.say (sayPass);
 			}
 		}
-		// console.log("exiting wantsToSwapTest for ", players[index].name);
-
 		// return wantsToSwap;
 	}
 	//End of game loop while
