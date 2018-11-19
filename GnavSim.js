@@ -4,16 +4,8 @@ const HOST = "http://localhost";
 const PORT = 8000;
 
 import Player from '/imports/player.js';
-import Human from './imports/human.js';
-
-// import Card from './imports/card.js';		
-import Deck from './imports/deck.js';		
-// import Cuckoo from './imports/cuckoo.js';		
-// import Dragoon from './imports/dragoon.js';		
-// import Cat from './imports/cat.js';		
-// import Horse from './imports/horse.js';		
-// import House from './imports/house.js';		
-// import Fool from './imports/fool.js';	
+import Human from './imports/human.js';		
+import Deck from './imports/deck.js';			
 import Game from './imports/game.js';	
 import Speaker from './imports/speaker.js';
 
@@ -86,6 +78,8 @@ function settingsPart() {
 		const value = $( "#form_font option:selected" ).val();
 		document.querySelector('body').style.setProperty('--body-font', value);
 	});
+
+	document.querySelector('body').style.setProperty('--body-fontsize', '32px');
 
 	//handle font size change
 	$('#form_fontSize').change(() => {

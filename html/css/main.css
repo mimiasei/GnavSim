@@ -1,6 +1,6 @@
 :root {
   --body-font: 'Roboto';
-  --body-fontsize: '25px';
+  --body-fontsize: '32px';
 }
 
 body {
@@ -10,23 +10,9 @@ body {
   line-height: 1.5;
 }
 
-@media only screen 
-  and (max-width: 839px) { 
-    * {
-      font-size: calc(var(--body-fontsize) - 1vmax); /*mobile*/
-    }
-    .form-control {
-      height: calc(70px - 1vmin) !important;
-    }
-    #settingsForm {
-      width: 75%;
-    }
-}
-
-@media only screen 
-  and (min-width : 840px) {
+@media only screen {
   * {
-    font-size: calc(var(--body-fontsize) - 1vmin); /*desktop*/
+    font-size: calc(var(--body-fontsize) - 1.4vw); /*desktop*/
   }
   #settingsForm {
     width: 50%;
