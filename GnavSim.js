@@ -23,11 +23,6 @@ $(document).ready(function() {
 		settingsPart();
 	});
 
-	// $('#btnMenu').click(() => {
-	// 	hideAll();
-	// 	settingsPart();
-	// });
-
 	var active_chat = false;
 
 	$('#btn_chat').click(() => {
