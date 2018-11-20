@@ -15,7 +15,7 @@ export default class Speaker {
 		this._tableData = [];
 		this._statsTableBody = $("#stats_table tbody");
 		this._nextTurnButton = $("#btnNextTurn");
-		this._menuButton = $("#btnMenu");
+		this._knockButton = $("#btnKnock");
 		this._value = -1;
 		this._statsElems = [];
 		this._elemId = 0;
@@ -28,10 +28,12 @@ export default class Speaker {
 	get value() { return this._value }
 	get statsElems() { return this._statsElems }
 	get parent() { return this._parent }
-	get nextTurnButton() { return this._nextTurnButton }
+	//stats table
 	get statsTable() { return this._statsTable }
 	get tableData() { return this._tableData }
-	get menuButton() { return this._menuButton }
+	//buttons
+	get nextTurnButton() { return this._nextTurnButton }
+	get knockButton() { return this._knockButton }
 
 	set output(value) { this._output = jQuery.extend(true, {}, value) }
 	set stats(value) { this._stats = jQuery.extend(true, {}, value) }
@@ -45,8 +47,11 @@ export default class Speaker {
 		return cloned;
 	}
 
-	initialize(callbackFn) {
-		this._nextTurnButton.click(() => { callbackFn(true); });
+	initialize(nextTurnCallback, knockCallback) {
+		this._nextTurnButton.click(() => { nextTurnCallback(true); });
+
+		this._knockButton.click(() => { knockCallback(true); });
+
 		this._statsTable = new Tabulator('#stats_table', {
 			columnHeaderSortMulti: false,
 			layout: "fitColumns",
@@ -75,20 +80,18 @@ export default class Speaker {
 	hideNextTurnButton(show) {
 		show = show || false;
 		if (show) {
-			console.log("showing next turn button...");
 			this._nextTurnButton.show();
 		} else {
-			console.log("hiding next turn button...");
 			this._nextTurnButton.hide();
 		}
 	}
 
-	hideMenuButton(show) {
+	hideKnockButton(show) {
 		show = show || false;
 		if (show) {
-			this._menuButton.show();
+			this._knockButton.show();
 		} else {
-			this._menuButton.hide();
+			this._knockButton.hide();
 		}
 	}
 	
@@ -149,7 +152,7 @@ export default class Speaker {
 	}
 	
 	async ask(question, answers, callbackFn) {
-		//answers = 0 : default yes/no answers
+		//if answers === 0 : default yes/no answers
 		if (answers === 0) {
 			answers = [
 				{
@@ -163,14 +166,8 @@ export default class Speaker {
 			];
 		}
 		
-		// let div = this.createElem(null, null, 'margin-top-10'); //create group div
-		// div.append(this.say(question, 'span', 'margin-right-10'));
-		// this._output.append(div); //add group to output div
-		// for (const [index, answer] of answers.entries()) {
-		// 	let element = this.createBtn(answer.text, callbackFn);
-		// 	this._outputBtns[index].html(element);
-		// }
 		this.hideNextTurnButton();
+
 		await this.openModal(question, answers, callbackFn);
 	}
 	
@@ -203,10 +200,8 @@ export default class Speaker {
 		$("#modalBody").text(question + '?');
 
 		for (let i = 0; i < answers.length; i++) {
-			console.log(`#modalBtn_${i}`);
-			let $btn = $(`#modalBtn_${i}`);
-			$btn.text(answers[i].text);
-			$btn.click((e) => {
+			$(`#modalBtn_${i}`).text(answers[i].text);
+			$(`#modalBtn_${i}`).click((e) => {
 				this._modal.hide();
 				callbackFn(answers[i].value);
 			});

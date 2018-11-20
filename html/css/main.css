@@ -59,13 +59,13 @@ td:nth-child(3) {
   letter-spacing: 3px;
 }
 
-#btnNextTurn {
+.actionBtn {
   position: fixed;
   top: 20px;
-  right: 20px;
+  right: auto;
 }
 
-#btnNextTurn:focus, button:focus {
+.actionBtn:focus, button:focus {
   outline: none;
 }
 

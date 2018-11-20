@@ -8,23 +8,26 @@ export default class Human extends Player {
 	constructor(name, speaker) {
 		super(name, speaker);
 		this._human = true;
+		this._hasKnocked = false;
 	}
 
 	get human() { return this._human; }
 	get heldCard() { return super.heldCard; }
+	get hasKnocked() { return this._hasKnocked; }
 
 	set human(value) { this._human = value; }
 	set heldCard(value) {
 		super.heldCard = value;
 		this.printGotCard(super.heldCard.name);
- 	}
+	}
+	 
+	reset() {
+		this._hasKnocked = false;
+	}
 
 	knockOnTable() {
-		result = speaker.ask("Knock on the table", 0) === 0;
-		if (result) {
-			speaker.say (this.name + tools.TXT_KNOCK);
-		}
-		return result
+		this._speaker.say (this.name + tools.TXT_KNOCK);
+		this._hasKnocked = true;
 	}
 
 	requestSwap(toPlayer) {

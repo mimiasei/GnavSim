@@ -49,6 +49,7 @@ function hideAll() {
 	$('#stats_table').hide();
 	$('#settingsForm').hide();
 	$('#btnNextTurn').hide();
+	$('#btnKnock').hide();
 	$('#btnMenu').hide();
 }
 
@@ -108,10 +109,8 @@ async function submitSettingsAndReturnGame() {
 }
 
 async function startGame(game) {
-	let speaker = game.speaker;
-
 	//clear main output element
-	speaker.clear();
+	game.speaker.clear();
 
 	if (_scope_settings.multiplayer) {
 		//todo: implement multiplayer code
@@ -121,18 +120,16 @@ async function startGame(game) {
 }
 
 async function playGame(game) {
-	let speaker = game.speaker; //create reference
-
-	//show menu button
-	speaker.hideMenuButton(true);
+	//show knock button
+	game.speaker.hideKnockButton(true);
 
 	if (game.isHuman && _scope_settings.name) {
-		let human = new Human(_scope_settings.name, speaker);
+		let human = new Human(_scope_settings.name, game.speaker);
 		game.players.push(human);
 	}
 
 	for (const name of tools.PLAYERS) {
-		let newPlayer = new Player(name, speaker);
+		let newPlayer = new Player(name, game.speaker);
 
 		//Test, make Johannes a player that never swaps with anyone nor the deck
 		// if (index === 2) {
@@ -142,10 +139,8 @@ async function playGame(game) {
 		game.players.push(newPlayer);
 	}
 
-	let players = game.players; //create reference
-
-	let playersPromise = tools.shuffle(players);
-	players = await playersPromise; //wait for shuffle to finish
+	let playersPromise = tools.shuffle(game.players);
+	game.players = await playersPromise; //wait for shuffle to finish
 
 	let deck = new Deck();
 	await deck.init(); //async
@@ -153,68 +148,21 @@ async function playGame(game) {
 	let highestScorePlayers = [game.players[0], game.players[1]]; //set players as best and second best score
 
 	//function for when next turn button is clicked
-	let nextTurnCallback = (async (e) => {
-		game.nextTurn = e;
-		speaker.hideNextTurnButton();
-		await gameLoop(game, deck, game.players, highestScorePlayers);
+	let nextTurnCallback = (async (result) => {
+		game.nextTurn = result;
+		game.speaker.hideNextTurnButton();
+		highestScorePlayers = await gameLoop(game, deck, highestScorePlayers);
 	});
 
-	speaker.initialize(nextTurnCallback);
+	//function for when knock button is clicked
+	let knockCallback = (async (result) => {
+		console.log("knocking: ", result);
+	});
+
+	game.speaker.initialize(nextTurnCallback, knockCallback);
 
 	//play first turn
-	await gameLoop(game, deck, game.players, highestScorePlayers);
-	
-	async function gameLoop(game, deck, players, highestScorePlayers) {		
-		//clear main output element
-		game.speaker.clear();
-		
-		//refresh table of player stats
-		game.speaker.refreshStatsTable(game.players);
-		
-		game.speaker.printRound(game.value, deck.cards.length);
-		game.speaker.addSpace();
-		
-		// const imageSearches = ['infantry', 'cat', 'horse', 'bird', 'villa', 'jester', 'pot', 'owl'];
-		// game.speaker.output.append(getRandomImgElem(imageSearches[round % 8], 80));
-		// game.speaker.output.append(imageSearches[round % 8]);
-
-		game.speaker.say("Current dealer is: " + game.players[0].name);
-
-		//Pop out top player as dealer and insert at end
-		let oldDealer = game.players.shift(); //Pop out first player in list, to act as dealer
-		game.players.push(oldDealer); //Reinsert the dealer at the end of list
-
-		//Draw cards for each player
-		for (let i = 0; i < game.players.length; i++) {
-			game.players[i].drawFromDeck(deck);
-
-			if (game.players[i].heldCard && game.players[i].heldCard.isFool) { //If player receives Narren
-				if (game.players[i].knockOnTable()) {
-					game.players[i].addToScore(1);
-				}
-			}
-		}
-
-		// ********* Play round *********
-		for (const [index, player] of game.players.entries()) {
-			await updateStats(player, game);
-			await wantsToSwapTest(game, deck, index);
-		}
-		// ******** End of round ********
-		
-		//Calculate scores and stats
-		await sumUpGameTurn(game.players, deck);
-
-		if (game.isGameOver()) {
-			return true; //exit loop function
-		}
-
-		if (game.isHuman) {
-			game.speaker.hideNextTurnButton(true); //show next turn button
-			game.speaker.addSpace();
-		}
-	}
-	//End of game loop while
+	highestScorePlayers = await gameLoop(game, deck, highestScorePlayers);
 
 	//proclaimWinner(highestScore[0], game, round, speaker);
 }
@@ -252,6 +200,59 @@ async function wantsToSwapTest(game, deck, index) {
 	}
 }
 
+async function gameLoop(game, deck, highestScorePlayers) {		
+	//clear main output element
+	game.speaker.clear();
+	
+	//refresh table of player stats
+	game.speaker.refreshStatsTable(game.players);
+	
+	game.speaker.printRound(game.value, deck.cards.length);
+	game.speaker.addSpace();
+	
+	// const imageSearches = ['infantry', 'cat', 'horse', 'bird', 'villa', 'jester', 'pot', 'owl'];
+	// game.speaker.output.append(getRandomImgElem(imageSearches[round % 8], 80));
+	// game.speaker.output.append(imageSearches[round % 8]);
+
+	game.speaker.say("Current dealer is: " + game.players[0].name);
+
+	//Pop out top player as dealer and insert at end
+	let oldDealer = game.players.shift(); //Pop out first player in list, to act as dealer
+	game.players.push(oldDealer); //Reinsert the dealer at the end of list
+
+	//Draw cards for each player
+	for (let i = 0; i < game.players.length; i++) {
+		game.players[i].drawFromDeck(deck);
+
+		if (game.players[i].heldCard && game.players[i].heldCard.isFool) { //If player receives Narren
+			if (game.players[i].knockOnTable()) {
+				game.players[i].addToScore(1);
+			}
+		}
+	}
+
+	// ********* Play round *********
+	for (const [index, player] of game.players.entries()) {
+		await updateStats(player, game);
+		await wantsToSwapTest(game, deck, index);
+	}
+	// ******** End of round ********
+	
+	//Calculate scores and stats
+	highestScorePlayers = await sumUpGameTurn(game, deck, highestScorePlayers);
+
+	if (game.isGameOver()) {
+		return true; //exit loop function
+	}
+
+	if (game.isHuman) {
+		game.speaker.hideNextTurnButton(true); //show next turn button
+		game.speaker.addSpace();
+	}
+
+	return highestScorePlayers;
+}
+
 async function swapCards(game, index, result, wantsToSwap, sayPass, deck, running) {
 	if (game.players[index + 1] && game.players[index + 1].heldCard && game.players[index + 1].heldCard.isFool) { //If the other player has Narren...
 		if (result) {
@@ -282,9 +283,10 @@ async function swapCards(game, index, result, wantsToSwap, sayPass, deck, runnin
 	}
 }
 
-async function sumUpGameTurn(game, deck) {
+async function sumUpGameTurn(game, deck, highestScorePlayers) {
 	//find winner
 	let maxVal = await tools.extreme(game.players, 'heldCard.value'); //maxval is default when not passing 3rd param
+	console.log("maxval: ", maxVal);
 	let winner = game.players[maxVal.mostIndex];
 	winner.wins++;
 	
@@ -300,14 +302,14 @@ async function sumUpGameTurn(game, deck) {
 
 	//All game.players toss their card in the discard pile and search for Narren
 	for (let player of game.players) {
-		if (player.heldCard.value === 4) {
+		if (player.heldCard.ifFool) {
 			game.speaker.say("Unfortunately, " + player.name + "'s card at end of round is Narren.");
 			player.addToScore(-1);
 		}
 		player.discard(deck); //toss card to deck's discard pile
 	}
 
-	deck.testLengthSum();
+	// deck.testLengthSum();
 
 	//most wins
 	maxVal = await tools.extreme(game.players, 'wins');
@@ -350,6 +352,8 @@ async function sumUpGameTurn(game, deck) {
 	game.setHighestScore(highestScorePlayers[0].score);
 
 	game.speaker.addSpace();
+
+	return highestScorePlayers;
 }
 
 async function updateStats(player, game) {
