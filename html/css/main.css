@@ -19,6 +19,22 @@ body {
   }
 }
 
+h1 {
+  font-size: 4.0vw;
+}
+
+h2 {
+  font-size: 3.5vw;
+}
+
+h3 {
+  font-size: 3.0vw;
+}
+
+h4 {
+  font-size: 2.5vw;
+}
+
 input:disabled {
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==) repeat;
 }

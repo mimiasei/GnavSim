@@ -7,7 +7,6 @@ import Player from '/imports/player.js';
 import Human from './imports/human.js';		
 import Deck from './imports/deck.js';			
 import Game from './imports/game.js';	
-import Speaker from './imports/speaker.js';
 
 import * as tools from './imports/gnavtools.js';	
 
