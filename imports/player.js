@@ -6,10 +6,10 @@ import * as tools from './gnavtools.js';
 
 export default class Player {
 
-	constructor(name, speaker) {
+	constructor(name, game) {
 		this._name = name || '';
 		this._pid = this.getIndex();
-		this._speaker = speaker || null;
+		this._game = game || null;
 		this._score = 5;
 		this._heldCard = null;
 		this._wins = 0;
@@ -19,7 +19,6 @@ export default class Player {
 
 	get name() { return this._name; }
 	get pid() { return this._pid; }
-	get speaker() { return this._speaker; }
 	get score() { return this._score; }
 	get heldCard() { return this._heldCard; }
 	get wins() { return this._wins; }
@@ -28,7 +27,6 @@ export default class Player {
 
 	set name(value) { this._name = value }
 	// set pid(value) { this._pid = value }
-	set speaker(value) { this._speaker = value }
 	set score(value) { this._score = value }
 	set heldCard(value) { this._heldCard = Card.clone(value) }
 	set wins(value) { this._wins = value }
@@ -39,7 +37,7 @@ export default class Player {
 		let cloned = Object.assign (Object.create (Object.getPrototypeOf (player)), player);
 		cloned.name = player.name;
 		cloned.pid = player.pid;
-		cloned.speaker = Speaker.clone(player.speaker);
+		cloned.game = Game.clone(player.game);
 		cloned.score = player.score;
 		cloned.heldCard = Card.clone(player.heldCard);
 		cloned.wins = player.wins;
@@ -66,20 +64,84 @@ export default class Player {
 		}
 		this._heldCard = null;
 	}
+
+	async wantsToSwapTest(withPlayer, deck) {
+
+		let wantsToSwap = false;
+		let running = true;
+	
+		if (withPlayer !== 'deck') {
+			running = false;
+	
+			const watchCallback = async (result) => {
+				running = true;
+				await this.swapCards(withPlayer, result, wantsToSwap, deck);
+			}
+	
+			let obj = {
+				name : withPlayer.name,
+				result : null
+			}
+			
+			const watchedObj = tools.onChange(obj, watchCallback);
+	
+			await this.testForSwap(watchedObj); //Do small chance check if player has forgotten someone knocked 3 times.
+	
+		} else {
+			if (this.testForSwap('deck')) { //Only swap if card is 4 or less.
+				this._game.speaker.say (this._name + ' draws from the deck.');
+				this.drawFromDeck(deck); //Draw from deck if noone else to swap with.
+			} else {
+				this._game.speaker.say (this.sayPass());
+			}
+		}
+	}
+
+	async swapCards(withPlayer, result, wantsToSwap, deck) {
+		let sayPass = '';
+
+		if (withPlayer && withPlayer.heldCard && withPlayer.heldCard.isFool) { //If the other player has Narren...
+			if (result) {
+				wantsToSwap = true;
+			}
+			else {
+				sayPass = this.sayNoFool(withPlayer);
+			}
+		}
+		else {
+			if (!this._neverSwapsWithDeck && this.testForSwap(withPlayer)) { //Only ask to swap if card is 4 or less.
+				wantsToSwap = true;
+			}
+			else {
+				if (this._neverSwapsWithDeck) {
+					this._game.speaker.say(this._name + " never swaps!");
+				}
+			}
+		}
+		if (wantsToSwap) {
+			// if (!askPlayers(index, game.players[index], game.players, deck, speaker)) { //Check if Staa for gjok! is called.
+			if (!askPlayers(index, game, deck)) { //Check if Staa for gjok! is called.
+				running = false;
+			}
+		}
+		else {
+			this._game.speaker.say(sayPass);
+		}
+	}
 	
 	requestSwap(toPlayer) {
-		this._speaker.say (this.sayTo(toPlayer, 0) + tools.quote(tools.TXT_WANT_TO_SWAP));
+		this._game.speaker.say (this.sayTo(toPlayer, 0) + tools.quote(tools.TXT_WANT_TO_SWAP));
 	}
 
 	answerSwap(fromPlayer) {
 		// let val = this._heldCard.value;
 		// if (val <= 16) {
 		if (!this._heldCard.isMatador) {
-			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(tools.TXT_ACCEPT_SWAP));
+			this._game.speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(tools.TXT_ACCEPT_SWAP));
 		}
 		else {
 			// let reply = val < 21 ? Card.statement(val) : Card.statement(val).toUpperCase();
-			this._speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(this._heldCard.statement)); //reply
+			this._game.speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(this._heldCard.statement)); //reply
 		}
 		// return val;
 		return this._heldCard;
@@ -87,29 +149,13 @@ export default class Player {
 
 	swapWithPlayer(fromPlayer) {
 		console.log("swapping...");
-		this._speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
+		this._game.speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
 		let card = jQuery.extend(true, {}, this._heldCard);
 		console.log(card);
 		this._heldCard = jQuery.extend(true, {}, fromPlayer.heldCard);
 		console.log(this._heldCard);
 		fromPlayer.heldCard = jQuery.extend(true, {}, card);
 	}
-
-	// processAnswer(returnedCardValue) {
-	// 	if (returnedCardValue > 16) { //If one of the matador cards (better than (12))
-	// 		if (returnedCardValue == 17 || returnedCardValue == 18) { //huset, hesten
-	// 			return 1; //must ask next player.
-	// 		} else if (returnedCardValue == 19) { //katten
-	// 			return 2; //Loses 1 score and must ask next player.
-	// 		} else if (returnedCardValue == 20) { //dragonen
-	// 			return 3; //Loses 1 score.
-	// 		} else if (returnedCardValue == 21) { //gjoeken
-	// 			return 4; //Turn is over for all players.
-	// 		}
-	// 	} else {
-	// 		return 0; //Nothing happens.
-	// 	}
-	// }
 
 	processAnswer(returnedCard) {
 		if (returnedCard.isMatador) { //If one of the matador cards
@@ -131,7 +177,7 @@ export default class Player {
 		console.log(this._name, this._score);
 		let verb = value > 0 ? "added" : "subtracted";
 		let prepos = value > 0 ? "to" : "from";
-		this._speaker.say (`${this.name} ${verb} ${Math.abs(value)} ${prepos} score.`);
+		this._game.speaker.say (`${this.name} ${verb} ${Math.abs(value)} ${prepos} score.`);
 	}
 
 	sayTo(toPlayer, typ) {
@@ -149,7 +195,7 @@ export default class Player {
 	}
 
 	knockOnTable() {
-		this._speaker.say (this._name + tools.TXT_KNOCK);
+		this._game.speaker.say (this._name + tools.TXT_KNOCK);
 		return true;
 	}
 

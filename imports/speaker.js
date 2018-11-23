@@ -58,7 +58,6 @@ export default class Speaker {
 			responsiveLayout: "hide",
 			tooltipsHeader: false,
 			columns: [
-				{ title: 'Id', field: 'id', headerSort: false, align: 'center', width: 30, responsive: 2 },
 				{ title: 'Name', field: 'name', headerSort: false, widthGrow: 2, responsive: 0, minWidth: 70 },
 				{ title: 'Score', field: 'score', align: 'center', headerSort: false, minWidth: 40 },
 				{ title: 'Wins', field: 'wins', align: 'center', headerSort: false, responsive: 3, minWidth: 40 },
@@ -226,6 +225,12 @@ export default class Speaker {
 		this._output.append(group);
 	}
 
+	updateStats(player) {
+		const index = this.getStatsIndex(player);
+		this._tableData[index].score = player.score;
+		this._statsTable.updateData([{ id: index, score: player.score }]);
+	}
+
 	addToStats(name, type) {
 		let $elem = this.createElem(name, type);
 		this._statsElems.push($elem);
@@ -235,13 +240,12 @@ export default class Speaker {
 	refreshStatsTable(players) {
 		this._tableData = [];
 
-		for (let i = 0; i < players.length; i++) {
+		for (const player of players) {
 			let obj = { 
-				id: players[i].pid, 
-				name: players[i].name,
-				score: players[i].score,
-				wins: players[i].wins,
-				losses: players[i].losses,
+				name: player.name,
+				score: player.score,
+				wins: player.wins,
+				losses: player.losses,
 			};
 			this._tableData.push(obj);
 		}
@@ -253,9 +257,13 @@ export default class Speaker {
 		});
 	}
 
+	getStatsIndex(player) {
+		return this._tableData.findIndex(line => line.field === player.name);
+	}
+
 	getStatsElem(name) {
 		return this._statsElems.find((e) => {
-			return e.text = name; 
+			return e.text === name; 
 		});
 	}
 

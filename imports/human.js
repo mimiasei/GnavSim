@@ -5,8 +5,8 @@ import Card from './card.js';
 
 export default class Human extends Player {
 
-	constructor(name, speaker) {
-		super(name, speaker);
+	constructor(name, game) {
+		super(name, game);
 		this._human = true;
 		this._hasKnocked = false;
 	}
@@ -26,18 +26,18 @@ export default class Human extends Player {
 	}
 
 	knockOnTable() {
-		this._speaker.say (this.name + tools.TXT_KNOCK);
+		this._game.speaker.say (this.name + tools.TXT_KNOCK);
 		this._hasKnocked = true;
 	}
 
 	requestSwap(toPlayer) {
-		this._speaker.say (this.sayTo(toPlayer, 0) + quote(tools.TXT_WANT_TO_SWAP));
+		this._game.speaker.say (this.sayTo(toPlayer, 0) + quote(tools.TXT_WANT_TO_SWAP));
 	}
 
 	printGotCard(cardName) {
 		cardName = cardName || '';
 		let card = cardName === '' ? this._heldCard.name : cardName;
-		this._speaker.say (`Player ${this.name}, you got the card ${card}.`);
+		this._game.speaker.say (`Player ${this.name}, you got the card ${card}.`);
 	}
 
 	async testForSwap(obj) {
@@ -51,12 +51,12 @@ export default class Human extends Player {
 
 			let callbackFn = (result) => {
 				console.log("human ask result: ", result);
-				this._speaker.hideNextTurnButton(true);
+				this._game.speaker.hideNextTurnButton(true);
 				obj.result = result ? 'yes' : 'no';
 				return result;
 			};
 
-			this._speaker.ask(text, 0, callbackFn);
+			this._game.speaker.ask(text, 0, callbackFn);
 
 		} else {
 			console.log('testForSwap obj is undefined!');
