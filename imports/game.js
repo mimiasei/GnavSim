@@ -6,6 +6,8 @@ export default class Game extends EventTarget {
 		playType = playType || 0;
 		maxValue = maxValue || 1;
 		isHuman = isHuman || false;
+
+		super();
 		
 		this._playType = playType; //0 = max ROUNDS, 1 = reach SCORE
 		this._turn = 1; //current turn
@@ -16,6 +18,8 @@ export default class Game extends EventTarget {
 		this._players = [];
 		this._dealer = 0;
 		this._currentPlayer = 0;
+
+		this.initEvents();
 	}
 
 	//getters
@@ -39,6 +43,22 @@ export default class Game extends EventTarget {
 	set isHuman(value) { this._isHuman = value }
 	set players(value) { this._players = Array.from(value) }
 
+	initEvents() {
+		this.addEventListener(
+			'event_hasSwapped', 
+			(event) => {
+				console.log("event_hasSwapped called by player: ", this._players[event.detail.playerIndex]);
+			}
+		);
+
+		this.addEventListener(
+			'event_endTurn', 
+			(event) => {
+				console.log("event_endTurn called by player: ", this._players[event.detail.playerIndex]);
+			}
+		);
+	}
+
 	async gameLoop(deck, highestScorePlayers) {		
 		//clear main output element
 		this._speaker.clear();
@@ -49,39 +69,37 @@ export default class Game extends EventTarget {
 		this._speaker.printRound(this._value, deck.cards.length);
 		this._speaker.addSpace();
 	
+		//Draw cards for each player
+		this.dealOutCards(deck);
+	
+		// ********* Play round *********
+
+		/**
+		 * One round consists of these stages:
+		 * 
+		 * 1. set next dealer
+		 * 2. deal cards
+		 * 3. listen for knock event from players with the fool card
+		 * 4. player has these stages:
+		 * 		a. check if player wants to swap with the next player or deck (wait for event)
+		 * 		b. go to next player after swapping stage is finished
+		 * 
+		 */
+
 		//set next dealer
 		this.nextDealer();
 		//proclaim dealer
 		this._speaker.say("Current dealer is: " + this._players[0].name);
-	
-		//Draw cards for each player
-		this.dealOutCards(deck);
 
-		//****** test event dispatcher
-		const myDispatcher = new Dispatcher();
 
-		// Listen for socket messages
-		this.addEventListener("message", (message) => {
-			// dispatch the appropriate event
-			const data = JSON.parse(message.data);
-			myDispatcher.dispatch(data.event, data);
-		});
-
-		// Add event listeners for the events that come from the socket
-		myDispatcher.on("NewMessage", addMessage);
-		myDispatcher.on("MessageEdited", changeMessage);
-		myDispatcher.on("MessageEdited", someSideEffect);
-		//***** end test
-	
-		// ********* Play round *********
-		for (const [index, player] of this._players.entries()) {
-			this._speaker.updateStats(player);
-			let withPlayer = 'deck';
-			if (index + 2 <= this._players.length) { //same as index + 1 <= this._players.length - 1
-				withPlayer = this._players[index + 1];
-			}
-			await player.wantsToSwapTest(withPlayer, deck);
-		}
+		// for (const [index, player] of this._players.entries()) {
+		// 	this._speaker.updateStats(player);
+		// 	let withPlayer = 'deck';
+		// 	if (index + 2 <= this._players.length) { //same as index + 1 <= this._players.length - 1
+		// 		withPlayer = this._players[index + 1];
+		// 	}
+		// 	await player.wantsToSwapTest(withPlayer, deck);
+		// }
 		// ******** End of round ********
 		
 		//Calculate scores and stats
@@ -161,7 +179,7 @@ class Dispatcher {
 		// If the event does not exist then we should create it!
 		if (!event) {
 			event = new DispatcherEvent(eventName);
-			this.events[eventName] = event;
+			this._events[eventName] = event;
 		}
 		// Now we add the callback to the event
 		event.registerCallback(callback);
@@ -169,14 +187,15 @@ class Dispatcher {
 	
 	off(eventName, callback) {
 	    // First get the correct event
-		const event = this.events[eventName];
+		const event = this._events[eventName];
+
 		// Check that the event exists and it has the callback registered
 		if (event && event.callbacks.indexOf(callback) > -1) {
 			// if it is registered then unregister it!
 			event.unregisterCallback(callback);
 			// if the event has no callbacks left, delete the event
 			if (event.callbacks.length === 0) {
-				delete this.events[eventName];
+				delete this._events[eventName];
 			}
 		}
 	}
@@ -195,20 +214,22 @@ class DispatcherEvent {
 
 	unregisterCallback(callback) {
 	    // Get the index of the callback in the callbacks array
-		const index = this.callbacks.indexOf(callback);
+		const index = this._callbacks.indexOf(callback);
+
 		// If the callback is in the array then remove it
 		if (index > -1) {
-			this.callbacks.splice(index, 1);
+			this_callbacks.splice(index, 1);
 		}
 	}
 
 	fire(data) {
 		// We loop over a cloned version of the callbacks array
 		// in case the original array is spliced while looping
-		const callbacks = this.callbacks.slice(0);
+		const callbacks = this._callbacks.slice(0);
+
 		// loop through the callbacks and call each one
-		callbacks.forEach((callback) => {
+		for (const callback of callbacks) {
 			callback(data);
-		});
+		}
 	}
 }

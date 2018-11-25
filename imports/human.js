@@ -2,6 +2,7 @@
 
 import Player from './player.js';
 import Card from './card.js';
+import * as tools from './gnavtools.js';
 
 export default class Human extends Player {
 
