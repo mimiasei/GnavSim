@@ -1,6 +1,6 @@
 import Speaker from './speaker.js';
 
-export default class Game {
+export default class Game extends EventTarget {
 
 	constructor(playType, maxValue, isHuman) {
 		playType = playType || 0;
@@ -8,17 +8,19 @@ export default class Game {
 		isHuman = isHuman || false;
 		
 		this._playType = playType; //0 = max ROUNDS, 1 = reach SCORE
-		this._value = 1; //current value, either ROUND or highest SCORE
+		this._turn = 1; //current turn
 		this._highscore = 0;
 		this._maxValue = maxValue; //value to reach, either ROUNDS or SCORE
 		this._isHuman = isHuman;
 		this._speaker = new Speaker(this);
-		this._dealer = 0;
 		this._players = [];
+		this._dealer = 0;
+		this._currentPlayer = 0;
 	}
 
+	//getters
 	get playType() { return this._playType }
-	get value() { return this._value }
+	get turn() { return this._turn }
 	get highscore() { return this._highscore }
 	get maxValue() { return this._maxValue }
 	get isHuman() { return this._isHuman }
@@ -27,8 +29,12 @@ export default class Game {
 	get players() { return this._players }
 	get speaker() { return this._speaker }
 
+	//Special getters
+	get currentPlayer() { return this._players[this._currentPlayer] }
+	get currentDealer() { return this._players[this._dealer] }
+
 	set playType(value) { this._playType = value }
-	set value(value) { this._value = value }
+	set turn(value) { this._turn= turn }
 	set maxValue(value) { this._maxValue = value }
 	set isHuman(value) { this._isHuman = value }
 	set players(value) { this._players = Array.from(value) }
@@ -50,6 +56,22 @@ export default class Game {
 	
 		//Draw cards for each player
 		this.dealOutCards(deck);
+
+		//****** test event dispatcher
+		const myDispatcher = new Dispatcher();
+
+		// Listen for socket messages
+		this.addEventListener("message", (message) => {
+			// dispatch the appropriate event
+			const data = JSON.parse(message.data);
+			myDispatcher.dispatch(data.event, data);
+		});
+
+		// Add event listeners for the events that come from the socket
+		myDispatcher.on("NewMessage", addMessage);
+		myDispatcher.on("MessageEdited", changeMessage);
+		myDispatcher.on("MessageEdited", someSideEffect);
+		//***** end test
 	
 		// ********* Play round *********
 		for (const [index, player] of this._players.entries()) {
@@ -108,15 +130,85 @@ export default class Game {
 		} 
 	}
 
-	incValue() {
-		this._value++;
+	nextTurn() {
+		this._turn++;
 		this._dealer++;
+		//reset dealer after last player index
 		if (this._dealer > this._players.length - 1) {
 			this._dealer = 0;
 		}
 	}
+}
 
-	getDealerPlayer() {
-		return this._players[this._dealer];
+class Dispatcher {
+
+	constructor() {
+		this._events = {};
+	}
+
+	dispatch(eventName, data) {
+		// First we grab the event
+		const event = this.events[eventName];
+		// If the event exists then we fire it!
+		if (event) {
+			event.fire(data);
+		}
+	}
+
+	on(eventName, callback) {
+		// First we grab the event from this.events
+		let event = this.events[eventName];
+		// If the event does not exist then we should create it!
+		if (!event) {
+			event = new DispatcherEvent(eventName);
+			this.events[eventName] = event;
+		}
+		// Now we add the callback to the event
+		event.registerCallback(callback);
+	}
+	
+	off(eventName, callback) {
+	    // First get the correct event
+		const event = this.events[eventName];
+		// Check that the event exists and it has the callback registered
+		if (event && event.callbacks.indexOf(callback) > -1) {
+			// if it is registered then unregister it!
+			event.unregisterCallback(callback);
+			// if the event has no callbacks left, delete the event
+			if (event.callbacks.length === 0) {
+				delete this.events[eventName];
+			}
+		}
+	}
+}
+
+class DispatcherEvent {
+
+	constructor(eventName) {
+		this._eventName = eventName;
+		this._callbacks = [];
+	}
+
+	registerCallback(callback) {
+		this.callbacks.push(callback);
+	}
+
+	unregisterCallback(callback) {
+	    // Get the index of the callback in the callbacks array
+		const index = this.callbacks.indexOf(callback);
+		// If the callback is in the array then remove it
+		if (index > -1) {
+			this.callbacks.splice(index, 1);
+		}
+	}
+
+	fire(data) {
+		// We loop over a cloned version of the callbacks array
+		// in case the original array is spliced while looping
+		const callbacks = this.callbacks.slice(0);
+		// loop through the callbacks and call each one
+		callbacks.forEach((callback) => {
+			callback(data);
+		});
 	}
 }

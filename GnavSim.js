@@ -247,7 +247,7 @@ async function sumUpGameTurn(game, deck, highestScorePlayers) {
 	game.speaker.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
 
 	//Make it next round
-	game.incValue();
+	game.nextTurn();
 
 	console.log("highest score players:");
 	console.log(highestScorePlayers);
