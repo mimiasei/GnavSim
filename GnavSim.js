@@ -126,20 +126,22 @@ async function playGame(game) {
 		let newPlayer = new Player(name, game);
 
 		//Test, make Johannes a player that never swaps with anyone nor the deck
-		// if (index === 2) {
-		// 	newPlayer.neverSwapsWithDeck = false;
+		// if (name === 'Johannes') {
+		// 	newPlayer.neverSwapsWithDeck = true;
 		// }
 
 		game.players.push(newPlayer);
 	}
 
 	let playersPromise = tools.shuffle(game.players);
-	game.players = await playersPromise; //wait for shuffle to finish
+	//wait for shuffle to finish
+	game.players = await playersPromise; 
 
 	let deck = new Deck();
-	await deck.init(); //async
+	await deck.init();
 
-	let highestScorePlayers = [game.players[0], game.players[1]]; //set players as best and second best score
+	//set players as best and second best score
+	let highestScorePlayers = [game.players[0], game.players[1]];
 
 	//function for when next turn button is clicked
 	const nextTurnCallback = (async (result) => {
@@ -248,10 +250,6 @@ async function sumUpGameTurn(game, deck, highestScorePlayers) {
 
 	//Make it next round
 	game.nextTurn();
-
-	console.log("highest score players:");
-	console.log(highestScorePlayers);
-	console.log("highest score players end");
 
 	//Set highest score
 	if (highestScore > highestScorePlayers[0]) {

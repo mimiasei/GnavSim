@@ -8,6 +8,9 @@ export default class Game extends EventTarget {
 		isHuman = isHuman || false;
 
 		super();
+
+		Game.STATE_BEFORE_SWAP = 0x01;
+		Game.STATE_AFTER_SWAP = 0x02;
 		
 		this._playType = playType; //0 = max ROUNDS, 1 = reach SCORE
 		this._turn = 1; //current turn
@@ -18,6 +21,7 @@ export default class Game extends EventTarget {
 		this._players = [];
 		this._dealer = 0;
 		this._currentPlayer = 0;
+		this._state = Game.STATE_BEFORE_SWAP;
 
 		this.initEvents();
 	}
@@ -31,17 +35,19 @@ export default class Game extends EventTarget {
 	get round() { return this._round }
 	get dealer() { return this._dealer }
 	get players() { return this._players }
-	get speaker() { return this._speaker }
+	get state() { return this._state }
 
 	//Special getters
 	get currentPlayer() { return this._players[this._currentPlayer] }
 	get currentDealer() { return this._players[this._dealer] }
 
+	//setters
 	set playType(value) { this._playType = value }
-	set turn(value) { this._turn= turn }
+	set turn(value) { this._turn = value }
 	set maxValue(value) { this._maxValue = value }
 	set isHuman(value) { this._isHuman = value }
 	set players(value) { this._players = Array.from(value) }
+	set state(value) { this._state = value }
 
 	initEvents() {
 		this.addEventListener(
