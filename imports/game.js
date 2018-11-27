@@ -9,21 +9,21 @@ export default class Game extends EventTarget {
 
 		super();
 
-		Game.STATE_BEFORE_SWAP = 0x01;
-		Game.STATE_AFTER_SWAP = 0x02;
+		Game.STATE_START_TURN = 'state_startTurn';
+		Game.STATE_BEFORE_SWAP = 'state_beforeSwap';
+		Game.STATE_AFTER_SWAP = 'state_afterSwap';
+		Game.STATE_END_TURN = 'state_endTurn';
 		
 		this._playType = playType; //0 = max ROUNDS, 1 = reach SCORE
 		this._turn = 1; //current turn
 		this._highscore = 0;
 		this._maxValue = maxValue; //value to reach, either ROUNDS or SCORE
 		this._isHuman = isHuman;
-		this._speaker = new Speaker(this);
+		this._speaker = null;
 		this._players = [];
-		this._dealer = 0;
-		this._currentPlayer = 0;
+		this._dealerIndex = 0;
+		this._currPlayerIndex = 0;
 		this._state = Game.STATE_BEFORE_SWAP;
-
-		this.initEvents();
 	}
 
 	//getters
@@ -32,14 +32,14 @@ export default class Game extends EventTarget {
 	get highscore() { return this._highscore }
 	get maxValue() { return this._maxValue }
 	get isHuman() { return this._isHuman }
-	get round() { return this._round }
-	get dealer() { return this._dealer }
+	get dealer() { return this._dealerIndex }
 	get players() { return this._players }
 	get state() { return this._state }
+	get speaker() { return this._speaker }
 
 	//Special getters
-	get currentPlayer() { return this._players[this._currentPlayer] }
-	get currentDealer() { return this._players[this._dealer] }
+	get currentPlayer() { return this._players[this._currPlayerIndex] }
+	get currentDealer() { return this._players[this._dealerIndex] }
 
 	//setters
 	set playType(value) { this._playType = value }
@@ -49,18 +49,62 @@ export default class Game extends EventTarget {
 	set players(value) { this._players = Array.from(value) }
 	set state(value) { this._state = value }
 
-	initEvents() {
+	async init() {
+		
+		//function for when next turn button is clicked
+		const nextTurnCallback = (async (result) => {			
+			// First create the event
+			const event = new CustomEvent('event_endTurn', {
+				detail: {
+					player: this.currentPlayer
+				}
+			});
+			
+			// Trigger it!
+			this.dispatchEvent(event);
+			
+			this.nextTurn = result;
+			this.speaker.hideNextTurnButton();
+			// highestScorePlayers = await gameLoop(game, deck, highestScorePlayers);
+		});
+		
+		//function for when knock button is clicked
+		let knockCallback = (async (result) => {
+			// First create the event
+			const event = new CustomEvent('event_knock', {
+				detail: {
+					player: this.currentPlayer
+				}
+			});
+			
+			// Trigger it!
+			this.dispatchEvent(event);
+
+			console.log("knocking: ", result);
+		});
+		
+		this._speaker = new Speaker(this);
+		this._speaker.initialize(nextTurnCallback, knockCallback);
+
+		this.addEventListener(
+			'event_knock', 
+			(event) => {
+				console.log("event_knock called by player: ", event.detail.player);
+			}
+		);
+		
 		this.addEventListener(
 			'event_hasSwapped', 
 			(event) => {
-				console.log("event_hasSwapped called by player: ", this._players[event.detail.playerIndex]);
+				this._state = Game.STATE_AFTER_SWAP;
+				console.log("event_hasSwapped called by player: ", event.detail.player);
 			}
 		);
 
 		this.addEventListener(
 			'event_endTurn', 
 			(event) => {
-				console.log("event_endTurn called by player: ", this._players[event.detail.playerIndex]);
+				console.log("event_endTurn called by player: ", event.detail.player);
 			}
 		);
 	}
@@ -78,10 +122,11 @@ export default class Game extends EventTarget {
 		//Draw cards for each player
 		this.dealOutCards(deck);
 	
-		// ********* Play round *********
+		// ********* Play turn *********
 
 		/**
-		 * One round consists of these stages:
+		 * 
+		 * A turn consists of these stages:
 		 * 
 		 * 1. set next dealer
 		 * 2. deal cards
@@ -89,6 +134,7 @@ export default class Game extends EventTarget {
 		 * 4. player has these stages:
 		 * 		a. check if player wants to swap with the next player or deck (wait for event)
 		 * 		b. go to next player after swapping stage is finished
+		 * 5. end of turn, go next turn (back to 1.)
 		 * 
 		 */
 
@@ -109,7 +155,7 @@ export default class Game extends EventTarget {
 		// ******** End of round ********
 		
 		//Calculate scores and stats
-		highestScorePlayers = await sumUpGameTurn(game, deck, highestScorePlayers);
+		highestScorePlayers = await this._speaker.sumUpGameTurn(deck, highestScorePlayers);
 	
 		if (this.isGameOver()) {
 			return true; //exit loop function
@@ -156,86 +202,10 @@ export default class Game extends EventTarget {
 
 	nextTurn() {
 		this._turn++;
-		this._dealer++;
+		this._dealerIndex++;
 		//reset dealer after last player index
-		if (this._dealer > this._players.length - 1) {
-			this._dealer = 0;
-		}
-	}
-}
-
-class Dispatcher {
-
-	constructor() {
-		this._events = {};
-	}
-
-	dispatch(eventName, data) {
-		// First we grab the event
-		const event = this.events[eventName];
-		// If the event exists then we fire it!
-		if (event) {
-			event.fire(data);
-		}
-	}
-
-	on(eventName, callback) {
-		// First we grab the event from this.events
-		let event = this.events[eventName];
-		// If the event does not exist then we should create it!
-		if (!event) {
-			event = new DispatcherEvent(eventName);
-			this._events[eventName] = event;
-		}
-		// Now we add the callback to the event
-		event.registerCallback(callback);
-	}
-	
-	off(eventName, callback) {
-	    // First get the correct event
-		const event = this._events[eventName];
-
-		// Check that the event exists and it has the callback registered
-		if (event && event.callbacks.indexOf(callback) > -1) {
-			// if it is registered then unregister it!
-			event.unregisterCallback(callback);
-			// if the event has no callbacks left, delete the event
-			if (event.callbacks.length === 0) {
-				delete this._events[eventName];
-			}
-		}
-	}
-}
-
-class DispatcherEvent {
-
-	constructor(eventName) {
-		this._eventName = eventName;
-		this._callbacks = [];
-	}
-
-	registerCallback(callback) {
-		this.callbacks.push(callback);
-	}
-
-	unregisterCallback(callback) {
-	    // Get the index of the callback in the callbacks array
-		const index = this._callbacks.indexOf(callback);
-
-		// If the callback is in the array then remove it
-		if (index > -1) {
-			this_callbacks.splice(index, 1);
-		}
-	}
-
-	fire(data) {
-		// We loop over a cloned version of the callbacks array
-		// in case the original array is spliced while looping
-		const callbacks = this._callbacks.slice(0);
-
-		// loop through the callbacks and call each one
-		for (const callback of callbacks) {
-			callback(data);
+		if (this._dealerIndex > this._players.length - 1) {
+			this._dealerIndex = 0;
 		}
 	}
 }

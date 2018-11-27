@@ -1,5 +1,7 @@
 'use strict';
 
+import * as tools from './gnavtools.js';
+
 /**
  * Class for general speaker object.
  */
@@ -124,8 +126,8 @@ export default class Speaker {
 		}
 	}
 	
-	printRound(round, cardLength) {
-		this.say(`Round: ${round}. Card pile length: ${cardLength}`, 'span', 'print-round');
+	printRound(cardLength) {
+		this.say(`Turn: ${this.parent.turn}. Card pile length: ${cardLength}`, 'span', 'print-round');
 	}
 	
 	addSpace(n) {
@@ -278,5 +280,88 @@ export default class Speaker {
 		type = type || 'div';
 
 		return type + '_' + text.split(' ')[0] + this._elemId++;
+	}
+
+	async sumUpGameTurn(deck, highestScorePlayers) {
+		//find winner
+		let maxVal = await tools.extreme(this.parent.players, 'heldCard.value'); //maxval is default when not passing 3rd param
+		let winner = this.parent.players[maxVal.mostIndex];
+		winner.wins++;
+		
+		//find loser
+		let minVal = await tools.extreme(this.parent.players, 'heldCard.value', tools.FIND_MIN); //tools.FIND_MIN === true
+		let loser = this.parent.players[minVal.mostIndex];
+		loser.losses++;
+	
+		this.say("Winner of this turn is " + winner.name + " with the card " + winner.heldCard.name);
+		winner.addToScore(1);
+		this.say("Loser of this turn is " + loser.name + " with the card " + loser.heldCard.name);
+		loser.addToScore(-1);
+	
+		//All game.players toss their card in the discard pile and search for Narren
+		for (let player of this.parent.players) {
+			if (player.heldCard.ifFool) {
+				this.say("Unfortunately, " + player.name + "'s card at end of turn is Narren.");
+				player.addToScore(-1);
+			}
+			player.discard(deck); //toss card to deck's discard pile
+		}
+	
+		//DEBUG:
+		// deck.testLengthSum();
+	
+		//most wins
+		maxVal = await tools.extreme(this.parent.players, 'wins');
+		let ply_mostWins = this.parent.players[maxVal.mostIndex];
+		//most losses
+		maxVal = await tools.extreme(this.parent.players, 'losses');
+		let ply_mostLosses = this.parent.players[maxVal.mostIndex];
+		// highest score
+		maxVal = await tools.extreme(this.parent.players, 'score');
+		let highestScore = this.parent.players[maxVal.mostIndex];
+	
+		let scoreLine = '';
+	
+		for (let player of this.parent.players) {
+			let thisPly = player.name;
+			if (player.pid === highestScorePlayers.pid) {
+				thisPly = "**" + thisPly.toUpperCase() + "**";
+			}
+			scoreLine += thisPly + ": " + player.score + ", ";
+		}
+	
+		this.addSpace();
+		this.say (scoreLine.slice(0, scoreLine.len - 2));
+		this.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
+	
+		//Set highest score
+		if (highestScore > highestScorePlayers[0]) {
+			highestScorePlayers.pop(); //remove last item
+			highestScorePlayers.unshift(highestScore); //set current highest score player as first item
+	
+			this.say("INFO: Setting " + highestScorePlayers[0].score + " as new best score value for game.");
+		}
+		
+		this.parent.setHighestScore(highestScorePlayers[0].score);
+		this.addSpace();
+	
+		return highestScorePlayers;
+	}
+
+	proclaimWinner(player) {
+		this.addSpace();
+		let text = "<<<<<<<<<<<<<<<<<< ";
+		if (this.parent.playType === 0) {
+			text += `The winner of ${this.parent.maxValue} turns of GNAV is...`;
+		} else {
+			text += `The winner after ${this.parent.turn} turns reaching score ${this.parent.maxValue} is...`;
+		}
+		text += " >>>>>>>>>>>>>>>>>>";
+		this.say (text);
+		this.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
+		let spaces = ((text.length - 2) / 2) - (player.name.length / 2);
+		this.say ('<<' + (' '.repeat(spaces)) + player.name + (' '.repeat(spaces - 2)) + '>>');
+		this.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
+		this.say ('<'.repeat(text.length / 2) + '>'.repeat(text.length / 2));
 	}
 }
