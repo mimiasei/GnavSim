@@ -1,38 +1,43 @@
 :root {
   --body-font: 'Roboto';
   --body-fontsize: '32px';
+  /*bg colours*/
+  /*--color-bg-main: rgba(7, 79, 87, 1); midnight green*/
+  --color-bg-main: rgb(59, 55, 0); /*midnight green*/
+  /*--color-bg-output: #416165;  deep space sparkle*/
+  --color-bg-output: rgb(77, 71, 0);  /*deep space sparkle*/
+  --color-bg-round: rgba(7, 113, 135, 1); /*metallic seaweed*/
+  --color-bg-modal: rgba(116, 165, 127, 1); /*shiny shamrock*/
+  /*txt colours*/
+  --color-txt-main: lightgray;
+  --color-txt-table: rgba(187, 219, 180, 1); /*light moss green*/
+  --color-txt-special: #b9c17b;
+  --color-txt-option: rgba(252, 240, 204, 1); /*blanched almond*/
 }
 
 body {
-  color: lightgray;
-  background-color: #416165;  /*deep space sparkle*/
+  color: var(--color-txt-main);
+  background-color: var(--color-bg-output);
   font-family: var(--body-font);
   line-height: 1.5;
 }
 
-@media only screen {
-  * {
-    font-size: calc(var(--body-fontsize) - 1.4vw); /*desktop*/
+@media screen and (min-width: 320px) {
+  html {
+    font-size: calc(var(--body-fontsize) + 6 * ((100vw - 320px) / 680));
   }
   #settingsForm {
     width: 50%;
   }
 }
 
-h1 {
-  font-size: 4.0vw;
-}
-
-h2 {
-  font-size: 3.5vw;
-}
-
-h3 {
-  font-size: 3.0vw;
-}
-
-h4 {
-  font-size: 2.5vw;
+@media screen  and (min-width: 1000px) {
+  html {
+    font-size: var(--body-fontsize);
+  }
+  #settingsForm {
+    width: 50%;
+  }
 }
 
 input:disabled {
@@ -40,7 +45,7 @@ input:disabled {
 }
 
 p {
-  color: #b9c17b;
+  color: var(--color-txt-special);
 }
 
 img {
@@ -90,23 +95,23 @@ td:nth-child(3) {
 }
 
 .tabulator {
-  background-color: rgba(7, 79, 87, 1); /*midnight green*/
+  background-color: var(--color-bg-main);
   border: none;
   padding: 0;
   margin: 0;
 }
 
 .tabulator-row .tabulator-cell {
-  background-color: rgba(7, 79, 87, 1); /*midnight green*/
-  color: rgba(187, 219, 180, 1); /*light moss green*/
+  background-color: var(--color-bg-main);
+  color: var(--color-txt-table);
   border: none;
   padding: 0;
   margin: 0;
 }
 
 .tabulator .tabulator-header .tabulator-col {
-  background-color: rgba(7, 79, 87, 1); /*midnight green*/
-  color: rgba(187, 219, 180, 1); /*light moss green*/
+  background-color: var(--color-bg-main);
+  color: var(--color-txt-table);
   border: none;
   overflow: hidden;
   padding: 0;
@@ -114,10 +119,15 @@ td:nth-child(3) {
   font-weight: normal;
 }
 
+.tabulator .tabulator-tableHolder {
+  overflow: hidden;
+  padding: 5px;
+}
+
 .tabulator-tableHolder .tabulator-table .tabulator-row,
 .tabulator-tableHolder .tabulator-table .tabulator-col {
-  background-color: rgba(7, 79, 87, 1); /*midnight green*/
-  color: rgba(187, 219, 180, 1); /*light moss green*/
+  background-color: var(--color-bg-main);
+  color: var(--color-txt-table);
   border: none;
   padding: 0;
   margin: 0;
@@ -125,12 +135,12 @@ td:nth-child(3) {
 
 #info {
   border: 2px;
-  background: rgba(7, 79, 87, 1);  /*midnight green*/
+  background: var(--color-bg-main);
 }
 
 #chat_output {
   border: 2px;
-  border-color: rgba(187, 219, 180, 1); /*light moss green*/
+  border-color: var(--color-txt-table);
   background: rgba(7, 113, 135, 1); /*metallic seaweed*/
   position: relative;
   text-align: left;
@@ -143,7 +153,7 @@ td:nth-child(3) {
 }
 
 .outputSection {
-  background: #416165;  /*deep space sparkle*/
+  background: var(--color-bg-output);
 }
 
 .block {
@@ -191,10 +201,10 @@ td:nth-child(3) {
 }
 
 .print-round {
-  color: rgba(252, 240, 204, 1); /*blanched almond*/
-  background-color: rgba(7, 113, 135, 1); /*metallic seaweed*/
+  color: var(--color-txt-option);
+  background-color: var(--color-bg-round);
   border-radius: 6px;
-  border: solid rgba(252, 240, 204, 1); /*blanched almond*/
+  border: solid var(--color-txt-option);
   border-width: 2px;
   height: 30px;
   vertical-align: center;
@@ -222,7 +232,7 @@ td:nth-child(3) {
 .modal-content {
   position: relative;
   color: white;
-  background-color: rgba(116, 165, 127, 1); /*shiny shamrock*/
+  background-color: var(--color-bg-modal);
   border-radius: 5px;
   margin: 0;
   padding: 5px;
@@ -236,7 +246,13 @@ td:nth-child(3) {
 
 /* Modal body */
 .modal-body {
-  background-color: rgb(99, 141, 108); /*darker shiny shamrock*/
+  background-color:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.25),
+      rgba(0, 0, 0, 0.25)
+    )
+    var(--color-bg-modal);
 }
 
 /* The Close Button */

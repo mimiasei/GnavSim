@@ -76,16 +76,30 @@ export default class Game extends EventTarget {
 					player: this.currentPlayer
 				}
 			});
-			
 			// Trigger it!
 			this.dispatchEvent(event);
 
 			console.log("knocking: ", result);
 		});
 		
+		//assign callback functions to speaker
 		this._speaker = new Speaker(this);
 		this._speaker.initialize(nextTurnCallback, knockCallback);
 
+		//create events
+		this._event_beforeSwap = new CustomEvent('event_beforeSwap', {
+			detail: {
+				player: this.currentPlayer
+			}
+		});
+
+		this._event_endTurn = new CustomEvent('event_endTurn', {
+			detail: {
+				player: this.currentPlayer
+			}
+		});
+
+		//create event listeners
 		this.addEventListener(
 			'event_knock', 
 			(event) => {
@@ -109,40 +123,44 @@ export default class Game extends EventTarget {
 		);
 	}
 
+	/**
+	 * A turn consists of these stages:
+	 * 
+	 * 1. set next dealer
+	 * 2. deal cards
+	 * 3. listen for knock event from players with the fool card
+	 * 4. player has these stages:
+	 * 		a. check if player wants to swap with the next player or deck (wait for event)
+	 * 		b. go to next player after swapping stage is finished
+	 * 5. end of turn, go next turn (back to 1.)
+	 */
 	async gameLoop(deck, highestScorePlayers) {		
-		//clear main output element
-		this._speaker.clear();
+	
+		//main game loop until someone wins
+		while(!this.isGameOver()) {
+			switch (this._state) {
+				case (Game.STATE_START_TURN):
+					this.startTurn();
+					break;
+				case (Game.STATE_BEFORE_SWAP):
+					break;
+				case (Game.STATE_AFTER_SWAP):
+					this.nextPlayer();
+					break;
+				case (Game.STATE_END_TURN):
+					if (this._isHuman) {
+						this._speaker.hideNextTurnButton(true); //show next turn button
+						this._speaker.addSpace();
+					}
+					this.nextTurn();
+					break;
+			}
+		}
 		
-		//refresh table of player stats
-		this._speaker.refreshStatsTable(this._players);
-		//print round
-		this._speaker.printRound(this._value, deck.cards.length);
-		this._speaker.addSpace();
+		//Calculate scores and stats
+		highestScorePlayers = await this._speaker.sumUpGameTurn(deck, highestScorePlayers);
 	
-		//Draw cards for each player
-		this.dealOutCards(deck);
-	
-		// ********* Play turn *********
-
-		/**
-		 * 
-		 * A turn consists of these stages:
-		 * 
-		 * 1. set next dealer
-		 * 2. deal cards
-		 * 3. listen for knock event from players with the fool card
-		 * 4. player has these stages:
-		 * 		a. check if player wants to swap with the next player or deck (wait for event)
-		 * 		b. go to next player after swapping stage is finished
-		 * 5. end of turn, go next turn (back to 1.)
-		 * 
-		 */
-
-		//set next dealer
-		this.nextDealer();
-		//proclaim dealer
-		this._speaker.say("Current dealer is: " + this._players[0].name);
-
+		return highestScorePlayers;
 
 		// for (const [index, player] of this._players.entries()) {
 		// 	this._speaker.updateStats(player);
@@ -152,21 +170,26 @@ export default class Game extends EventTarget {
 		// 	}
 		// 	await player.wantsToSwapTest(withPlayer, deck);
 		// }
-		// ******** End of round ********
-		
-		//Calculate scores and stats
-		highestScorePlayers = await this._speaker.sumUpGameTurn(deck, highestScorePlayers);
+	}
+
+	startTurn() {
+		//clear main output element
+		this._speaker.clear();
+
+		//refresh table of player stats
+		this._speaker.refreshStatsTable(this._players);
+		//print round
+		this._speaker.printRound(this._value, deck.cards.length);
+		this._speaker.addSpace();
 	
-		if (this.isGameOver()) {
-			return true; //exit loop function
-		}
-	
-		if (this._isHuman) {
-			this._speaker.hideNextTurnButton(true); //show next turn button
-			this._speaker.addSpace();
-		}
-	
-		return highestScorePlayers;
+		//set next dealer
+		this.nextDealer();
+
+		//Draw cards for each player
+		this.dealOutCards(deck);
+
+		//call event that turn start is done and we want next state
+		this.dispatchEvent(this.event_beforeSwap);
 	}
 
 	dealOutCards(deck) {
@@ -185,8 +208,21 @@ export default class Game extends EventTarget {
 
 	nextDealer() {
 		//Pop out top player as dealer and insert at end
-		let oldDealer = this._players.shift(); //Pop out first player in list, to act as dealer
-		this._players.push(oldDealer); //Reinsert the dealer at the end of list
+		// let oldDealer = this._players.shift(); //Pop out first player in list, to act as dealer
+		// this._players.push(oldDealer); //Reinsert the dealer at the end of list
+
+
+
+		//proclaim dealer
+		this._speaker.say("Current dealer is: " + this._players[0].name);
+	}
+
+	nextPlayer() {
+		this._currPlayerIndex++;
+		
+		if (this._currPlayerIndex > this._dealerIndex - 1) {
+			this.dispatchEvent(this._event_endTurn);
+		}
 	}
 
 	isGameOver() {
@@ -207,5 +243,6 @@ export default class Game extends EventTarget {
 		if (this._dealerIndex > this._players.length - 1) {
 			this._dealerIndex = 0;
 		}
+		this._currPlayerIndex = this._dealerIndex + 1;
 	}
 }

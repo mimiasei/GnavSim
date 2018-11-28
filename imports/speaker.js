@@ -51,9 +51,9 @@ export default class Speaker {
 
 	initialize(nextTurnCallback, knockCallback) {
 		this._nextTurnButton.click(() => { nextTurnCallback(true); });
-
 		this._knockButton.click(() => { knockCallback(true); });
 
+		//init stats table
 		this._statsTable = new Tabulator('#stats_table', {
 			columnHeaderSortMulti: false,
 			layout: "fitColumns",
@@ -65,6 +65,7 @@ export default class Speaker {
 				{ title: 'Wins', field: 'wins', align: 'center', headerSort: false, responsive: 3, minWidth: 40 },
 				{ title: 'Losses', field: 'losses', align: 'center', headerSort: false, responsive: 4, minWidth: 40 },
 			],
+			//function for when a table row is clicked
 			rowClick: (e, row) => {
 				alert(
 					'Player: ' + row.getData().name + '\n\n' +
@@ -74,6 +75,7 @@ export default class Speaker {
 				);
 			}
 		});
+		//show stats table
 		$('#stats_table').show();
 	}
 
