@@ -9,6 +9,8 @@ export default class Speaker {
 
 	constructor(parent) {
 		this._output = $("#outputWin");
+		this._humanName = $('#form_name').val();
+		this._multiplayer = $('#form_multiplayer').is(':checked');
 		this._outputBtns = [];
 		this._stats = $("#playerStats");
 		this._info = $("#info");
@@ -25,6 +27,8 @@ export default class Speaker {
 	}
 
 	get output() { return this._output }
+	get humanName() { return this._humanName }
+	get multiplayer() { return this._multiplayer }
 	get stats() { return this._stats }
 	get info() { return this._info }
 	get value() { return this._value }
@@ -241,10 +245,10 @@ export default class Speaker {
 		this._stats.append($elem);
 	}
 
-	refreshStatsTable(players) {
+	refreshStatsTable() {
 		this._tableData = [];
 
-		for (const player of players) {
+		for (const player of this._parent.players) {
 			let obj = { 
 				name: player.name,
 				score: player.score,

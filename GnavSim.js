@@ -2,11 +2,8 @@
 // Multiplayer stuff -----------------
 const HOST = "http://localhost";
 const PORT = 8000;
-
-import Player from '/imports/player.js';
-import Human from './imports/human.js';		
+	
 import Game from './imports/game.js';	
-
 import * as tools from './imports/gnavtools.js';
 
 $(document).ready(function() {
@@ -14,7 +11,7 @@ $(document).ready(function() {
 
 	hideAll();
 
-	Player.index = 1;
+	// Player.index = 1;
 
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
@@ -28,14 +25,6 @@ $(document).ready(function() {
 		chat(active_chat);
 	});
 });
-
-var _scope_settings = {
-	name : '',
-	// computerOnly : false,
-	multiplayer : false,
-	// winType : 0,
-	// winValue : 10
-}
 
 function hideAll() {
 	$('#chat_section').hide();
@@ -83,14 +72,14 @@ function settingsPart() {
 
 	$('#btn_playGame').click(async () => {
 		$('#settingsForm').hide();
-		let game = await submitSettingsAndReturnGame();
+		let game = await createGame();
 		await startGame(game);
 	});
 }
 
-async function submitSettingsAndReturnGame() {
-	_scope_settings.name = $('#form_name').val();
-	_scope_settings.multiplayer = $('#form_multiplayer').is(':checked');
+async function createGame() {
+	// _scope_settings.name = $('#form_name').val();
+	// _scope_settings.multiplayer = $('#form_multiplayer').is(':checked');
 
 	//Create default game object
 	let game = new Game( 
@@ -106,10 +95,7 @@ async function submitSettingsAndReturnGame() {
 }
 
 async function startGame(game) {
-	//clear main output element
-	// game.speaker.clear();
-
-	if (_scope_settings.multiplayer) {
+	if (game.speaker.multiplayer) {
 		//todo: implement multiplayer code
 	} else {
 		await game.initGame();

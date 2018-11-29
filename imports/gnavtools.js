@@ -60,8 +60,9 @@ export async function extreme(array, attr, findMin) {
 	}
 	let promises = [];
 
+	const parts = attr ? attr.split('.') : null;
+
 	for (let index = 0; index < array.length; index++) {
-		const parts = attr ? attr.split('.') : null;
 		const value = parts ? (parts.length > 1 ? array[index][parts[0]][parts[1]] : array[index][parts[0]]) : array[index];
 		obj.currentIndex = index;
 		promises.push(compare(value, obj));

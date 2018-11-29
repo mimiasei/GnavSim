@@ -1,5 +1,10 @@
+'use strict';
+
 import Speaker from './speaker.js';
 import Deck from './deck.js';
+import Player from './player.js';
+import Human from './human.js';
+import * as tools from './gnavtools.js';
 
 export default class Game extends EventTarget {
 
@@ -16,7 +21,7 @@ export default class Game extends EventTarget {
 		Game.STATE_END_TURN = 'state_endTurn';
 		
 		this._playType = playType; //0 = max ROUNDS, 1 = reach SCORE
-		this._turn = 1; //current turn
+		this._turn = 0; //current turn
 		this._highscore = 0;
 		this._maxValue = maxValue; //value to reach, either ROUNDS or SCORE
 		this._isHuman = isHuman;
@@ -26,7 +31,7 @@ export default class Game extends EventTarget {
 		this._dealerIndex = 0;
 		this._currPlayerIndex = 0;
 		this._deck = null;
-		this._state = Game.STATE_START_TURN;
+		this._state = null;
 	}
 
 	//getters
@@ -55,7 +60,7 @@ export default class Game extends EventTarget {
 	//state handler in the state setter
 	set state(value) { 
 		this._state = value;
-		$("#prettyInfo").text('Current state: ', this._state);
+		$("#prettyInfo").text('Current state: ' + this._state);
 		this.stateChanged();
 	}
 
@@ -97,9 +102,8 @@ export default class Game extends EventTarget {
 		//initialize, assign callback functions to speaker
 		this._speaker.initialize(nextTurnCallback, knockCallback);
 
-		//create new deck
+		//create and init new deck
 		this._deck = new Deck();
-		//initialize deck
 		await this._deck.init();
 
 		//set players as best and second best score
@@ -142,6 +146,37 @@ export default class Game extends EventTarget {
 		);
 	}
 
+	async initGame() {
+		console.log('initgame...');
+		//show knock button
+		this._speaker.hideKnockButton(true);
+
+		if (this._isHuman && this._speaker.humanName) {
+			let human = new Human(this._speaker.humanName, this);
+			this._players.push(human);
+		}
+
+		for (const name of tools.PLAYERS) {
+			let newPlayer = new Player(name, this);
+			//Test, make Johannes a player that never swaps with anyone nor the deck
+			if (name === 'Johannes') {
+				newPlayer.neverSwapsWithDeck = true;
+			}
+			this._players.push(newPlayer);
+		}
+
+		let playersPromise = tools.shuffle(this._players);
+		//wait for shuffle to finish
+		this._players = await playersPromise;
+		//redraw stats table
+		this._speaker.refreshStatsTable();
+		//set first turn
+		this.nextTurn();
+		//set state to start turn
+		this.state = Game.STATE_START_TURN;
+		console.log('initgame done.');
+	}
+
 	/**
 	 * A turn consists of these stages:
 	 * 
@@ -157,7 +192,7 @@ export default class Game extends EventTarget {
 	
 		switch (this.state) {
 			case (Game.STATE_START_TURN):
-				this.startTurn();
+				await this.startTurn();
 				break;
 			case (Game.STATE_BEFORE_SWAP):
 				break;
@@ -169,7 +204,9 @@ export default class Game extends EventTarget {
 					this._speaker.hideNextTurnButton(true); //show next turn button
 					this._speaker.addSpace();
 				}
-				this.nextTurn();
+				//Calculate scores and stats
+				await this._speaker.sumUpGameTurn();
+				await this.nextTurn();
 				break;
 		}
 	
@@ -183,7 +220,7 @@ export default class Game extends EventTarget {
 		// }
 	}
 
-	startTurn() {
+	async startTurn() {
 		//clear main output element
 		this._speaker.clear();
 
@@ -197,20 +234,19 @@ export default class Game extends EventTarget {
 		this.nextDealer();
 
 		//Draw cards for each player
-		this.dealOutCards();
+		await this.dealOutCards();
 
 		//call event that turn start is done and we want next state
-		this.dispatchEvent(this.event_beforeSwap);
+		this.dispatchEvent(this._event_beforeSwap);
 	}
 
-	dealOutCards() {
+	async dealOutCards() {
 		for (const player of this._players) {
-
 			player.drawFromDeck(this._deck);
 
 			//If player receives Narren
 			if (player.heldCard && player.heldCard.isFool) {
-				if (player.knockOnTable()) {
+				if (player.knockOnTable()) { //todo: this doesn't work yet with Human player
 					player.addToScore(1);
 				}
 			}
@@ -222,7 +258,12 @@ export default class Game extends EventTarget {
 		// let oldDealer = this._players.shift(); //Pop out first player in list, to act as dealer
 		// this._players.push(oldDealer); //Reinsert the dealer at the end of list
 
-
+		this._dealerIndex++;
+		//reset dealer after last player index
+		if (this._dealerIndex > this._players.length - 1) {
+			this._dealerIndex = 0;
+		}
+		this._currPlayerIndex = this._dealerIndex + 1;
 
 		//proclaim dealer
 		this._speaker.say("Current dealer is: " + this._players[0].name);
@@ -247,19 +288,12 @@ export default class Game extends EventTarget {
 		} 
 	}
 
-	nextTurn() {
-		//Calculate scores and stats
-		await this._speaker.sumUpGameTurn(this._deck);
-
+	async nextTurn() {
+		console.log('setting next turn...');
 		this._turn++;
-		this._dealerIndex++;
-		//reset dealer after last player index
-		if (this._dealerIndex > this._players.length - 1) {
-			this._dealerIndex = 0;
-		}
-		this._currPlayerIndex = this._dealerIndex + 1;
 		
 		//set state
 		this.state = Game.STATE_START_TURN;
+		console.log('has set next turn.');
 	}
 }
