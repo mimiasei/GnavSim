@@ -128,8 +128,8 @@ export default class Speaker {
 		}
 	}
 	
-	printRound(cardLength) {
-		this.say(`Turn: ${this.parent.turn}. Card pile length: ${cardLength}`, 'span', 'print-round');
+	printRound() {
+		this.say(`Turn: ${this.parent.turn}. Card pile length: ${this.parent.deck.getLength()}`, 'span', 'print-round');
 	}
 	
 	addSpace(n) {
@@ -284,7 +284,7 @@ export default class Speaker {
 		return type + '_' + text.split(' ')[0] + this._elemId++;
 	}
 
-	async sumUpGameTurn(deck, highestScorePlayers) {
+	async sumUpGameTurn() {
 		//find winner
 		let maxVal = await tools.extreme(this.parent.players, 'heldCard.value'); //maxval is default when not passing 3rd param
 		let winner = this.parent.players[maxVal.mostIndex];
@@ -306,7 +306,7 @@ export default class Speaker {
 				this.say("Unfortunately, " + player.name + "'s card at end of turn is Narren.");
 				player.addToScore(-1);
 			}
-			player.discard(deck); //toss card to deck's discard pile
+			player.discard(this.parent.deck); //toss card to deck's discard pile
 		}
 	
 		//DEBUG:
@@ -337,17 +337,15 @@ export default class Speaker {
 		this.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
 	
 		//Set highest score
-		if (highestScore > highestScorePlayers[0]) {
-			highestScorePlayers.pop(); //remove last item
-			highestScorePlayers.unshift(highestScore); //set current highest score player as first item
+		if (highestScore > this.parent.highestScorePlayers[0]) {
+			this.parent.highestScorePlayers.pop(); //remove last item
+			this.parent.highestScorePlayers.unshift(highestScore); //set current highest score player as first item
 	
-			this.say("INFO: Setting " + highestScorePlayers[0].score + " as new best score value for game.");
+			this.say("INFO: Setting " + this.parent.highestScorePlayers[0].score + " as new best score value for game.");
 		}
 		
-		this.parent.setHighestScore(highestScorePlayers[0].score);
-		this.addSpace();
-	
-		return highestScorePlayers;
+		this.parent.setHighestScore(this.parent.highestScorePlayers[0].score);
+		this.addSpace();	
 	}
 
 	proclaimWinner(player) {

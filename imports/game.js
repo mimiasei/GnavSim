@@ -1,4 +1,5 @@
 import Speaker from './speaker.js';
+import Deck from './deck.js';
 
 export default class Game extends EventTarget {
 
@@ -21,9 +22,11 @@ export default class Game extends EventTarget {
 		this._isHuman = isHuman;
 		this._speaker = null;
 		this._players = [];
+		this._highestScorePlayers = [];
 		this._dealerIndex = 0;
 		this._currPlayerIndex = 0;
-		this._state = Game.STATE_BEFORE_SWAP;
+		this._deck = null;
+		this._state = Game.STATE_START_TURN;
 	}
 
 	//getters
@@ -36,6 +39,7 @@ export default class Game extends EventTarget {
 	get players() { return this._players }
 	get state() { return this._state }
 	get speaker() { return this._speaker }
+	get deck() { return this._deck }
 
 	//Special getters
 	get currentPlayer() { return this._players[this._currPlayerIndex] }
@@ -47,7 +51,13 @@ export default class Game extends EventTarget {
 	set maxValue(value) { this._maxValue = value }
 	set isHuman(value) { this._isHuman = value }
 	set players(value) { this._players = Array.from(value) }
-	set state(value) { this._state = value }
+
+	//state handler in the state setter
+	set state(value) { 
+		this._state = value;
+		$("#prettyInfo").text('Current state: ', this._state);
+		this.stateChanged();
+	}
 
 	async init() {
 		
@@ -82,9 +92,18 @@ export default class Game extends EventTarget {
 			console.log("knocking: ", result);
 		});
 		
-		//assign callback functions to speaker
+		//create new speaker
 		this._speaker = new Speaker(this);
+		//initialize, assign callback functions to speaker
 		this._speaker.initialize(nextTurnCallback, knockCallback);
+
+		//create new deck
+		this._deck = new Deck();
+		//initialize deck
+		await this._deck.init();
+
+		//set players as best and second best score
+		this._highestScorePlayers = [this._players[0], this._players[1]]; 
 
 		//create events
 		this._event_beforeSwap = new CustomEvent('event_beforeSwap', {
@@ -110,7 +129,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_hasSwapped', 
 			(event) => {
-				this._state = Game.STATE_AFTER_SWAP;
+				this.state = Game.STATE_AFTER_SWAP;
 				console.log("event_hasSwapped called by player: ", event.detail.player);
 			}
 		);
@@ -134,34 +153,26 @@ export default class Game extends EventTarget {
 	 * 		b. go to next player after swapping stage is finished
 	 * 5. end of turn, go next turn (back to 1.)
 	 */
-	async gameLoop(deck, highestScorePlayers) {		
+	async stateChanged() {		
 	
-		//main game loop until someone wins
-		while(!this.isGameOver()) {
-			switch (this._state) {
-				case (Game.STATE_START_TURN):
-					this.startTurn();
-					break;
-				case (Game.STATE_BEFORE_SWAP):
-					break;
-				case (Game.STATE_AFTER_SWAP):
-					this.nextPlayer();
-					break;
-				case (Game.STATE_END_TURN):
-					if (this._isHuman) {
-						this._speaker.hideNextTurnButton(true); //show next turn button
-						this._speaker.addSpace();
-					}
-					this.nextTurn();
-					break;
-			}
+		switch (this.state) {
+			case (Game.STATE_START_TURN):
+				this.startTurn();
+				break;
+			case (Game.STATE_BEFORE_SWAP):
+				break;
+			case (Game.STATE_AFTER_SWAP):
+				this.nextPlayer();
+				break;
+			case (Game.STATE_END_TURN):
+				if (this._isHuman) {
+					this._speaker.hideNextTurnButton(true); //show next turn button
+					this._speaker.addSpace();
+				}
+				this.nextTurn();
+				break;
 		}
-		
-		//Calculate scores and stats
-		highestScorePlayers = await this._speaker.sumUpGameTurn(deck, highestScorePlayers);
 	
-		return highestScorePlayers;
-
 		// for (const [index, player] of this._players.entries()) {
 		// 	this._speaker.updateStats(player);
 		// 	let withPlayer = 'deck';
@@ -179,23 +190,23 @@ export default class Game extends EventTarget {
 		//refresh table of player stats
 		this._speaker.refreshStatsTable(this._players);
 		//print round
-		this._speaker.printRound(this._value, deck.cards.length);
+		this._speaker.printRound();
 		this._speaker.addSpace();
 	
 		//set next dealer
 		this.nextDealer();
 
 		//Draw cards for each player
-		this.dealOutCards(deck);
+		this.dealOutCards();
 
 		//call event that turn start is done and we want next state
 		this.dispatchEvent(this.event_beforeSwap);
 	}
 
-	dealOutCards(deck) {
+	dealOutCards() {
 		for (const player of this._players) {
 
-			player.drawFromDeck(deck);
+			player.drawFromDeck(this._deck);
 
 			//If player receives Narren
 			if (player.heldCard && player.heldCard.isFool) {
@@ -237,6 +248,9 @@ export default class Game extends EventTarget {
 	}
 
 	nextTurn() {
+		//Calculate scores and stats
+		await this._speaker.sumUpGameTurn(this._deck);
+
 		this._turn++;
 		this._dealerIndex++;
 		//reset dealer after last player index
@@ -244,5 +258,8 @@ export default class Game extends EventTarget {
 			this._dealerIndex = 0;
 		}
 		this._currPlayerIndex = this._dealerIndex + 1;
+		
+		//set state
+		this.state = Game.STATE_START_TURN;
 	}
 }

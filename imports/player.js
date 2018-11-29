@@ -37,7 +37,7 @@ export default class Player {
 		let cloned = Object.assign (Object.create (Object.getPrototypeOf (player)), player);
 		cloned.name = player.name;
 		cloned.pid = player.pid;
-		cloned.game = Game.clone(player.game);
+		cloned.game = player.game;
 		cloned.score = player.score;
 		cloned.heldCard = Card.clone(player.heldCard);
 		cloned.wins = player.wins;
@@ -50,22 +50,22 @@ export default class Player {
 		return Player.index++;
 	}
 
-	drawFromDeck(deck) {
+	drawFromDeck() {
 		// Object.setPrototypeOf(deck, Deck.prototype);
-		this.discard(deck);
-		let result = deck.draw();
+		this.discard(this._game.deck);
+		let result = this._game.deck.draw();
 		this.heldCard = result;
 	}
 
-	discard(deck) {
+	discard() {
 		// Object.setPrototypeOf(deck, Deck.prototype);
 		if (this._heldCard !== null) {
-			deck.discard(this._heldCard);
+			this._game.deck.discard(this._heldCard);
 		}
 		this._heldCard = null;
 	}
 
-	async wantsToSwapTest(withPlayer, deck) {
+	async wantsToSwapTest(withPlayer) {
 
 		let wantsToSwap = false;
 		let running = true;
@@ -75,7 +75,7 @@ export default class Player {
 	
 			const watchCallback = async (result) => {
 				running = true;
-				await this.swapCards(withPlayer, result, wantsToSwap, deck);
+				await this.swapCards(withPlayer, result, wantsToSwap);
 			}
 	
 			let obj = {
@@ -90,14 +90,14 @@ export default class Player {
 		} else {
 			if (this.testForSwap('deck')) { //Only swap if card is 4 or less.
 				this._game.speaker.say (this._name + ' draws from the deck.');
-				this.drawFromDeck(deck); //Draw from deck if noone else to swap with.
+				this.drawFromDeck(); //Draw from deck if noone else to swap with.
 			} else {
 				this._game.speaker.say (this.sayPass());
 			}
 		}
 	}
 
-	async swapCards(withPlayer, result, wantsToSwap, deck) {
+	async swapCards(withPlayer, result, wantsToSwap) {
 		let sayPass = '';
 
 		if (withPlayer && withPlayer.heldCard && withPlayer.heldCard.isFool) { //If the other player has Narren...
@@ -120,7 +120,7 @@ export default class Player {
 		}
 		if (wantsToSwap) {
 			// if (!askPlayers(index, game.players[index], game.players, deck, speaker)) { //Check if Staa for gjok! is called.
-			if (!askPlayers(index, game, deck)) { //Check if Staa for gjok! is called.
+			if (!askPlayers(index, game)) { //Check if Staa for gjok! is called.
 				running = false;
 			}
 		}

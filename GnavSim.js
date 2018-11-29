@@ -5,7 +5,6 @@ const PORT = 8000;
 
 import Player from '/imports/player.js';
 import Human from './imports/human.js';		
-import Deck from './imports/deck.js';			
 import Game from './imports/game.js';	
 
 import * as tools from './imports/gnavtools.js';
@@ -113,47 +112,11 @@ async function startGame(game) {
 	if (_scope_settings.multiplayer) {
 		//todo: implement multiplayer code
 	} else {
-		await playGame(game);
+		await game.initGame();
 	}
 }
 
-async function playGame(game) {
-	//show knock button
-	game.speaker.hideKnockButton(true);
-
-	if (game.isHuman && _scope_settings.name) {
-		let human = new Human(_scope_settings.name, game);
-		game.players.push(human);
-	}
-
-	for (const name of tools.PLAYERS) {
-		let newPlayer = new Player(name, game);
-
-		//Test, make Johannes a player that never swaps with anyone nor the deck
-		// if (name === 'Johannes') {
-		// 	newPlayer.neverSwapsWithDeck = true;
-		// }
-
-		game.players.push(newPlayer);
-	}
-
-	let playersPromise = tools.shuffle(game.players);
-	//wait for shuffle to finish
-	game.players = await playersPromise; 
-
-	let deck = new Deck();
-	await deck.init();
-
-	//set players as best and second best score
-	let highestScorePlayers = [game.players[0], game.players[1]];
-
-	//play first turn
-	highestScorePlayers = await game.gameLoop(deck, highestScorePlayers);
-
-	//proclaimWinner(highestScore[0], game, round, speaker);
-}
-
-async function wantsToSwapTest(game, deck, index) {
+async function wantsToSwapTest(game, index) {
 
 	let wantsToSwap = false;
 	let sayPass = game.players[index].sayPass();
@@ -179,14 +142,14 @@ async function wantsToSwapTest(game, deck, index) {
 	} else {
 		if (game.players[index].testForSwap("deck")) { //Only swap if card is 4 or less.
 			speaker.say (game.players[index].name + " draws from the deck.");
-			game.players[index].drawFromDeck(deck); //Draw from deck if noone else to swap with.
+			game.players[index].drawFromDeck(); //Draw from deck if noone else to swap with.
 		} else {
 			game.speaker.say (sayPass);
 		}
 	}
 }
 
-function askPlayers(nbr, game, deck) {
+function askPlayers(nbr, game) {
 	let nextAdd = 1;
 	let hasSwapped = false;
 	let dragonen = false;
@@ -220,7 +183,7 @@ function askPlayers(nbr, game, deck) {
 
 		if (!hasSwapped) { //If player still hasn't swapped after being last in round
 			game.speaker.say (game.players[index].name + " draws from the deck.");
-			game.players[index].drawFromDeck(deck);
+			game.players[index].drawFromDeck();
 		}
 	}
 	return true;

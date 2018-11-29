@@ -99,6 +99,10 @@ export default class Deck {
 		//console.log ("INFO: A %s card was discarded." % (card.name));
 	}
 
+	getLength() {
+		return this._cards.length;
+	}
+
 	testLengthSum() {
 		if (this._cards.length + this._discardPile.length !== 42) {
 			console.log ("INFO: Warning! Sum of piles is not 42.");
