@@ -12,12 +12,6 @@ import Fool from './fool.js';
 export default class Deck {
 
 	constructor() {
-		// (async () => {
-		// 	let promises = [];
-		// 	promises.push(this.buildDeck());
-		// 	promises.push(this.shuffleDeck());
-		// 	await Promise.all(promises);
-		// });
 	}
 
 	get cards() { return this._cards }
@@ -70,7 +64,7 @@ export default class Deck {
 	}
 
 	async shuffleDeck() {
-		console.log ("*** INFO: The deck is being shuffled.");
+		console.log ('*** INFO: The deck is being shuffled.');
 		const cardsPromise = tools.shuffle(this._cards);
 		this._cards = await cardsPromise;
 	}
@@ -84,7 +78,7 @@ export default class Deck {
 	}
 
 	useDiscardPile() {
-		console.log("**** INFO: The discard deck is used.");
+		console.log('**** INFO: The discard deck is used.');
 		this._cards = Array.from(this._discardPile);
 		this.shuffleDeck();
 		this._discardPile = [];
@@ -96,7 +90,6 @@ export default class Deck {
 
 	discard(card) {
 		this._discardPile.push(card);
-		//console.log ("INFO: A %s card was discarded." % (card.name));
 	}
 
 	getLength() {
@@ -105,17 +98,17 @@ export default class Deck {
 
 	testLengthSum() {
 		if (this._cards.length + this._discardPile.length !== 42) {
-			console.log ("INFO: Warning! Sum of piles is not 42.");
+			console.log ('INFO: Warning! Sum of piles is not 42.');
 			this.printCards();
 			this.printCards(true);
 		}
 	}
 
 	printCards(discarded = false) {
-		let cardsLine = discarded ? "Discarded: " : "Cards: ";
+		let cardsLine = discarded ? 'Discarded: ' : 'Cards: ';
 		let cardList = discarded ? this._discardPile : this._cards;
 		for (let card of cardList) {
-			cardsLine += card.name + ", ";
+			cardsLine += card.name + ', ';
 		}
 		cardsLine = cardsLine.slice(0, cardsLine.length - 2);
 		console.log (cardsLine);

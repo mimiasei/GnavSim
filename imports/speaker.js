@@ -20,7 +20,7 @@ export default class Speaker {
 		this._statsTableBody = $("#stats_table tbody");
 		this._nextTurnButton = $("#btnNextTurn");
 		this._knockButton = $("#btnKnock");
-		this._value = -1;
+		// this._value = -1;
 		this._statsElems = [];
 		this._elemId = 0;
 		this._parent = parent;
@@ -31,7 +31,7 @@ export default class Speaker {
 	get multiplayer() { return this._multiplayer }
 	get stats() { return this._stats }
 	get info() { return this._info }
-	get value() { return this._value }
+	// get value() { return this._value }
 	get statsElems() { return this._statsElems }
 	get parent() { return this._parent }
 	//stats table
@@ -41,15 +41,15 @@ export default class Speaker {
 	get nextTurnButton() { return this._nextTurnButton }
 	get knockButton() { return this._knockButton }
 
-	set output(value) { this._output = jQuery.extend(true, {}, value) }
-	set stats(value) { this._stats = jQuery.extend(true, {}, value) }
-	set info(value) { this._info = jQuery.extend(true, {}, value) }
-	set value(value) { this._value = value }
+	set output(value) { this._output = $.extend(true, {}, value) }
+	set stats(value) { this._stats = $.extend(true, {}, value) }
+	set info(value) { this._info = $.extend(true, {}, value) }
+	// set value(value) { this._value = value }
 
 	static clone(speaker) {
 		let cloned = Object.assign (Object.create (Object.getPrototypeOf (speaker)), speaker);
-		cloned.output = speaker.output;
-		cloned.value = speaker.value;
+		// cloned.output = speaker.output;
+		// cloned.value = speaker.value;
 		return cloned;
 	}
 

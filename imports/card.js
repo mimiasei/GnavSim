@@ -33,11 +33,11 @@ export default class Card {
 
 	static get types() {
 		return {		
-			'Gjøken': 21,
-			'Dragonen': 20,
-			'Katten': 19,
-			'Hesten': 18,
-			'Huset': 17,
+			// 'Gj�ken': 21,
+			// 'Dragonen': 20,
+			// 'Katten': 19,
+			// 'Hesten': 18,
+			// 'Huset': 17,
 			'(12)': 16,
 			'(11)': 15,
 			'(10)': 14,
@@ -57,42 +57,42 @@ export default class Card {
 		};
 	};
 
-	static get typesSize() {
-		return Object.keys(this.types).length;
-	}
+	// static get typesSize() {
+	// 	return Object.keys(this.types).length;
+	// }
 
 	static type(index) {
 		return Object.keys(this.types)[index];
 	}
 
-	static get statements() {
-		return {
-			21: 'Stå for gjøk!',
-			20: 'Hogg av!',
-			19: 'Kiss!',
-			18: 'Hest forbi!',
-			17: 'Hus forbi!'
-		};
-	};
+	// static get statements() {
+	// 	return {
+	// 		21: 'Stå for gjøk!',
+	// 		20: 'Hogg av!',
+	// 		19: 'Kiss!',
+	// 		18: 'Hest forbi!',
+	// 		17: 'Hus forbi!'
+	// 	};
+	// };
 
-	static get statementsSize() {
-		return Object.keys(this.statements).length;
-	}
+	// static get statementsSize() {
+	// 	return Object.keys(this.statements).length;
+	// }
 
-	static statement(index) {
-		return Object.keys(this.statements)[index];
-	}
+	// static statement(index) {
+	// 	return Object.keys(this.statements)[index];
+	// }
 
 	static clone(card) {
 		let cloned = Object.assign (Object.create (Object.getPrototypeOf (card)), card);
-		cloned.name = card.name;
-		cloned.value = card.value;
-		cloned.statement = card.statement;
-		cloned.isMatador = card.isMatador;
-		cloned.causeNoMoreSwap = card.causeNoMoreSwap;
-		cloned.causeLosePoint = card.causeLosePoint;
-		cloned.causeAllLosePointAndStopGame = card.causeAllLosePointAndStopGame;
-		cloned.isFool = card.isFool;
+		// cloned.name = card.name;
+		// cloned.value = card.value;
+		// cloned.statement = card.statement;
+		// cloned.isMatador = card.isMatador;
+		// cloned.causeNoMoreSwap = card.causeNoMoreSwap;
+		// cloned.causeLosePoint = card.causeLosePoint;
+		// cloned.causeAllLosePointAndStopGame = card.causeAllLosePointAndStopGame;
+		// cloned.isFool = card.isFool;
 		return cloned;
 	}
 

@@ -32,7 +32,7 @@ export default class Player {
 		this._score = value;
 		this._game.speaker.updateStats(this);
 	}
-	set heldCard(value) { this._heldCard = Card.clone(value) }
+	set heldCard(value) { this._heldCard = $.extend(true, {}, value) } //Card.clone(value)
 	set wins(value) { this._wins = value }
 	set losses(value) { this._losses = value }
 	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value }
@@ -45,14 +45,14 @@ export default class Player {
 
 	static clone(player) {
 		let cloned = Object.assign (Object.create (Object.getPrototypeOf (player)), player);
-		cloned.name = player.name;
-		cloned.pid = player.pid;
-		cloned.game = player.game;
-		cloned.score = player.score;
-		cloned.heldCard = Card.clone(player.heldCard);
-		cloned.wins = player.wins;
-		cloned.losses = player.losses;
-		cloned.neverSwapsWithDeck = player.neverSwapsWithDeck;
+		// cloned.name = player.name;
+		// cloned.pid = player.pid;
+		// cloned.game = player.game;
+		// cloned.score = player.score;
+		// cloned.heldCard = Card.clone(player.heldCard);
+		// cloned.wins = player.wins;
+		// cloned.losses = player.losses;
+		// cloned.neverSwapsWithDeck = player.neverSwapsWithDeck;
 		return cloned;
 	}
 
@@ -62,8 +62,7 @@ export default class Player {
 
 	drawFromDeck() {
 		this.discard(this._game.deck);
-		let result = this._game.deck.draw();
-		this.heldCard = result;
+		this.heldCard = this._game.deck.draw(); //using setter to create clone
 	}
 
 	discard() {
@@ -73,16 +72,14 @@ export default class Player {
 		this._heldCard = null;
 	}
 
+	//todo: hoping to get rid of this silly method!
 	async wantsToSwapTest(withPlayer) {
 
 		let wantsToSwap = false;
-		let running = true;
 	
 		if (withPlayer !== 'deck') {
-			running = false;
 	
 			const watchCallback = async (result) => {
-				running = true;
 				await this.swapCards(withPlayer, result, wantsToSwap);
 			}
 	
@@ -98,6 +95,13 @@ export default class Player {
 		}
 	}
 
+	/**
+	 * result = button click result. yes = true, no = false.
+	 * 
+	 * @param Player withPlayer 
+	 * @param bool result 
+	 * @param bool wantsToSwap 
+	 */
 	async swapCards(withPlayer, result, wantsToSwap) {
 		let sayPass = '';
 
@@ -120,8 +124,8 @@ export default class Player {
 			}
 		}
 		if (wantsToSwap) {
-			if (!this._game.askPlayers(index, game)) { //Check if Staa for gjok! is called.
-				running = false;
+			if (!this.askPlayers(index, game)) { //Check if Staa for gjok! is called.
+				// running = false;
 			}
 		}
 		else {
@@ -143,22 +147,23 @@ export default class Player {
 				this._game.speaker.say ("Everyone starts laughing and says 'Men " + this._game.players[nbr + nextAdd].name + " har jo narren!'");
 			}
 	
-			result = this.processAnswer(returnedCard);
-	
-			switch (result) {
-				case 1:		nextAdd++; //Hesten or huset
-							break;
-				case 2:		this.addToScore(-1); //katten
-							nextAdd++;
-							break;
-				case 3:		dragonen = true; //dragonen
-							this.addToScore(-1);
-							break;
-				case 4:		subractFromAllPlayers(this._game.players[nbr + nextAdd], this._game.players); //gjoeken
-							return false;
-				default:	this.swapWithPlayer(this._game.players[nbr + nextAdd]); //The two players Swap cards
-							hasSwapped = true;
-							break;
+			if (returnedCard.isMatador) {
+				switch (returnedCard.value) {
+					case 17:
+					case 18:	nextAdd++; //Hesten or huset
+								break;
+					case 19:	this.addToScore(-1); //katten
+								nextAdd++;
+								break;
+					case 20:	dragonen = true; //dragonen
+								this.addToScore(-1);
+								break;
+					case 21:	subractFromAllPlayers(this._game.players[nbr + nextAdd], this._game.players); //gjøken
+								return false;
+				}
+			} else {
+				this.swapWithPlayer(this._game.players[nbr + nextAdd]); //The two players Swap cards
+				hasSwapped = true;
 			}
 	
 			//If player still hasn't swapped after being last in round
@@ -176,42 +181,17 @@ export default class Player {
 	}
 
 	answerSwap(fromPlayer) {
-		// let val = this._heldCard.value;
-		// if (val <= 16) {
-		if (!this._heldCard.isMatador) {
-			this._game.speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(tools.TXT_ACCEPT_SWAP));
-		}
-		else {
-			// let reply = val < 21 ? Card.statement(val) : Card.statement(val).toUpperCase();
-			this._game.speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(this._heldCard.statement)); //reply
-		}
-		// return val;
+		const quote = this._heldCard.isMatador ? this._heldCard.statement : tools.TXT_ACCEPT_SWAP;
+		this._game.speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(quote));
 		return this._heldCard;
 	}
 
 	swapWithPlayer(fromPlayer) {
 		console.log("swapping...");
 		this._game.speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
-		let card = jQuery.extend(true, {}, this._heldCard);
-		console.log(card);
-		this._heldCard = jQuery.extend(true, {}, fromPlayer.heldCard);
-		console.log(this._heldCard);
-		fromPlayer.heldCard = jQuery.extend(true, {}, card);
-	}
-
-	processAnswer(returnedCard) {
-		if (returnedCard.isMatador) { //If one of the matador cards
-			switch (returnedCard.constructor.name) {
-				case 'House':
-				case 'Horse':	return 1;
-				case 'Cat': 	return 2;
-				case 'Dragoon':	return 3;
-				case 'Cuckoo':	return 4;
-				default:		return 0;
-			}
-		} else {
-			return 0;
-		}
+		const card = $.extend(true, {}, this._heldCard); //$.extend used to make deep copies
+		this._heldCard = $.extend(true, {}, fromPlayer.heldCard);
+		fromPlayer.heldCard = $.extend(true, {}, card);
 	}
 
 	addToScore(value) {
@@ -240,24 +220,24 @@ export default class Player {
 		return true;
 	}
 
-	testForSwap(toPlayer = null) {
+	/**
+	 * Test with fuzziness to simulate human error
+	 * so AI doesn't always use threshold nbr as reference
+	 * for swapping or not.
+	 */
+	testForSwap() {
 		if (this._heldCard) {
-			let value = this._heldCard.value;
 			let swap = tools.SWAP_THRESHOLDNUMBER + 4;
-			let chance = Math.random();
+			const chance = Math.random();
+
 			if (chance < tools.SWAP_FUZZINESS) {
 				swap--;
 			} else if (chance > 1 - tools.SWAP_FUZZINESS) {
 				swap++;
 			}
 
-			if (value > swap) {
-				return false; //Player doesn't want to swap and will say pass.
-			} else {
-				return true; //Player wants to swap.
-			}
-		} else {
-			return false;
+			return !(this._heldCard.value > swap);
 		}
+		return false;
 	}
 }
