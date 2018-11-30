@@ -64,6 +64,57 @@ export default class Game extends EventTarget {
 		this.stateChanged();
 	}
 
+		/**
+	 * A turn consists of these stages:
+	 * 
+	 * 1. set next dealer
+	 * 2. deal cards
+	 * 3. listen for knock event from players with the fool card
+	 * 4. player has these stages:
+	 * 		a. check if player wants to swap with the next player or deck (wait for event)
+	 * 		b. go to next player after swapping stage is finished
+	 * 5. end of turn, go next turn (back to 1.)
+	 */
+	async stateChanged() {		
+	
+		switch (this.state) {
+			case (Game.STATE_START_TURN):
+				await this.startTurn();
+				this.state = Game.STATE_BEFORE_SWAP;
+				break;
+			case (Game.STATE_BEFORE_SWAP):
+				initSwap();
+				break;
+			case (Game.STATE_AFTER_SWAP):
+				this.nextPlayer();
+				break;
+			case (Game.STATE_END_TURN):
+				if (this._isHuman) {
+					//show next turn button
+					this._speaker.hideNextTurnButton(true);
+					this._speaker.addSpace();
+				}
+				//Calculate scores and stats
+				await this._speaker.sumUpGameTurn();
+				await this.nextTurn();
+				break;
+		}
+	
+		// for (const [index, player] of this._players.entries()) {
+		// 	this._speaker.updateStats(player);
+		// 	let withPlayer = 'deck';
+		// 	if (index + 2 <= this._players.length) { //same as index + 1 <= this._players.length - 1
+		// 		withPlayer = this._players[index + 1];
+		// 	}
+		// 	await player.wantsToSwapTest(withPlayer, deck);
+		// }
+	}
+
+	initSwap() {
+		const withPlayer = this.getPlayerNextTo();
+		this.currentPlayer.test
+	}
+
 	async init() {
 		
 		//function for when next turn button is clicked
@@ -169,7 +220,7 @@ export default class Game extends EventTarget {
 		//wait for shuffle to finish
 		this._players = await playersPromise;
 		//redraw stats table
-		this._speaker.refreshStatsTable();
+		await this._speaker.refreshStatsTable();
 		//set first turn
 		this.nextTurn();
 		//set state to start turn
@@ -177,55 +228,12 @@ export default class Game extends EventTarget {
 		console.log('initgame done.');
 	}
 
-	/**
-	 * A turn consists of these stages:
-	 * 
-	 * 1. set next dealer
-	 * 2. deal cards
-	 * 3. listen for knock event from players with the fool card
-	 * 4. player has these stages:
-	 * 		a. check if player wants to swap with the next player or deck (wait for event)
-	 * 		b. go to next player after swapping stage is finished
-	 * 5. end of turn, go next turn (back to 1.)
-	 */
-	async stateChanged() {		
-	
-		switch (this.state) {
-			case (Game.STATE_START_TURN):
-				await this.startTurn();
-				break;
-			case (Game.STATE_BEFORE_SWAP):
-				break;
-			case (Game.STATE_AFTER_SWAP):
-				this.nextPlayer();
-				break;
-			case (Game.STATE_END_TURN):
-				if (this._isHuman) {
-					this._speaker.hideNextTurnButton(true); //show next turn button
-					this._speaker.addSpace();
-				}
-				//Calculate scores and stats
-				await this._speaker.sumUpGameTurn();
-				await this.nextTurn();
-				break;
-		}
-	
-		// for (const [index, player] of this._players.entries()) {
-		// 	this._speaker.updateStats(player);
-		// 	let withPlayer = 'deck';
-		// 	if (index + 2 <= this._players.length) { //same as index + 1 <= this._players.length - 1
-		// 		withPlayer = this._players[index + 1];
-		// 	}
-		// 	await player.wantsToSwapTest(withPlayer, deck);
-		// }
-	}
-
 	async startTurn() {
 		//clear main output element
 		this._speaker.clear();
 
 		//refresh table of player stats
-		this._speaker.refreshStatsTable(this._players);
+		// this._speaker.refreshStatsTable(this._players);
 		//print round
 		this._speaker.printRound();
 		this._speaker.addSpace();
@@ -270,6 +278,7 @@ export default class Game extends EventTarget {
 	}
 
 	nextPlayer() {
+		console.log('about to run nextPlayer()');
 		this._currPlayerIndex++;
 		
 		if (this._currPlayerIndex > this._dealerIndex - 1) {
@@ -289,11 +298,34 @@ export default class Game extends EventTarget {
 	}
 
 	async nextTurn() {
-		console.log('setting next turn...');
 		this._turn++;
-		
-		//set state
 		this.state = Game.STATE_START_TURN;
-		console.log('has set next turn.');
+	}
+
+	/**
+	 * Returns player with highest score
+	 */
+	async findWinner() {
+		let maxVal = await tools.extreme(this._players, 'heldCard.value'); //maxval is default when not passing 3rd param
+		let winner = this._players[maxVal.mostIndex];
+		winner.hasHighscore = true;
+		return winner;
+	}
+
+	/**
+	 * Returns player with lowest score
+	 */
+	async findLoser() {
+		let minVal = await tools.extreme(this._players, 'heldCard.value', tools.FIND_MIN); //tools.FIND_MIN === true
+		return this._players[minVal.mostIndex];
+	}
+
+	getPlayerNextTo() {
+		let withPlayer = 'deck';
+		if (this._currPlayerIndex + 2 <= this._players.length) { //same as index + 1 <= this._players.length - 1
+			withPlayer = this._players[this._currPlayerIndex + 1];
+		}
+
+		return withPlayer;
 	}
 }

@@ -235,8 +235,14 @@ export default class Speaker {
 
 	updateStats(player) {
 		const index = this.getStatsIndex(player);
-		this._tableData[index].score = player.score;
-		this._statsTable.updateData([{ id: index, score: player.score }]);
+		console.log(`found stats index for ${player.name}: ${index}`);
+		if (index >= 0) {
+			this._tableData[index].score = player.score;
+			this._statsTable.updateData([{ id: index, score: player.score }]);
+			this._statsTable.redraw();
+		} else {
+			console.log('stats table not initialized yet, skipping score update.');
+		}
 	}
 
 	addToStats(name, type) {
@@ -245,7 +251,7 @@ export default class Speaker {
 		this._stats.append($elem);
 	}
 
-	refreshStatsTable() {
+	async refreshStatsTable() {
 		this._tableData = [];
 
 		for (const player of this._parent.players) {
@@ -266,7 +272,7 @@ export default class Speaker {
 	}
 
 	getStatsIndex(player) {
-		return this._tableData.findIndex(line => line.field === player.name);
+		return this._tableData.findIndex(line => line.name === player.name);
 	}
 
 	getStatsElem(name) {
@@ -290,13 +296,11 @@ export default class Speaker {
 
 	async sumUpGameTurn() {
 		//find winner
-		let maxVal = await tools.extreme(this.parent.players, 'heldCard.value'); //maxval is default when not passing 3rd param
-		let winner = this.parent.players[maxVal.mostIndex];
+		let winner = this._parent.findWinner();
 		winner.wins++;
 		
 		//find loser
-		let minVal = await tools.extreme(this.parent.players, 'heldCard.value', tools.FIND_MIN); //tools.FIND_MIN === true
-		let loser = this.parent.players[minVal.mostIndex];
+		let loser = this._parent.findLoser();
 		loser.losses++;
 	
 		this.say("Winner of this turn is " + winner.name + " with the card " + winner.heldCard.name);

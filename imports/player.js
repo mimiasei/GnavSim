@@ -15,6 +15,7 @@ export default class Player {
 		this._wins = 0;
 		this._losses = 0;
 		this._neverSwapsWithDeck = false;
+		this._hasHighscore = false;
 	}
 
 	get name() { return this._name; }
@@ -24,14 +25,23 @@ export default class Player {
 	get wins() { return this._wins; }
 	get losses() { return this._losses; }
 	get neverSwapsWithDeck() { return this._neverSwapsWithDeck; }
+	get hasHighscore() { return this._hasHighscore; }
 
 	set name(value) { this._name = value }
-	// set pid(value) { this._pid = value }
-	set score(value) { this._score = value }
+	set score(value) { 
+		this._score = value;
+		this._game.speaker.updateStats(this);
+	}
 	set heldCard(value) { this._heldCard = Card.clone(value) }
 	set wins(value) { this._wins = value }
 	set losses(value) { this._losses = value }
 	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value }
+	set hasHighscore(value) {
+		this._hasHighscore = value;
+		if (this._hasHighscore) {
+			this._game.speaker.say(`${this._name} now has highest score.`);
+		}
+	}
 
 	static clone(player) {
 		let cloned = Object.assign (Object.create (Object.getPrototypeOf (player)), player);
@@ -51,14 +61,12 @@ export default class Player {
 	}
 
 	drawFromDeck() {
-		// Object.setPrototypeOf(deck, Deck.prototype);
 		this.discard(this._game.deck);
 		let result = this._game.deck.draw();
 		this.heldCard = result;
 	}
 
 	discard() {
-		// Object.setPrototypeOf(deck, Deck.prototype);
 		if (this._heldCard !== null) {
 			this._game.deck.discard(this._heldCard);
 		}
@@ -77,13 +85,6 @@ export default class Player {
 				running = true;
 				await this.swapCards(withPlayer, result, wantsToSwap);
 			}
-	
-			let obj = {
-				name : withPlayer.name,
-				result : null
-			}
-			
-			const watchedObj = tools.onChange(obj, watchCallback);
 	
 			await this.testForSwap(watchedObj); //Do small chance check if player has forgotten someone knocked 3 times.
 	
@@ -119,14 +120,55 @@ export default class Player {
 			}
 		}
 		if (wantsToSwap) {
-			// if (!askPlayers(index, game.players[index], game.players, deck, speaker)) { //Check if Staa for gjok! is called.
-			if (!askPlayers(index, game)) { //Check if Staa for gjok! is called.
+			if (!this._game.askPlayers(index, game)) { //Check if Staa for gjok! is called.
 				running = false;
 			}
 		}
 		else {
 			this._game.speaker.say(sayPass);
 		}
+	}
+
+	askPlayers(nbr) {
+		console.log('entered askPlayers() with index for player: ' + this._name);
+		let nextAdd = 1;
+		let hasSwapped, dragonen = false;
+		let returnedCard = null;
+	
+		while (!hasSwapped && !dragonen && (nbr + nextAdd) < this._game.players.length) {
+			this.requestSwap(this._game.players[nbr + nextAdd]);
+			returnedCard = this._game.players[nbr + nextAdd].answerSwap(this);
+	
+			if (returnedCard.constructor.name === 'Fool') {
+				this._game.speaker.say ("Everyone starts laughing and says 'Men " + this._game.players[nbr + nextAdd].name + " har jo narren!'");
+			}
+	
+			result = this.processAnswer(returnedCard);
+	
+			switch (result) {
+				case 1:		nextAdd++; //Hesten or huset
+							break;
+				case 2:		this.addToScore(-1); //katten
+							nextAdd++;
+							break;
+				case 3:		dragonen = true; //dragonen
+							this.addToScore(-1);
+							break;
+				case 4:		subractFromAllPlayers(this._game.players[nbr + nextAdd], this._game.players); //gjoeken
+							return false;
+				default:	this.swapWithPlayer(this._game.players[nbr + nextAdd]); //The two players Swap cards
+							hasSwapped = true;
+							break;
+			}
+	
+			//If player still hasn't swapped after being last in round
+			if (!hasSwapped) {
+				this._game.speaker.say (this._game.players[index].name + " draws from the deck.");
+				this._game.players[index].drawFromDeck();
+			}
+		}
+
+		return true;
 	}
 	
 	requestSwap(toPlayer) {
@@ -173,8 +215,7 @@ export default class Player {
 	}
 
 	addToScore(value) {
-		this._score += value;
-		console.log(this._name, this._score);
+		this.score += value;
 		let verb = value > 0 ? "added" : "subtracted";
 		let prepos = value > 0 ? "to" : "from";
 		this._game.speaker.say (`${this.name} ${verb} ${Math.abs(value)} ${prepos} score.`);
