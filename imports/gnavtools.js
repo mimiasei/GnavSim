@@ -3,7 +3,7 @@
 export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Øivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"];
 export const MAX_ROUNDS = 1;
 export const SWAP_THRESHOLDNUMBER = 4;
-export const SWAP_FUZZINESS = 0.03; //Simulates human error. 0.1 = 10% chance of making a mistake.
+export const SWAP_FUZZINESS = 0.08; //Simulates human error. 0.1 = 10% chance of making a mistake.
 
 export const TXT_WANT_TO_SWAP = "Jeg vil gjerne bytte med deg.";
 export const TXT_ACCEPT_SWAP = "Jada, her er kortet mitt.";

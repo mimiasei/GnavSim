@@ -79,11 +79,7 @@ export default class Player {
 	
 		if (withPlayer !== 'deck') {
 	
-			const watchCallback = async (result) => {
-				await this.swapCards(withPlayer, result, wantsToSwap);
-			}
-	
-			await this.testForSwap(watchedObj); //Do small chance check if player has forgotten someone knocked 3 times.
+			await this.testForSwap(); //Do small chance check if player has forgotten someone knocked 3 times.
 	
 		} else {
 			if (this.testForSwap('deck')) { //Only swap if card is 4 or less.
@@ -102,7 +98,7 @@ export default class Player {
 	 * @param bool result 
 	 * @param bool wantsToSwap 
 	 */
-	async swapCards(withPlayer, result, wantsToSwap) {
+	async swapCards(withPlayer) {
 		let sayPass = '';
 
 		if (withPlayer && withPlayer.heldCard && withPlayer.heldCard.isFool) { //If the other player has Narren...
@@ -124,7 +120,7 @@ export default class Player {
 			}
 		}
 		if (wantsToSwap) {
-			if (!this.askPlayers(index, game)) { //Check if Staa for gjok! is called.
+			if (!this.askPlayers(index)) { //Check if Staa for gjok! is called.
 				// running = false;
 			}
 		}
@@ -133,18 +129,18 @@ export default class Player {
 		}
 	}
 
-	askPlayers(nbr) {
+	askPlayers(playerIndex) {
 		console.log('entered askPlayers() with index for player: ' + this._name);
 		let nextAdd = 1;
 		let hasSwapped, dragonen = false;
 		let returnedCard = null;
 	
-		while (!hasSwapped && !dragonen && (nbr + nextAdd) < this._game.players.length) {
-			this.requestSwap(this._game.players[nbr + nextAdd]);
-			returnedCard = this._game.players[nbr + nextAdd].answerSwap(this);
+		while (!hasSwapped && !dragonen && (playerIndex + nextAdd) < this._game.players.length) {
+			this.requestSwap(this._game.players[playerIndex + nextAdd]);
+			returnedCard = this._game.players[playerIndex + nextAdd].answerSwap(this);
 	
 			if (returnedCard.constructor.name === 'Fool') {
-				this._game.speaker.say ("Everyone starts laughing and says 'Men " + this._game.players[nbr + nextAdd].name + " har jo narren!'");
+				this._game.speaker.say ("Everyone starts laughing and says 'Men " + this._game.players[playerIndex + nextAdd].name + " har jo narren!'");
 			}
 	
 			if (returnedCard.isMatador) {
@@ -158,11 +154,11 @@ export default class Player {
 					case 20:	dragonen = true; //dragonen
 								this.addToScore(-1);
 								break;
-					case 21:	subractFromAllPlayers(this._game.players[nbr + nextAdd], this._game.players); //gjøken
+					case 21:	subractFromAllPlayers(this._game.players[playerIndex + nextAdd], this._game.players); //gjøken
 								return false;
 				}
 			} else {
-				this.swapWithPlayer(this._game.players[nbr + nextAdd]); //The two players Swap cards
+				this.swapWithPlayer(this._game.players[playerIndex + nextAdd]); //The two players Swap cards
 				hasSwapped = true;
 			}
 	
@@ -232,7 +228,7 @@ export default class Player {
 
 			if (chance < tools.SWAP_FUZZINESS) {
 				swap--;
-			} else if (chance > 1 - tools.SWAP_FUZZINESS) {
+			} else if (chance > (1 - tools.SWAP_FUZZINESS)) {
 				swap++;
 			}
 

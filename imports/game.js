@@ -15,8 +15,10 @@ export default class Game extends EventTarget {
 
 		super();
 
+		//static state enums
 		Game.STATE_START_TURN = 'state_startTurn';
 		Game.STATE_BEFORE_SWAP = 'state_beforeSwap';
+		Game.STATE_DECIDED_SWAP = 'state_decidedSwap';
 		Game.STATE_AFTER_SWAP = 'state_afterSwap';
 		Game.STATE_END_TURN = 'state_endTurn';
 		
@@ -85,6 +87,8 @@ export default class Game extends EventTarget {
 			case (Game.STATE_BEFORE_SWAP):
 				initSwap();
 				break;
+			case (Game.STATE_DECIDED_SWAP): //after callback from deciding yes/no for swapping
+				break;
 			case (Game.STATE_AFTER_SWAP):
 				this.nextPlayer();
 				break;
@@ -112,7 +116,7 @@ export default class Game extends EventTarget {
 
 	initSwap() {
 		const withPlayer = this.getPlayerNextTo();
-		this.currentPlayer.test
+		this.currentPlayer.wantsToSwapTest(withPlayer);
 	}
 
 	async init() {
@@ -131,7 +135,6 @@ export default class Game extends EventTarget {
 			
 			this.nextTurn = result;
 			this.speaker.hideNextTurnButton();
-			// highestScorePlayers = await gameLoop(game, deck, highestScorePlayers);
 		});
 		
 		//function for when knock button is clicked
