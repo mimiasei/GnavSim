@@ -34,6 +34,8 @@ export default class Game extends EventTarget {
 		this._currPlayerIndex = 0;
 		this._deck = null;
 		this._state = null;
+
+		this.counter = 0;
 	}
 
 	//getters
@@ -60,10 +62,16 @@ export default class Game extends EventTarget {
 	set players(value) { this._players = Array.from(value) }
 
 	//state handler in the state setter
-	set state(value) { 
-		this._state = value;
-		$("#prettyInfo").text('Current state: ' + this._state);
-		this.stateChanged();
+	set state(value) {
+		console.log('old state: ' + this._state);
+		if (this._state !== value) {
+			this._state = value;
+			$("#prettyInfo").text('Current state: ' + this._state);
+			console.log('state changed to: ' + this._state);
+			this.stateChanged();
+		} else {
+			console.log('not changing state as new value === old value');
+		}
 	}
 
 		/**
@@ -78,14 +86,16 @@ export default class Game extends EventTarget {
 	 * 5. end of turn, go next turn (back to 1.)
 	 */
 	async stateChanged() {		
-	
+		this.counter++;
 		switch (this.state) {
 			case (Game.STATE_START_TURN):
+				console.log('awaiting start turn');
 				await this.startTurn();
+				console.log('has awaited start turn');
 				this.state = Game.STATE_BEFORE_SWAP;
 				break;
 			case (Game.STATE_BEFORE_SWAP):
-				initSwap();
+				this.initSwap();
 				break;
 			case (Game.STATE_DECIDED_SWAP): //after callback from deciding yes/no for swapping
 				break;
@@ -103,6 +113,7 @@ export default class Game extends EventTarget {
 				await this.nextTurn();
 				break;
 		}
+		console.log('statechanged counter: ' + this.counter);
 	
 		// for (const [index, player] of this._players.entries()) {
 		// 	this._speaker.updateStats(player);
@@ -116,7 +127,9 @@ export default class Game extends EventTarget {
 
 	initSwap() {
 		const withPlayer = this.getPlayerNextTo();
-		this.currentPlayer.wantsToSwapTest(withPlayer);
+		this.currentPlayer.swapWithPlayer(withPlayer);
+		// this.currentPlayer.wantsToSwapTest(withPlayer);
+		this.state = Game.STATE_AFTER_SWAP;
 	}
 
 	async init() {
@@ -170,6 +183,18 @@ export default class Game extends EventTarget {
 			}
 		});
 
+		this._event_decidedSwap = new CustomEvent('event_decidedSwap', {
+			detail: {
+				player: this.currentPlayer
+			}
+		});
+
+		this._event_decidedSwap = new CustomEvent('event_afterSwap', {
+			detail: {
+				player: this.currentPlayer
+			}
+		});
+
 		this._event_endTurn = new CustomEvent('event_endTurn', {
 			detail: {
 				player: this.currentPlayer
@@ -183,12 +208,28 @@ export default class Game extends EventTarget {
 				console.log("event_knock called by player: ", event.detail.player);
 			}
 		);
+
+		this.addEventListener(
+			'event_beforeSwap', 
+			(event) => {
+				console.log("event_beforeSwap called by player: ", event.detail.player);
+				// this.state = Game.STATE_BEFORE_SWAP;
+			}
+		);
+
+		this.addEventListener(
+			'event_decidedSwap', 
+			(event) => {
+				console.log("event_decidedSwap called by player: ", event.detail.player);
+				// this.state = Game.STATE_DECIDED_SWAP;
+			}
+		);
 		
 		this.addEventListener(
-			'event_hasSwapped', 
+			'event_afterSwap', 
 			(event) => {
-				this.state = Game.STATE_AFTER_SWAP;
-				console.log("event_hasSwapped called by player: ", event.detail.player);
+				console.log("event_afterSwap called by player: ", event.detail.player);
+				// this.state = Game.STATE_AFTER_SWAP;
 			}
 		);
 
@@ -196,6 +237,7 @@ export default class Game extends EventTarget {
 			'event_endTurn', 
 			(event) => {
 				console.log("event_endTurn called by player: ", event.detail.player);
+				// this.state = Game.STATE_END_TURN;
 			}
 		);
 	}
@@ -248,7 +290,9 @@ export default class Game extends EventTarget {
 		await this.dealOutCards();
 
 		//call event that turn start is done and we want next state
-		this.dispatchEvent(this._event_beforeSwap);
+		// this.dispatchEvent(this._event_beforeSwap);
+
+		this.state = Game.STATE_BEFORE_SWAP;
 	}
 
 	async dealOutCards() {
@@ -285,7 +329,8 @@ export default class Game extends EventTarget {
 		this._currPlayerIndex++;
 		
 		if (this._currPlayerIndex > this._dealerIndex - 1) {
-			this.dispatchEvent(this._event_endTurn);
+			// this.dispatchEvent(this._event_endTurn);
+			this.state = Game.STATE_END_TURN;
 		}
 	}
 

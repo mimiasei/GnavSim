@@ -25,10 +25,15 @@ export function highlight(strings, ...values) {
 	return str;
 }
 
-export function* range(start, end) {
+export function range(start, end) {
+	console.log(`start: ${start}, end: ${end}`);
+	let array = [];
+
 	for (let i = start; i <= end; i++) {
-		yield i;
+		array.push(i);
 	}
+
+	return array;
 }
 
 /**

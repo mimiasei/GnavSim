@@ -132,32 +132,46 @@ export default class Player {
 	askPlayers(playerIndex) {
 		console.log('entered askPlayers() with index for player: ' + this._name);
 		let nextAdd = 1;
-		let hasSwapped, dragonen = false;
+		let hasSwapped, abortSwap = false;
 		let returnedCard = null;
 	
-		while (!hasSwapped && !dragonen && (playerIndex + nextAdd) < this._game.players.length) {
+		while (!hasSwapped && !abortSwap && (playerIndex + nextAdd) < this._game.players.length) {
 			this.requestSwap(this._game.players[playerIndex + nextAdd]);
 			returnedCard = this._game.players[playerIndex + nextAdd].answerSwap(this);
 	
-			if (returnedCard.constructor.name === 'Fool') {
+			if (returnedCard.isFool) {
 				this._game.speaker.say ("Everyone starts laughing and says 'Men " + this._game.players[playerIndex + nextAdd].name + " har jo narren!'");
 			}
 	
 			if (returnedCard.isMatador) {
-				switch (returnedCard.value) {
-					case 17:
-					case 18:	nextAdd++; //Hesten or huset
-								break;
-					case 19:	this.addToScore(-1); //katten
-								nextAdd++;
-								break;
-					case 20:	dragonen = true; //dragonen
-								this.addToScore(-1);
-								break;
-					case 21:	subractFromAllPlayers(this._game.players[playerIndex + nextAdd], this._game.players); //gjøken
-								return false;
+				if (returnedCard.causeAllLosePointAndStopGame) { //gjøken
+					subractFromAllPlayers(this._game.players[playerIndex + nextAdd], this._game.players);
+				} else if (returnedCard.causeLosePoint) { //cat, dragoon
+					this.addToScore(-1);
+					if (returnedCard.causeNoMoreSwap) { //dragoon
+						abortSwap = true;
+					} else {
+						nextAdd++; //cat
+					}
+				} else {
+					nextAdd++; //horse, house
 				}
+
+				// switch (returnedCard.value) {
+				// 	case 17:
+				// 	case 18:	nextAdd++; //Hesten or huset
+				// 				break;
+				// 	case 19:	this.addToScore(-1); //katten
+				// 				nextAdd++;
+				// 				break;
+				// 	case 20:	dragonen = true; //dragonen
+				// 				this.addToScore(-1);
+				// 				break;
+				// 	case 21:	subractFromAllPlayers(this._game.players[playerIndex + nextAdd], this._game.players); //gjøken
+				// 				return false;
+				// }
 			} else {
+				console.log('swapping in askplayers()...');
 				this.swapWithPlayer(this._game.players[playerIndex + nextAdd]); //The two players Swap cards
 				hasSwapped = true;
 			}
@@ -183,11 +197,18 @@ export default class Player {
 	}
 
 	swapWithPlayer(fromPlayer) {
-		console.log("swapping...");
+		console.log(`${this._name} swapping with ${fromPlayer.name}...`);
 		this._game.speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
-		const card = $.extend(true, {}, this._heldCard); //$.extend used to make deep copies
-		this._heldCard = $.extend(true, {}, fromPlayer.heldCard);
-		fromPlayer.heldCard = $.extend(true, {}, card);
+		console.log('before first clone')
+		const card = this._heldCard.clone();
+		console.log('after first clone')
+		this._heldCard.test(card);
+		console.log('after first test')
+		console.log('before second clone')
+		this._heldCard = fromPlayer.heldCard.clone();
+		fromPlayer.heldCard.test(this._heldCard);
+		fromPlayer.heldCard = card.clone();
+		card.test(fromPlayer.heldCard);
 	}
 
 	addToScore(value) {

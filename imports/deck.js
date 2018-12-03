@@ -21,10 +21,8 @@ export default class Deck {
 	set discardPile(value) { this._discardPile = Array.from(value) }
 
 	async init() {
-		let promises = [];
-		promises.push(this.buildDeck());
-		promises.push(this.shuffleDeck());
-		await Promise.all(promises);
+		await this.buildDeck();
+		await this.shuffleDeck();
 	}
 
 	async buildDeck() {
@@ -32,8 +30,7 @@ export default class Deck {
 		this._discardPile = [];
 		let card = null;
 
-		// for(let i = 0; i < Card.typesSize; i++) {
-		for (const i of tools.range(0, Card.typesSize - 1)) {
+		for (const i of tools.range(0, Card.typesLength - 1)) {
 			switch (i) {
 				case 0:
 					card = new Cuckoo();
@@ -57,7 +54,6 @@ export default class Deck {
 					card = new Card(Card.type(i), Card.types[Card.type(i)]);
 					break;
 			}
-			
 			this._cards.push(card); //need two of same card type
 			this._cards.push(card);
 		}
