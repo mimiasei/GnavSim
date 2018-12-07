@@ -65,10 +65,8 @@ export default class Card {
 		return Object.keys(this.types)[index];
 	}
 
-	clone() {
-		// return JSON.parse(JSON.stringify(this));
-		const clone = Object.assign( Object.create( Object.getPrototypeOf(this)), this);
-		return clone;
+	async clone() {
+		return Object.assign( Object.create( Object.getPrototypeOf(this)), this);
 	}
 
 	static deepCopy(card) {

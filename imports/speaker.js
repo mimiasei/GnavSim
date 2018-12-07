@@ -295,6 +295,9 @@ export default class Speaker {
 	}
 
 	async sumUpGameTurn() {
+		//DEBUG, skip this method for now
+		return true;
+
 		//find winner
 		let winner = this._parent.findWinner();
 		winner.wins++;

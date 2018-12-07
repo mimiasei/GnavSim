@@ -8,19 +8,21 @@ import * as tools from './gnavtools.js';
 
 export default class Game extends EventTarget {
 
+	/**
+	 * Has static vars:
+	 * Game.STATE_START_TURN (string)
+	 * Game.STATE_BEFORE_SWAP (string)
+	 * Game.STATE_DECIDED_SWAP (string)
+	 * Game.STATE_AFTER_SWAP (string)
+	 * Game.STATE_END_TURN (string)
+	 */
+
 	constructor(playType, maxValue, isHuman) {
 		playType = playType || 0;
 		maxValue = maxValue || 1;
 		isHuman = isHuman || false;
 
 		super();
-
-		//static state enums
-		Game.STATE_START_TURN = 'state_startTurn';
-		Game.STATE_BEFORE_SWAP = 'state_beforeSwap';
-		Game.STATE_DECIDED_SWAP = 'state_decidedSwap';
-		Game.STATE_AFTER_SWAP = 'state_afterSwap';
-		Game.STATE_END_TURN = 'state_endTurn';
 		
 		this._playType = playType; //0 = max ROUNDS, 1 = reach SCORE
 		this._turn = 0; //current turn
@@ -98,6 +100,7 @@ export default class Game extends EventTarget {
 				this.initSwap();
 				break;
 			case (Game.STATE_DECIDED_SWAP): //after callback from deciding yes/no for swapping
+
 				break;
 			case (Game.STATE_AFTER_SWAP):
 				this.nextPlayer();
@@ -127,7 +130,8 @@ export default class Game extends EventTarget {
 
 	initSwap() {
 		const withPlayer = this.getPlayerNextTo();
-		this.currentPlayer.swapWithPlayer(withPlayer);
+		console.log(`${this.currentPlayer.name} doing swapCards with ${withPlayer.name} in game.initSwap()...`);
+		this.currentPlayer.swapCards(withPlayer);
 		// this.currentPlayer.wantsToSwapTest(withPlayer);
 		this.state = Game.STATE_AFTER_SWAP;
 	}
@@ -185,7 +189,8 @@ export default class Game extends EventTarget {
 
 		this._event_decidedSwap = new CustomEvent('event_decidedSwap', {
 			detail: {
-				player: this.currentPlayer
+				player: this.currentPlayer,
+				result: false
 			}
 		});
 
@@ -221,7 +226,7 @@ export default class Game extends EventTarget {
 			'event_decidedSwap', 
 			(event) => {
 				console.log("event_decidedSwap called by player: ", event.detail.player);
-				// this.state = Game.STATE_DECIDED_SWAP;
+				this.state = Game.STATE_DECIDED_SWAP;
 			}
 		);
 		
@@ -243,7 +248,7 @@ export default class Game extends EventTarget {
 	}
 
 	async initGame() {
-		console.log('initgame...');
+		console.log('---> initgame...');
 		//show knock button
 		this._speaker.hideKnockButton(true);
 
@@ -270,7 +275,7 @@ export default class Game extends EventTarget {
 		this.nextTurn();
 		//set state to start turn
 		this.state = Game.STATE_START_TURN;
-		console.log('initgame done.');
+		console.log('---> initgame done.');
 	}
 
 	async startTurn() {
@@ -368,12 +373,24 @@ export default class Game extends EventTarget {
 		return this._players[minVal.mostIndex];
 	}
 
+	/**
+	 * Returns the player next to current player. 
+	 * If next player is dealer, then returning object with name 'deck'.
+	 */
 	getPlayerNextTo() {
-		let withPlayer = 'deck';
+		let withPlayer = { name: 'deck' };
 		if (this._currPlayerIndex + 2 <= this._players.length) { //same as index + 1 <= this._players.length - 1
 			withPlayer = this._players[this._currPlayerIndex + 1];
 		}
 
 		return withPlayer;
+	}
+
+	subractFromAllPlayers(players) {
+		for (let player of players) {
+			if (player.pid !== this.currentPlayer.pid) { //Subtract 1 score one from all players except current
+				player.addToScore(-1);
+			}
+		}
 	}
 }

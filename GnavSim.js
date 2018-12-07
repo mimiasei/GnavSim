@@ -4,14 +4,24 @@ const HOST = "http://localhost";
 const PORT = 8000;
 	
 import Game from './imports/game.js';	
+import Player from './imports/player.js';	
 import * as tools from './imports/gnavtools.js';
 
 $(document).ready(function() {
-	console.log("document is ready");
+	/**
+	 *Declare static class variables:
+	 */
+	//Player:
+	Player.index = 1;
+	//Game:
+	Game.STATE_START_TURN = 'state_startTurn';
+	Game.STATE_BEFORE_SWAP = 'state_beforeSwap';
+	Game.STATE_DECIDED_SWAP = 'state_decidedSwap';
+	Game.STATE_AFTER_SWAP = 'state_afterSwap';
+	Game.STATE_END_TURN = 'state_endTurn';
 
+	//hide all game UI
 	hideAll();
-
-	// Player.index = 1;
 
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
@@ -78,9 +88,6 @@ function settingsPart() {
 }
 
 async function createGame() {
-	// _scope_settings.name = $('#form_name').val();
-	// _scope_settings.multiplayer = $('#form_multiplayer').is(':checked');
-
 	//Create default game object
 	let game = new Game( 
 		$('#form_winType').val(), 
@@ -102,18 +109,7 @@ async function startGame(game) {
 	}
 }
 
-function subractFromAllPlayers(player, players) {
-	for (let ply of players) {
-		if (ply.pid !== player.pid) { //Subtract 1 score one from all players except current
-			ply.addToScore(-1);
-		}
-	}
-}
-
-function getRandomImgElem(search, width) {
-	let imageUrl = 'https://source.unsplash.com/' + width + 'x' + width + '/?' + search;
-	return $( "<img>", { id: search + "_img", src: imageUrl, title: search } );
-}
+////////////////////////////////////////////
 
 function chat(active_chat) {
 	if (active_chat) {
@@ -159,5 +155,10 @@ function chat(active_chat) {
 
 	} else {
 		$('#chat_section').hide();
+	}
+
+	function getRandomImgElem(search, width) {
+		let imageUrl = 'https://source.unsplash.com/' + width + 'x' + width + '/?' + search;
+		return $( "<img>", { id: search + "_img", src: imageUrl, title: search } );
 	}
 }

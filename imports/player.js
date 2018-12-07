@@ -6,6 +6,11 @@ import * as tools from './gnavtools.js';
 
 export default class Player {
 
+	/**
+	 * Has static vars:
+	 * index (int)
+	 */
+
 	constructor(name, game) {
 		this._name = name || '';
 		this._pid = this.getIndex();
@@ -100,6 +105,7 @@ export default class Player {
 	 */
 	async swapCards(withPlayer) {
 		let sayPass = '';
+		let wantsToSwap = false;
 
 		if (withPlayer && withPlayer.heldCard && withPlayer.heldCard.isFool) { //If the other player has Narren...
 			if (result) {
@@ -120,7 +126,8 @@ export default class Player {
 			}
 		}
 		if (wantsToSwap) {
-			if (!this.askPlayers(index)) { //Check if Staa for gjok! is called.
+			const result = await this.askPlayers();
+			if (!result) { //Check if Staa for gjok! is called.
 				// running = false;
 			}
 		}
@@ -129,32 +136,34 @@ export default class Player {
 		}
 	}
 
-	askPlayers(playerIndex) {
-		console.log('entered askPlayers() with index for player: ' + this._name);
-		let nextAdd = 1;
+	async askPlayers() {
+		console.log('ASKPLAYERS: entered askPlayers() with index for player: ' + this._name);
+		let gotoNextPlayer = false;
 		let hasSwapped, abortSwap = false;
 		let returnedCard = null;
-	
-		while (!hasSwapped && !abortSwap && (playerIndex + nextAdd) < this._game.players.length) {
-			this.requestSwap(this._game.players[playerIndex + nextAdd]);
-			returnedCard = this._game.players[playerIndex + nextAdd].answerSwap(this);
+		let nextPlayer = this._game.getPlayerNextTo();
+
+		while (!hasSwapped && !abortSwap && nextPlayer.name !== 'deck') {
+
+			this.requestSwap(nextPlayer);
+			returnedCard = nextPlayer.answerSwap(this);
 	
 			if (returnedCard.isFool) {
-				this._game.speaker.say ("Everyone starts laughing and says 'Men " + this._game.players[playerIndex + nextAdd].name + " har jo narren!'");
+				this._game.speaker.say ("Everyone starts laughing and says 'Men " + nextPlayer.name + " har jo narren!'");
 			}
 	
 			if (returnedCard.isMatador) {
 				if (returnedCard.causeAllLosePointAndStopGame) { //gjøken
-					subractFromAllPlayers(this._game.players[playerIndex + nextAdd], this._game.players);
+					subractFromAllPlayers(nextPlayer, this._game.players);
 				} else if (returnedCard.causeLosePoint) { //cat, dragoon
 					this.addToScore(-1);
 					if (returnedCard.causeNoMoreSwap) { //dragoon
 						abortSwap = true;
 					} else {
-						nextAdd++; //cat
+						gotoNextPlayer = true; //cat
 					}
 				} else {
-					nextAdd++; //horse, house
+					gotoNextPlayer = true; //horse, house
 				}
 
 				// switch (returnedCard.value) {
@@ -171,15 +180,19 @@ export default class Player {
 				// 				return false;
 				// }
 			} else {
-				console.log('swapping in askplayers()...');
-				this.swapWithPlayer(this._game.players[playerIndex + nextAdd]); //The two players Swap cards
+				console.log('ASKPLAYERS: card is NOT matador. going to swapwithplayer...');
+				await this.swapWithPlayer(nextPlayer); //The two players Swap cards
 				hasSwapped = true;
 			}
 	
 			//If player still hasn't swapped after being last in round
 			if (!hasSwapped) {
-				this._game.speaker.say (this._game.players[index].name + " draws from the deck.");
-				this._game.players[index].drawFromDeck();
+				this._game.speaker.say (this._name + " draws from the deck.");
+				this.drawFromDeck();
+			}
+
+			if (gotoNextPlayer) {
+				nextPlayer = this._game.getPlayerNextTo();
 			}
 		}
 
@@ -196,16 +209,17 @@ export default class Player {
 		return this._heldCard;
 	}
 
-	swapWithPlayer(fromPlayer) {
-		console.log(`${this._name} swapping with ${fromPlayer.name}...`);
+	async swapWithPlayer(fromPlayer) {
+		console.log(`SWAPWITHPLAYER: ${this._name} is swapping with ${fromPlayer.name}...`);
 		this._game.speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
-		console.log('before first clone')
-		const card = this._heldCard.clone();
-		console.log('after first clone')
+		console.log('SWAPWITHPLAYER clone: before first clone')
+		const card = await this._heldCard.clone();
+		console.log('SWAPWITHPLAYER clone: after first clone')
 		this._heldCard.test(card);
-		console.log('after first test')
-		console.log('before second clone')
+		console.log('SWAPWITHPLAYER clonetest: after first test')
+		console.log('SWAPWITHPLAYER clone: before second clone')
 		this._heldCard = fromPlayer.heldCard.clone();
+		console.log('SWAPWITHPLAYER clone: after second clone')
 		fromPlayer.heldCard.test(this._heldCard);
 		fromPlayer.heldCard = card.clone();
 		card.test(fromPlayer.heldCard);
