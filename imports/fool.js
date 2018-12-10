@@ -11,16 +11,4 @@ export default class Fool extends Card {
 		this.statement = "<Bank bank bank>!";
 		this.isFool = true;
 	}
-
-	async carboncopy() {
-		let clone = new Fool(this._name, this._value);
-		clone.statement = this._statement;
-		clone.isMatador = this._isMatador;
-		clone.causeNoMoreSwap = this._causeNoMoreSwap;
-		clone.causeLosePoint = this._causeLosePoint;
-		clone._causeAllLosePointAndStopGame = this._causeAllLosePointAndStopGame;
-		clone.isFool = this._isFool;
-
-		return clone;
-	}
 }

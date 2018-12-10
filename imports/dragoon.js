@@ -13,16 +13,4 @@ export default class Dragoon extends Card {
 		this.causeNoMoreSwap = true;
 		this.causeLosePoint = true;
 	}
-
-	async carboncopy() {
-		let clone = new Dragoon(this._name, this._value);
-		clone.statement = this._statement;
-		clone.isMatador = this._isMatador;
-		clone.causeNoMoreSwap = this._causeNoMoreSwap;
-		clone.causeLosePoint = this._causeLosePoint;
-		clone._causeAllLosePointAndStopGame = this._causeAllLosePointAndStopGame;
-		clone.isFool = this._isFool;
-
-		return clone;
-	}
 }

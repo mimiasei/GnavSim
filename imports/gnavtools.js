@@ -97,15 +97,3 @@ export function log(message) {
         caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
     console.log(caller + ":" + message);
 }
-
-export function getAllFuncs(obj) {
-    var props = [];
-
-    do {
-        props = props.concat(Object.getOwnPropertyNames(obj));
-    } while (obj = Object.getPrototypeOf(obj));
-
-    return props.sort().filter(function(e, i, arr) { 
-       if (e!=arr[i+1] && typeof obj[e] == 'function') return true;
-    });
-}

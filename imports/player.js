@@ -2,6 +2,7 @@
 
 import Deck from './deck.js';
 import Card from './card.js';
+import CardClass from './cardclass.js';
 import * as tools from './gnavtools.js';
 
 export default class Player {
@@ -210,14 +211,12 @@ export default class Player {
 	}
 
 	async swapWithPlayer(fromPlayer) {
-		tools.log(`SWAPWITHPLAYER: ${this._name} is swapping with ${fromPlayer.name}...`);
+		tools.log(`${this._name} swaps ${this._heldCard.name} with ${fromPlayer.name}'s ${fromPlayer.heldCard.name}...`);
 		this._game.speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
-		tools.log('SWAPWITHPLAYER clone: before first clone');
-		const card = await this._heldCard.carboncopy();
-		tools.log('SWAPWITHPLAYER clone: after first clone');
-		this._heldCard = await fromPlayer.heldCard.carboncopy();
-		fromPlayer.heldCard = await card.carboncopy();
-		card.test(fromPlayer.heldCard);
+		const card = CardClass.deepCopy(this._heldCard);
+		this._heldCard = CardClass.deepCopy(fromPlayer.heldCard);
+		fromPlayer.heldCard = card;
+		tools.log(`${this._name} now has ${this._heldCard.name} and ${fromPlayer.name} has ${fromPlayer.heldCard.name}.`);
 	}
 
 	addToScore(value) {
@@ -237,7 +236,6 @@ export default class Player {
 	}
 
 	sayNoFool(player) {
-		tools.log("saying no fool...");
 		return tools.highlight(tools.TXT_NO_WAY_FOOL, player.name);
 	}
 

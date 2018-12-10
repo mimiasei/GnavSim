@@ -65,11 +65,11 @@ export default class Game extends EventTarget {
 
 	//state handler in the state setter
 	set state(value) {
-		tools.log('old state: ' + this._state);
+		tools.log('STATE: old: ' + this._state);
 		if (this._state !== value) {
 			this._state = value;
 			$("#prettyInfo").text('Current state: ' + this._state);
-			tools.log('state changed to: ' + this._state);
+			tools.log('STATE: new: ' + this._state);
 			this.stateChanged();
 		} else {
 			tools.log('not changing state as new value === old value');
@@ -116,7 +116,7 @@ export default class Game extends EventTarget {
 				await this.nextTurn();
 				break;
 		}
-		tools.log('statechanged counter: ' + this.counter);
+		tools.log(`statechanged counter: ${this.counter}, current turn: ${this._turn}`);
 	
 		// for (const [index, player] of this._players.entries()) {
 		// 	this._speaker.updateStats(player);
@@ -210,14 +210,14 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_knock', 
 			(event) => {
-				tools.log("event_knock called by player: ", event.detail.player);
+				console.log("event_knock called by player: ", event.detail.player);
 			}
 		);
 
 		this.addEventListener(
 			'event_beforeSwap', 
 			(event) => {
-				tools.log("event_beforeSwap called by player: ", event.detail.player);
+				console.log("event_beforeSwap called by player: ", event.detail.player);
 				// this.state = Game.STATE_BEFORE_SWAP;
 			}
 		);
@@ -225,7 +225,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_decidedSwap', 
 			(event) => {
-				tools.log("event_decidedSwap called by player: ", event.detail.player);
+				console.log("event_decidedSwap called by player: ", event.detail.player);
 				this.state = Game.STATE_DECIDED_SWAP;
 			}
 		);
@@ -233,7 +233,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_afterSwap', 
 			(event) => {
-				tools.log("event_afterSwap called by player: ", event.detail.player);
+				console.log("event_afterSwap called by player: ", event.detail.player);
 				// this.state = Game.STATE_AFTER_SWAP;
 			}
 		);
@@ -241,7 +241,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_endTurn', 
 			(event) => {
-				tools.log("event_endTurn called by player: ", event.detail.player);
+				console.log("event_endTurn called by player: ", event.detail.player);
 				// this.state = Game.STATE_END_TURN;
 			}
 		);

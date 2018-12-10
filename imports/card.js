@@ -1,5 +1,8 @@
 'use strict';
 
+import * as tools from './gnavtools.js';
+// import CardClass from './cardclass.js';
+
 export default class Card {
 
 	constructor (name, value) {
@@ -33,7 +36,7 @@ export default class Card {
 
 	static get types() {
 		return {		
-			'GjÃ¸ken': 21,
+			'Gjøken': 21,
 			'Dragonen': 20,
 			'Katten': 19,
 			'Hesten': 18,
@@ -65,20 +68,20 @@ export default class Card {
 		return Object.keys(this.types)[index];
 	}
 
-	async carboncopy() {
-		// return Object.assign( Object.create( Object.getPrototypeOf(this)), this);
-		let clone = new Card(this._name, this._value);
-		clone.statement = this._statement;
-		clone.isMatador = this._isMatador;
-		clone.causeNoMoreSwap = this._causeNoMoreSwap;
-		clone.causeLosePoint = this._causeLosePoint;
-		clone._causeAllLosePointAndStopGame = this._causeAllLosePointAndStopGame;
-		clone.isFool = this._isFool;
+	// static deepCopy(card) {
+	// 	// let clone = new CardClass(card.name, card.name, card.value);
+	// 	let clone = new Card(card.name, card.value);
+	// 	clone.statement = card.statement;
+	// 	clone.isMatador = card.isMatador;
+	// 	clone.causeNoMoreSwap = card.causeNoMoreSwap;
+	// 	clone.causeLosePoint = card.causeLosePoint;
+	// 	clone._causeAllLosePointAndStopGame = card.causeAllLosePointAndStopGame;
+	// 	clone.isFool = card.isFool;
 
-		return clone;
-	}
+	// 	tools.log('------ DEEPCOPY ------');
+	// 	console.log(card);
+	// 	console.log(clone);
 
-	static deepCopy(card) {
-		return JSON.parse(JSON.stringify(card));
-	}
+	// 	return clone;
+	// }
 }
