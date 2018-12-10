@@ -94,6 +94,11 @@ td:nth-child(3) {
   width: 25%;
 }
 
+.stats-table {
+  position: relative;
+  top: 50px;
+}
+
 .tabulator {
   background-color: var(--color-bg-main);
   border: none;
