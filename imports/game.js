@@ -65,14 +65,14 @@ export default class Game extends EventTarget {
 
 	//state handler in the state setter
 	set state(value) {
-		console.log('old state: ' + this._state);
+		tools.log('old state: ' + this._state);
 		if (this._state !== value) {
 			this._state = value;
 			$("#prettyInfo").text('Current state: ' + this._state);
-			console.log('state changed to: ' + this._state);
+			tools.log('state changed to: ' + this._state);
 			this.stateChanged();
 		} else {
-			console.log('not changing state as new value === old value');
+			tools.log('not changing state as new value === old value');
 		}
 	}
 
@@ -91,9 +91,9 @@ export default class Game extends EventTarget {
 		this.counter++;
 		switch (this.state) {
 			case (Game.STATE_START_TURN):
-				console.log('awaiting start turn');
+				tools.log('awaiting start turn');
 				await this.startTurn();
-				console.log('has awaited start turn');
+				tools.log('has awaited start turn');
 				this.state = Game.STATE_BEFORE_SWAP;
 				break;
 			case (Game.STATE_BEFORE_SWAP):
@@ -116,7 +116,7 @@ export default class Game extends EventTarget {
 				await this.nextTurn();
 				break;
 		}
-		console.log('statechanged counter: ' + this.counter);
+		tools.log('statechanged counter: ' + this.counter);
 	
 		// for (const [index, player] of this._players.entries()) {
 		// 	this._speaker.updateStats(player);
@@ -130,7 +130,7 @@ export default class Game extends EventTarget {
 
 	initSwap() {
 		const withPlayer = this.getPlayerNextTo();
-		console.log(`${this.currentPlayer.name} doing swapCards with ${withPlayer.name} in game.initSwap()...`);
+		tools.log(`${this.currentPlayer.name} doing swapCards with ${withPlayer.name} in game.initSwap()...`);
 		this.currentPlayer.swapCards(withPlayer);
 		// this.currentPlayer.wantsToSwapTest(withPlayer);
 		this.state = Game.STATE_AFTER_SWAP;
@@ -165,7 +165,7 @@ export default class Game extends EventTarget {
 			// Trigger it!
 			this.dispatchEvent(event);
 
-			console.log("knocking: ", result);
+			tools.log("knocking: ", result);
 		});
 		
 		//create new speaker
@@ -210,14 +210,14 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_knock', 
 			(event) => {
-				console.log("event_knock called by player: ", event.detail.player);
+				tools.log("event_knock called by player: ", event.detail.player);
 			}
 		);
 
 		this.addEventListener(
 			'event_beforeSwap', 
 			(event) => {
-				console.log("event_beforeSwap called by player: ", event.detail.player);
+				tools.log("event_beforeSwap called by player: ", event.detail.player);
 				// this.state = Game.STATE_BEFORE_SWAP;
 			}
 		);
@@ -225,7 +225,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_decidedSwap', 
 			(event) => {
-				console.log("event_decidedSwap called by player: ", event.detail.player);
+				tools.log("event_decidedSwap called by player: ", event.detail.player);
 				this.state = Game.STATE_DECIDED_SWAP;
 			}
 		);
@@ -233,7 +233,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_afterSwap', 
 			(event) => {
-				console.log("event_afterSwap called by player: ", event.detail.player);
+				tools.log("event_afterSwap called by player: ", event.detail.player);
 				// this.state = Game.STATE_AFTER_SWAP;
 			}
 		);
@@ -241,14 +241,14 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_endTurn', 
 			(event) => {
-				console.log("event_endTurn called by player: ", event.detail.player);
+				tools.log("event_endTurn called by player: ", event.detail.player);
 				// this.state = Game.STATE_END_TURN;
 			}
 		);
 	}
 
 	async initGame() {
-		console.log('---> initgame...');
+		tools.log('starting initgame...');
 		//show knock button
 		this._speaker.hideKnockButton(true);
 
@@ -275,7 +275,7 @@ export default class Game extends EventTarget {
 		this.nextTurn();
 		//set state to start turn
 		this.state = Game.STATE_START_TURN;
-		console.log('---> initgame done.');
+		tools.log('initgame done.');
 	}
 
 	async startTurn() {
@@ -330,7 +330,7 @@ export default class Game extends EventTarget {
 	}
 
 	nextPlayer() {
-		console.log('about to run nextPlayer()');
+		tools.log('about to run nextPlayer()');
 		this._currPlayerIndex++;
 		
 		if (this._currPlayerIndex > this._dealerIndex - 1) {

@@ -26,7 +26,7 @@ export function highlight(strings, ...values) {
 }
 
 export function range(start, end) {
-	console.log(`start: ${start}, end: ${end}`);
+	log(`start: ${start}, end: ${end}`);
 	let array = [];
 
 	for (let i = start; i <= end; i++) {
@@ -90,4 +90,22 @@ export async function extreme(array, attr, findMin) {
 		}
 		return obj;
 	}
+}
+
+export function log(message) {
+    let stack = new Error().stack,
+        caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
+    console.log(caller + ":" + message);
+}
+
+export function getAllFuncs(obj) {
+    var props = [];
+
+    do {
+        props = props.concat(Object.getOwnPropertyNames(obj));
+    } while (obj = Object.getPrototypeOf(obj));
+
+    return props.sort().filter(function(e, i, arr) { 
+       if (e!=arr[i+1] && typeof obj[e] == 'function') return true;
+    });
 }

@@ -11,4 +11,9 @@ export default class House extends Card {
 		this.statement = "Hus forbi!";
 		this.isMatador = true;
 	}
+
+	clone() {
+		let clone = new House(this._name, this._value);
+		return super.cloneVars(clone);
+	}
 }

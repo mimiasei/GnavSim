@@ -180,7 +180,7 @@ export default class Speaker {
 	
 	async openModal(question, answers, callbackFn, useCloseBtn) {
 		useCloseBtn = useCloseBtn || false;
-		console.log("opening modal...");
+		tools.log("opening modal...");
 
 		//display modal
 		this._modal.show();
@@ -235,13 +235,13 @@ export default class Speaker {
 
 	updateStats(player) {
 		const index = this.getStatsIndex(player);
-		console.log(`found stats index for ${player.name}: ${index}`);
+		tools.log(`found stats index for ${player.name}: ${index}`);
 		if (index >= 0) {
 			this._tableData[index].score = player.score;
 			this._statsTable.updateData([{ id: index, score: player.score }]);
 			this._statsTable.redraw();
 		} else {
-			console.log('stats table not initialized yet, skipping score update.');
+			tools.log('stats table not initialized yet, skipping score update.');
 		}
 	}
 
@@ -267,7 +267,7 @@ export default class Speaker {
 		this._statsTable.clearData();
 		this._statsTable.replaceData(this._tableData).then(() => {
 			this._statsTable.redraw();
-			console.log("table updated!");
+			tools.log("table updated!");
 		});
 	}
 

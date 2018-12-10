@@ -32,7 +32,7 @@ export default class Human extends Player {
 	}
 
 	requestSwap(toPlayer) {
-		this._game.speaker.say (this.sayTo(toPlayer, 0) + quote(tools.TXT_WANT_TO_SWAP));
+		this._game.speaker.say (this.sayTo(toPlayer, 0) + tools.quote(tools.TXT_WANT_TO_SWAP));
 	}
 
 	printGotCard(cardName) {
@@ -51,7 +51,7 @@ export default class Human extends Player {
 			}
 
 			let callbackFn = (result) => {
-				console.log("human ask result: ", result);
+				tools.log("human ask result: ", result);
 				this._game.speaker.hideNextTurnButton(true);
 				obj.result = result ? 'yes' : 'no';
 				return result;
@@ -60,7 +60,7 @@ export default class Human extends Player {
 			this._game.speaker.ask(text, 0, callbackFn);
 
 		} else {
-			console.log('testForSwap obj is undefined!');
+			tools.log('testForSwap obj is undefined!');
 			return false;
 		}
 	}

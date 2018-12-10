@@ -65,25 +65,20 @@ export default class Card {
 		return Object.keys(this.types)[index];
 	}
 
-	async clone() {
-		return Object.assign( Object.create( Object.getPrototypeOf(this)), this);
+	async carboncopy() {
+		// return Object.assign( Object.create( Object.getPrototypeOf(this)), this);
+		let clone = new Card(this._name, this._value);
+		clone.statement = this._statement;
+		clone.isMatador = this._isMatador;
+		clone.causeNoMoreSwap = this._causeNoMoreSwap;
+		clone.causeLosePoint = this._causeLosePoint;
+		clone._causeAllLosePointAndStopGame = this._causeAllLosePointAndStopGame;
+		clone.isFool = this._isFool;
+
+		return clone;
 	}
 
 	static deepCopy(card) {
 		return JSON.parse(JSON.stringify(card));
-	}
-
-	test(clone) {
-		if (clone instanceof Card) {
-			console.log('clone is instance of Card class');
-		} else {
-			console.log('clone is NOT instance of Card class!');
-		}
-
-		if (JSON.stringify(clone) === JSON.stringify(this)) {
-			console.log('clone properties equal to this');
-		} else {
-			console.log('clone properties ARE NOT equal to this!');
-		}
 	}
 }

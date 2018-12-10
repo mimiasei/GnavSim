@@ -60,7 +60,7 @@ export default class Deck {
 	}
 
 	async shuffleDeck() {
-		console.log ('*** INFO: The deck is being shuffled.');
+		tools.log ('*** INFO: The deck is being shuffled.');
 		const cardsPromise = tools.shuffle(this._cards);
 		this._cards = await cardsPromise;
 	}
@@ -74,7 +74,7 @@ export default class Deck {
 	}
 
 	useDiscardPile() {
-		console.log('**** INFO: The discard deck is used.');
+		tools.log('**** INFO: The discard deck is used.');
 		this._cards = Array.from(this._discardPile);
 		this.shuffleDeck();
 		this._discardPile = [];
@@ -94,7 +94,7 @@ export default class Deck {
 
 	testLengthSum() {
 		if (this._cards.length + this._discardPile.length !== 42) {
-			console.log ('INFO: Warning! Sum of piles is not 42.');
+			tools.log ('INFO: Warning! Sum of piles is not 42.');
 			this.printCards();
 			this.printCards(true);
 		}
@@ -107,6 +107,6 @@ export default class Deck {
 			cardsLine += card.name + ', ';
 		}
 		cardsLine = cardsLine.slice(0, cardsLine.length - 2);
-		console.log (cardsLine);
+		tools.log (cardsLine);
 	}
 }

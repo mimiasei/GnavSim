@@ -137,7 +137,7 @@ export default class Player {
 	}
 
 	async askPlayers() {
-		console.log('ASKPLAYERS: entered askPlayers() with index for player: ' + this._name);
+		tools.log('ASKPLAYERS: entered askPlayers() with index for player: ' + this._name);
 		let gotoNextPlayer = false;
 		let hasSwapped, abortSwap = false;
 		let returnedCard = null;
@@ -180,7 +180,7 @@ export default class Player {
 				// 				return false;
 				// }
 			} else {
-				console.log('ASKPLAYERS: card is NOT matador. going to swapwithplayer...');
+				tools.log('ASKPLAYERS: card is NOT matador. going to swapwithplayer...');
 				await this.swapWithPlayer(nextPlayer); //The two players Swap cards
 				hasSwapped = true;
 			}
@@ -210,18 +210,13 @@ export default class Player {
 	}
 
 	async swapWithPlayer(fromPlayer) {
-		console.log(`SWAPWITHPLAYER: ${this._name} is swapping with ${fromPlayer.name}...`);
+		tools.log(`SWAPWITHPLAYER: ${this._name} is swapping with ${fromPlayer.name}...`);
 		this._game.speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
-		console.log('SWAPWITHPLAYER clone: before first clone')
-		const card = await this._heldCard.clone();
-		console.log('SWAPWITHPLAYER clone: after first clone')
-		this._heldCard.test(card);
-		console.log('SWAPWITHPLAYER clonetest: after first test')
-		console.log('SWAPWITHPLAYER clone: before second clone')
-		this._heldCard = fromPlayer.heldCard.clone();
-		console.log('SWAPWITHPLAYER clone: after second clone')
-		fromPlayer.heldCard.test(this._heldCard);
-		fromPlayer.heldCard = card.clone();
+		tools.log('SWAPWITHPLAYER clone: before first clone');
+		const card = await this._heldCard.carboncopy();
+		tools.log('SWAPWITHPLAYER clone: after first clone');
+		this._heldCard = await fromPlayer.heldCard.carboncopy();
+		fromPlayer.heldCard = await card.carboncopy();
 		card.test(fromPlayer.heldCard);
 	}
 
@@ -242,7 +237,7 @@ export default class Player {
 	}
 
 	sayNoFool(player) {
-		console.log("saying no fool...");
+		tools.log("saying no fool...");
 		return tools.highlight(tools.TXT_NO_WAY_FOOL, player.name);
 	}
 

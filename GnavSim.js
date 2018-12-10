@@ -83,7 +83,7 @@ function settingsPart() {
 	$('#btn_playGame').click(async () => {
 		$('#settingsForm').hide();
 		let game = await createGame();
-		await startGame(game);
+		startGame(game);
 	});
 }
 
@@ -113,7 +113,7 @@ async function startGame(game) {
 
 function chat(active_chat) {
 	if (active_chat) {
-		console.log("starting chat");
+		tools.log("starting chat");
 		var $input_handle = $('#chat_handle');
 		var $input_msg = $('#chat_message');
 		var $btn_send = $('#chat_send');
