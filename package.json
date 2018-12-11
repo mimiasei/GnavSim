@@ -4,6 +4,7 @@
   },
   "dependencies": {
     "express": "latest",
+    "p-iteration": "^1.1.7",
     "socket.io": "^2.1.1",
     "tabulator-tables": "^4.1.1"
   },
