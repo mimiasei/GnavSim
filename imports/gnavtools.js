@@ -1,6 +1,6 @@
 'use strict';
 
-export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Mikkel", "Emil", "Øivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"];
+export const PLAYERS = ["Kristoffer", "Matias"]; //, "Johannes", "Miriam", "Mikkel", "Emil", "Øivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"];
 export const MAX_ROUNDS = 1;
 export const SWAP_THRESHOLDNUMBER = 4;
 export const SWAP_FUZZINESS = 0.08; //Simulates human error. 0.1 = 10% chance of making a mistake.
@@ -96,4 +96,27 @@ export function log(message) {
     let stack = new Error().stack,
         caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
     console.log(caller + ":" + message);
+}
+
+/**
+ * Usage example:
+ * 
+ * const callback = (async (num) => {
+ * 	  		await waitFor(50); // <== timeout function
+ *    		console.log(num);
+ * 		});
+ * 
+ * const start = async () => {
+ * 		asyncForEach([1, 2, 3], callback);
+ *    	console.log('Done!);
+ * }
+ * 
+ * start();
+ * 
+ * // prints: (waits 50ms) 1 (waits 50ms) 2 (waits 50ms) 3 Done!
+ */
+export async function asyncForEach(array, callback) {
+	for (let index = 0; index < array.length; index++) {
+		await callback(array[index], index, array);
+	}
 }

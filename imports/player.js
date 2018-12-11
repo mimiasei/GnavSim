@@ -49,19 +49,6 @@ export default class Player {
 		}
 	}
 
-	static clone(player) {
-		let cloned = Object.assign (Object.create (Object.getPrototypeOf (player)), player);
-		// cloned.name = player.name;
-		// cloned.pid = player.pid;
-		// cloned.game = player.game;
-		// cloned.score = player.score;
-		// cloned.heldCard = Card.clone(player.heldCard);
-		// cloned.wins = player.wins;
-		// cloned.losses = player.losses;
-		// cloned.neverSwapsWithDeck = player.neverSwapsWithDeck;
-		return cloned;
-	}
-
 	getIndex() {
 		return Player.index++;
 	}
@@ -81,11 +68,9 @@ export default class Player {
 	//todo: hoping to get rid of this silly method!
 	async wantsToSwapTest(withPlayer) {
 
-		let wantsToSwap = false;
-	
 		if (withPlayer !== 'deck') {
 	
-			await this.testForSwap(); //Do small chance check if player has forgotten someone knocked 3 times.
+			return this.testForSwap(); //Do small chance check if player has forgotten someone knocked 3 times.
 	
 		} else {
 			if (this.testForSwap('deck')) { //Only swap if card is 4 or less.
@@ -166,20 +151,6 @@ export default class Player {
 				} else {
 					gotoNextPlayer = true; //horse, house
 				}
-
-				// switch (returnedCard.value) {
-				// 	case 17:
-				// 	case 18:	nextAdd++; //Hesten or huset
-				// 				break;
-				// 	case 19:	this.addToScore(-1); //katten
-				// 				nextAdd++;
-				// 				break;
-				// 	case 20:	dragonen = true; //dragonen
-				// 				this.addToScore(-1);
-				// 				break;
-				// 	case 21:	subractFromAllPlayers(this._game.players[playerIndex + nextAdd], this._game.players); //gjøken
-				// 				return false;
-				// }
 			} else {
 				tools.log('ASKPLAYERS: card is NOT matador. going to swapwithplayer...');
 				await this.swapWithPlayer(nextPlayer); //The two players Swap cards
