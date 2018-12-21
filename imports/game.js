@@ -314,10 +314,6 @@ export default class Game extends EventTarget {
 	}
 
 	nextDealer() {
-		//Pop out top player as dealer and insert at end
-		// let oldDealer = this._players.shift(); //Pop out first player in list, to act as dealer
-		// this._players.push(oldDealer); //Reinsert the dealer at the end of list
-
 		this._dealerIndex++;
 		//reset dealer after last player index
 		if (this._dealerIndex > this._players.length - 1) {
@@ -337,6 +333,29 @@ export default class Game extends EventTarget {
 			// this.dispatchEvent(this._event_endTurn);
 			this.state = Game.STATE_END_TURN;
 		}
+	}
+
+		/**
+	 * Returns the player next to current player. 
+	 * If next player is dealer, then returning object with name 'deck'.
+	 */
+	getPlayerNextTo() {
+		let withPlayer = { name: 'deck' };
+		let index = this._currPlayerIndex;
+
+		if (this._currPlayerIndex !== this._dealerIndex) {
+			tools.log('current player is not dealer.');
+			if (this._currPlayerIndex === this._players.length - 1) {
+				index = 0;
+			} else {
+				index = this._currPlayerIndex + 1;
+			}
+
+			withPlayer = this._players[index];
+		}
+
+		console.log(withPlayer);
+		return withPlayer;
 	}
 
 	isGameOver() {
@@ -371,19 +390,6 @@ export default class Game extends EventTarget {
 	async findLoser() {
 		let minVal = await tools.extreme(this._players, 'heldCard.value', tools.FIND_MIN); //tools.FIND_MIN === true
 		return this._players[minVal.mostIndex];
-	}
-
-	/**
-	 * Returns the player next to current player. 
-	 * If next player is dealer, then returning object with name 'deck'.
-	 */
-	getPlayerNextTo() {
-		let withPlayer = { name: 'deck' };
-		if (this._currPlayerIndex + 2 <= this._players.length) { //same as index + 1 <= this._players.length - 1
-			withPlayer = this._players[this._currPlayerIndex + 1];
-		}
-
-		return withPlayer;
 	}
 
 	subractFromAllPlayers(players) {
