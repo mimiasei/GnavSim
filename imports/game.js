@@ -125,11 +125,31 @@ export default class Game extends EventTarget {
 	}
 
 	initSwap() {
-		const withPlayer = this.getPlayerNextTo();
-		tools.log(`${this.currentPlayer.name} doing swapCards with ${withPlayer.name} in game.initSwap()...`);
-		this.currentPlayer.swapCards(withPlayer);
+		const nextPlayer = this._playerStack.nextTo();
+		tools.log(`${this.currentPlayer.name} swaps with ${nextPlayer.name}`);
+		this.cardSwap(this.currentPlayer, nextPlayer);
+
+
+		// const withPlayer = this.getPlayerNextTo();
+		// tools.log(`${this.currentPlayer.name} doing swapCards with ${withPlayer.name} in game.initSwap()...`);
+		// this.currentPlayer.swapCards(withPlayer);
+
+
 		// this.currentPlayer.wantsToSwapTest(withPlayer);
 		this.state = Game.STATE_AFTER_SWAP;
+	}
+
+	//test
+	cardSwap(player, nextPlayer) {
+		tools.log('before swap:');
+		tools.log(`${player.name}'s card: ${player.heldCard.name}`);
+		tools.log(`${nextPlayer.name}'s card: ${nextPlayer.heldCard.name}`);
+		const card = player.heldCard;
+		player.heldCard = nextPlayer.heldCard;
+		nextPlayer.heldCard = card;
+		tools.log('after swap:');
+		tools.log(`${player.name}'s card: ${player.heldCard.name}`);
+		tools.log(`${nextPlayer.name}'s card: ${nextPlayer.heldCard.name}`);
 	}
 
 	async init() {
@@ -178,28 +198,28 @@ export default class Game extends EventTarget {
 
 		//create events
 		this._event_beforeSwap = new CustomEvent('event_beforeSwap', {
-			detail: {
-				player: this.currentPlayer
-			}
+			// detail: {
+			// 	player: this.currentPlayer
+			// }
 		});
 
 		this._event_decidedSwap = new CustomEvent('event_decidedSwap', {
-			detail: {
-				player: this.currentPlayer,
-				result: false
-			}
+			// detail: {
+			// 	player: this.currentPlayer,
+			// 	result: false
+			// }
 		});
 
 		this._event_afterSwap = new CustomEvent('event_afterSwap', {
-			detail: {
-				player: this.currentPlayer
-			}
+			// detail: {
+			// 	player: this.currentPlayer
+			// }
 		});
 
 		this._event_endTurn = new CustomEvent('event_endTurn', {
-			detail: {
-				player: this.currentPlayer
-			}
+			// detail: {
+			// 	player: this.currentPlayer
+			// }
 		});
 
 		//create event listeners
@@ -268,7 +288,7 @@ export default class Game extends EventTarget {
 		//create player stack for handling players in game turn.
 		this._playerStack = new PlayerStack(this._players);
 		//redraw stats table
-		await this._speaker.refreshStatsTable();
+		this._speaker.refreshStatsTable();
 		//set first turn
 		this.nextTurn();
 		//set state to start turn
@@ -280,6 +300,7 @@ export default class Game extends EventTarget {
 		this._turn++;
 		//set next dealer
 		this._playerStack.nextDealer();
+		this._speaker.say(`Current dealer is: ${this._players[0].name}`);
 		this.state = Game.STATE_START_TURN;
 	}
 
@@ -330,15 +351,20 @@ export default class Game extends EventTarget {
 	// 	this._speaker.say("Current dealer is: " + this._players[0].name);
 	// }
 
-	// nextPlayer() {
-	// 	tools.log('about to run nextPlayer()');
-	// 	this._currPlayerIndex++;
+	nextPlayer() {
+		tools.log(`!! current player was: ${this.currentPlayer.name}`);
+		// this._currPlayerIndex++;
 		
-	// 	if (this._currPlayerIndex > this._dealerIndex - 1) {
-	// 		// this.dispatchEvent(this._event_endTurn);
-	// 		this.state = Game.STATE_END_TURN;
-	// 	}
-	// }
+		// if (this._currPlayerIndex > this._dealerIndex - 1) {
+			// 	// this.dispatchEvent(this._event_endTurn);
+			// 	this.state = Game.STATE_END_TURN;
+			// }
+			
+		if (!this._playerStack.next()) {
+			this.state = Game.STATE_END_TURN;
+		} 
+		tools.log(`!! current player is now: ${this.currentPlayer.name}`);
+	}
 
 		/**
 	 * Returns the player next to current player. 

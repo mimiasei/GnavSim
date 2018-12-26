@@ -38,7 +38,7 @@ export default class Player {
 		this._score = value;
 		this._game.speaker.updateStats(this);
 	}
-	set heldCard(value) { this._heldCard = $.extend(true, {}, value) } //Card.clone(value)
+	set heldCard(value) { this._heldCard = value } //Card.clone(value) . eller . $.extend(true, {}, value)
 	set wins(value) { this._wins = value }
 	set losses(value) { this._losses = value }
 	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value }
@@ -56,6 +56,7 @@ export default class Player {
 	drawFromDeck() {
 		this.discard(this._game.deck);
 		this.heldCard = this._game.deck.draw(); //using setter to create clone
+		tools.log(`${this._name} drew from deck: ${this.heldCard.name}`)
 	}
 
 	discard() {

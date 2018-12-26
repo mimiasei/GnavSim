@@ -60,36 +60,37 @@ export default class Deck {
 	}
 
 	async shuffleDeck() {
-		tools.log ('*** INFO: The deck is being shuffled. Cards before:');
-		console.log(this._cards);
+		tools.log ('*** INFO: The deck is being shuffled.');
 		const cardsPromise = tools.shuffle(this._cards);
 		this._cards = await cardsPromise;
-		tools.log('------> after shuffling cards:');
-		console.log(this._cards);
 	}
 
-	async draw() {
+	draw() {
 		if (this.isDeckEmpty()) {
-			await this.useDiscardPile();
+			this.useDiscardPile();
 		}
-		let card = this._cards.pop();
 
+		const card = this._cards.pop();
 		return card;
 	}
 
-	async useDiscardPile() {
+	useDiscardPile() {
 		tools.log('**** INFO: The discard deck is used.');
-		Promise.all(this._discardPile).then(cards => {
-			this._cards = cards;
+		// Promise.all(this._discardPile).then(cards => {
+		// 	this._cards = cards;
 
-			tools.log('------> just copied cards:');
-			console.log(this._cards);
-			tools.log('------> from discardpile:');
-			console.log(this._discardPile);
+		// 	tools.log('------> just copied cards:');
+		// 	console.log(this._cards);
+		// 	tools.log('------> from discardpile:');
+		// 	console.log(this._discardPile);
 
-			this._discardPile = [];
-			this.shuffleDeck();
-		});
+		// 	this._discardPile = [];
+		// 	this.shuffleDeck();
+		// });
+
+		this._cards = this._discardPile.slice();
+		this._discardPile = [];
+		this.shuffleDeck();
 	}
 
 	isDeckEmpty() {

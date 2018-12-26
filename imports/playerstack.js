@@ -10,8 +10,9 @@ export default class PlayerStack {
 
     next() {
         if (this.hasNext()) {
-            return this._player[++this._pos];
+            return this._players[++this._pos];
         } else {
+            this._pos = 0;
             return false;
         } 
     }

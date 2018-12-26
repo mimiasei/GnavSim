@@ -67,21 +67,4 @@ export default class Card {
 	static type(index) {
 		return Object.keys(this.types)[index];
 	}
-
-	// static deepCopy(card) {
-	// 	// let clone = new CardClass(card.name, card.name, card.value);
-	// 	let clone = new Card(card.name, card.value);
-	// 	clone.statement = card.statement;
-	// 	clone.isMatador = card.isMatador;
-	// 	clone.causeNoMoreSwap = card.causeNoMoreSwap;
-	// 	clone.causeLosePoint = card.causeLosePoint;
-	// 	clone._causeAllLosePointAndStopGame = card.causeAllLosePointAndStopGame;
-	// 	clone.isFool = card.isFool;
-
-	// 	tools.log('------ DEEPCOPY ------');
-	// 	console.log(card);
-	// 	console.log(clone);
-
-	// 	return clone;
-	// }
 }

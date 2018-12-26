@@ -20,7 +20,6 @@ export default class Speaker {
 		this._statsTableBody = $("#stats_table tbody");
 		this._nextTurnButton = $("#btnNextTurn");
 		this._knockButton = $("#btnKnock");
-		// this._value = -1;
 		this._statsElems = [];
 		this._elemId = 0;
 		this._parent = parent;
@@ -251,7 +250,7 @@ export default class Speaker {
 		this._stats.append($elem);
 	}
 
-	async refreshStatsTable() {
+	refreshStatsTable() {
 		this._tableData = [];
 
 		for (const player of this._parent.players) {
