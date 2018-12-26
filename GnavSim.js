@@ -82,23 +82,19 @@ function settingsPart() {
 
 	$('#btn_playGame').click(async () => {
 		$('#settingsForm').hide();
-		let game = await createGame();
+		
+		//Create default game object
+		const game = new Game( 
+			$('#form_winType').val(), 
+			$('#form_winValue').val(), 
+			!$('#form_computerOnly').is(':checked')
+		);
+
+		//set up speaker and state event listeners
+		await game.init();
+
 		startGame(game);
 	});
-}
-
-async function createGame() {
-	//Create default game object
-	let game = new Game( 
-		$('#form_winType').val(), 
-		$('#form_winValue').val(), 
-		!$('#form_computerOnly').is(':checked')
-	);
-
-	//set up speaker and state event listeners
-	await game.init();
-	
-	return game;
 }
 
 async function startGame(game) {

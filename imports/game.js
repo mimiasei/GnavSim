@@ -75,7 +75,7 @@ export default class Game extends EventTarget {
 			this._state = value;
 			$("#prettyInfo").text('Current state: ' + this._state);
 			tools.log('STATE: new: ' + this._state);
-			this.stateChanged();
+			(async () => await this.stateChanged());
 		} else {
 			tools.log('not changing state as new value === old value');
 		}
@@ -93,7 +93,7 @@ export default class Game extends EventTarget {
 	 * 5. end of turn, go next turn (back to 1.)
 	 */
 	async stateChanged() {		
-		this.counter++;
+		// this.counter++;
 		switch (this.state) {
 			case (Game.STATE_START_TURN):
 				tools.log('awaiting start turn');
@@ -102,7 +102,7 @@ export default class Game extends EventTarget {
 				this.state = Game.STATE_BEFORE_SWAP;
 				break;
 			case (Game.STATE_BEFORE_SWAP):
-				this.initSwap();
+				this.prepareSwap();
 				break;
 			case (Game.STATE_DECIDED_SWAP): //after callback from deciding yes/no for swapping
 
@@ -111,45 +111,30 @@ export default class Game extends EventTarget {
 				this.nextPlayer();
 				break;
 			case (Game.STATE_END_TURN):
-				if (this._isHuman) {
-					//show next turn button
-					this._speaker.hideNextTurnButton(true);
-					this._speaker.addSpace();
-				}
+				//show next turn button
+				this._speaker.hideNextTurnButton(true);
+				this._speaker.addSpace();
 				//Calculate scores and stats
 				await this._speaker.sumUpGameTurn();
 				await this.nextTurn();
+				tools.log('turn ended successfully.');
 				break;
 		}
-		tools.log(`statechanged counter: ${this.counter}, current turn: ${this._turn}`);
+
+		return true;
+		// tools.log(`statechanged counter: ${this.counter}, current turn: ${this._turn}`);
 	}
 
-	initSwap() {
+	prepareSwap() {
 		const nextPlayer = this._playerStack.nextTo();
-		tools.log(`${this.currentPlayer.name} swaps with ${nextPlayer.name}`);
-		this.cardSwap(this.currentPlayer, nextPlayer);
 
-
-		// const withPlayer = this.getPlayerNextTo();
-		// tools.log(`${this.currentPlayer.name} doing swapCards with ${withPlayer.name} in game.initSwap()...`);
-		// this.currentPlayer.swapCards(withPlayer);
-
+		if (this.currentPlayer.testForSwap(nextPlayer)) {
+			tools.log(`${this.currentPlayer.name} swaps with ${nextPlayer.name}`);
+			this.currentPlayer.cardSwap(nextPlayer);
+		}
 
 		// this.currentPlayer.wantsToSwapTest(withPlayer);
 		this.state = Game.STATE_AFTER_SWAP;
-	}
-
-	//test
-	cardSwap(player, nextPlayer) {
-		tools.log('before swap:');
-		tools.log(`${player.name}'s card: ${player.heldCard.name}`);
-		tools.log(`${nextPlayer.name}'s card: ${nextPlayer.heldCard.name}`);
-		const card = player.heldCard;
-		player.heldCard = nextPlayer.heldCard;
-		nextPlayer.heldCard = card;
-		tools.log('after swap:');
-		tools.log(`${player.name}'s card: ${player.heldCard.name}`);
-		tools.log(`${nextPlayer.name}'s card: ${nextPlayer.heldCard.name}`);
 	}
 
 	async init() {
@@ -227,6 +212,8 @@ export default class Game extends EventTarget {
 			'event_knock', 
 			(event) => {
 				console.log("event_knock called by player: ", event.detail.player);
+
+				this.tableKnocked();
 			}
 		);
 
@@ -234,7 +221,7 @@ export default class Game extends EventTarget {
 			'event_beforeSwap', 
 			(event) => {
 				console.log("event_beforeSwap called by player: ", event.detail.player);
-				// this.state = Game.STATE_BEFORE_SWAP;
+				this.state = Game.STATE_BEFORE_SWAP;
 			}
 		);
 
@@ -250,7 +237,7 @@ export default class Game extends EventTarget {
 			'event_afterSwap', 
 			(event) => {
 				console.log("event_afterSwap called by player: ", event.detail.player);
-				// this.state = Game.STATE_AFTER_SWAP;
+				this.state = Game.STATE_AFTER_SWAP;
 			}
 		);
 
@@ -258,7 +245,7 @@ export default class Game extends EventTarget {
 			'event_endTurn', 
 			(event) => {
 				console.log("event_endTurn called by player: ", event.detail.player);
-				// this.state = Game.STATE_END_TURN;
+				this.state = Game.STATE_END_TURN;
 			}
 		);
 	}
@@ -289,19 +276,23 @@ export default class Game extends EventTarget {
 		this._playerStack = new PlayerStack(this._players);
 		//redraw stats table
 		this._speaker.refreshStatsTable();
+		
 		//set first turn
-		this.nextTurn();
-		//set state to start turn
-		this.state = Game.STATE_START_TURN;
+		await this.nextTurn();
+
 		tools.log('initgame done.');
 	}
 
 	async nextTurn() {
 		this._turn++;
+
 		//set next dealer
 		this._playerStack.nextDealer();
 		this._speaker.say(`Current dealer is: ${this._players[0].name}`);
+
 		this.state = Game.STATE_START_TURN;
+
+		return true;
 	}
 
 	async startTurn() {
@@ -310,6 +301,7 @@ export default class Game extends EventTarget {
 
 		//refresh table of player stats
 		// this._speaker.refreshStatsTable(this._players);
+
 		//print round
 		this._speaker.printRound();
 		this._speaker.addSpace();
@@ -319,11 +311,6 @@ export default class Game extends EventTarget {
 
 		//Draw cards for each player
 		await this.dealOutCards();
-
-		//call event that turn start is done and we want next state
-		// this.dispatchEvent(this._event_beforeSwap);
-
-		this.state = Game.STATE_BEFORE_SWAP;
 	}
 
 	async dealOutCards() {
@@ -339,18 +326,6 @@ export default class Game extends EventTarget {
 		}
 	}
 
-	// nextDealer() {
-	// 	this._dealerIndex++;
-	// 	//reset dealer after last player index
-	// 	if (this._dealerIndex > this._players.length - 1) {
-	// 		this._dealerIndex = 0;
-	// 	}
-	// 	this._currPlayerIndex = this._dealerIndex + 1;
-
-	// 	//proclaim dealer
-	// 	this._speaker.say("Current dealer is: " + this._players[0].name);
-	// }
-
 	nextPlayer() {
 		tools.log(`!! current player was: ${this.currentPlayer.name}`);
 		// this._currPlayerIndex++;
@@ -359,6 +334,8 @@ export default class Game extends EventTarget {
 			// 	// this.dispatchEvent(this._event_endTurn);
 			// 	this.state = Game.STATE_END_TURN;
 			// }
+
+		tools.log('do we have a next player in this turn? ' + this._playerStack.hasNext());
 			
 		if (!this._playerStack.next()) {
 			this.state = Game.STATE_END_TURN;
@@ -400,6 +377,16 @@ export default class Game extends EventTarget {
 			if (player.pid !== this.currentPlayer.pid) { //Subtract 1 score one from all players except current
 				player.addToScore(-1);
 			}
+		}
+	}
+
+	tableKnocked() {
+		this.currentPlayer.knockOnTable();
+		//If player has Narren
+		if (this.currentPlayer.isFool) {
+			player.addToScore(1);
+		} else {
+			this._speaker.say(`${this.currentPlayer.name} knocked on the table for no apparent reason.`);
 		}
 	}
 }

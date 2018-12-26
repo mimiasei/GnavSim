@@ -54,8 +54,8 @@ export default class Player {
 	}
 
 	drawFromDeck() {
-		this.discard(this._game.deck);
-		this.heldCard = this._game.deck.draw(); //using setter to create clone
+		this.discard(); //discard currently held card
+		this.heldCard = this._game.deck.draw();
 		tools.log(`${this._name} drew from deck: ${this.heldCard.name}`)
 	}
 
@@ -66,10 +66,16 @@ export default class Player {
 		this._heldCard = null;
 	}
 
-	//todo: hoping to get rid of this silly method!
-	async wantsToSwapTest(withPlayer) {
+	cardSwap(nextPlayer) {
+		const card = this._heldCard;
+		this._heldCard = nextPlayer.heldCard;
+		nextPlayer.heldCard = card;
+	}
 
-		if (withPlayer !== 'deck') {
+	//todo: hoping to get rid of this silly method!
+	wantsToSwapTest(withPlayer) {
+
+		if (!withPlayer.isDeck) {
 	
 			return this.testForSwap(); //Do small chance check if player has forgotten someone knocked 3 times.
 	
