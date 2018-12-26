@@ -366,29 +366,6 @@ export default class Game extends EventTarget {
 		tools.log(`!! current player is now: ${this.currentPlayer.name}`);
 	}
 
-		/**
-	 * Returns the player next to current player. 
-	 * If next player is dealer, then returning object with name 'deck'.
-	 */
-	// getPlayerNextTo() {
-	// 	let withPlayer = { name: 'deck' };
-	// 	let index = this._currPlayerIndex;
-
-	// 	if (this._currPlayerIndex !== this._dealerIndex) {
-	// 		tools.log('current player is not dealer.');
-	// 		if (this._currPlayerIndex === this._players.length - 1) {
-	// 			index = 0;
-	// 		} else {
-	// 			index = this._currPlayerIndex + 1;
-	// 		}
-
-	// 		withPlayer = this._players[index];
-	// 	}
-
-	// 	console.log(withPlayer);
-	// 	return withPlayer;
-	// }
-
 	isGameOver() {
 		return (this._value >= this._maxValue);
 	}
