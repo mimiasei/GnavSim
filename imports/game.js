@@ -4,6 +4,7 @@ import Speaker from './speaker.js';
 import Deck from './deck.js';
 import Player from './player.js';
 import Human from './human.js';
+import PlayerStack from './playerstack.js';
 import * as tools from './gnavtools.js';
 
 export default class Game extends EventTarget {
@@ -33,9 +34,10 @@ export default class Game extends EventTarget {
 		this._players = [];
 		this._highestScorePlayers = [];
 		this._dealerIndex = 0;
-		this._currPlayerIndex = 0;
+		// this._currPlayerIndex = 0;
 		this._deck = null;
 		this._state = null;
+		this._playerStack = null;
 
 		this.counter = 0;
 	}
@@ -51,10 +53,13 @@ export default class Game extends EventTarget {
 	get state() { return this._state }
 	get speaker() { return this._speaker }
 	get deck() { return this._deck }
+	get playerStack() { return this._playerStack }
 
 	//Special getters
-	get currentPlayer() { return this._players[this._currPlayerIndex] }
-	get currentDealer() { return this._players[this._dealerIndex] }
+	// get currentPlayer() { return this._players[this._currPlayerIndex] }
+	get currentPlayer() { return this._playerStack.current() }
+	// get currentDealer() { return this._players[this._dealerIndex] }
+	get currentDealer() { return this._playerStack.dealer() }
 
 	//setters
 	set playType(value) { this._playType = value }
@@ -117,15 +122,6 @@ export default class Game extends EventTarget {
 				break;
 		}
 		tools.log(`statechanged counter: ${this.counter}, current turn: ${this._turn}`);
-	
-		// for (const [index, player] of this._players.entries()) {
-		// 	this._speaker.updateStats(player);
-		// 	let withPlayer = 'deck';
-		// 	if (index + 2 <= this._players.length) { //same as index + 1 <= this._players.length - 1
-		// 		withPlayer = this._players[index + 1];
-		// 	}
-		// 	await player.wantsToSwapTest(withPlayer, deck);
-		// }
 	}
 
 	initSwap() {
@@ -269,6 +265,8 @@ export default class Game extends EventTarget {
 		let playersPromise = tools.shuffle(this._players);
 		//wait for shuffle to finish
 		this._players = await playersPromise;
+		//create player stack for handling players in game turn.
+		this._playerStack = new PlayerStack(this._players);
 		//redraw stats table
 		await this._speaker.refreshStatsTable();
 		//set first turn
@@ -276,6 +274,13 @@ export default class Game extends EventTarget {
 		//set state to start turn
 		this.state = Game.STATE_START_TURN;
 		tools.log('initgame done.');
+	}
+
+	async nextTurn() {
+		this._turn++;
+		//set next dealer
+		this._playerStack.nextDealer();
+		this.state = Game.STATE_START_TURN;
 	}
 
 	async startTurn() {
@@ -289,7 +294,7 @@ export default class Game extends EventTarget {
 		this._speaker.addSpace();
 	
 		//set next dealer
-		this.nextDealer();
+		// this.nextDealer();
 
 		//Draw cards for each player
 		await this.dealOutCards();
@@ -313,50 +318,50 @@ export default class Game extends EventTarget {
 		}
 	}
 
-	nextDealer() {
-		this._dealerIndex++;
-		//reset dealer after last player index
-		if (this._dealerIndex > this._players.length - 1) {
-			this._dealerIndex = 0;
-		}
-		this._currPlayerIndex = this._dealerIndex + 1;
+	// nextDealer() {
+	// 	this._dealerIndex++;
+	// 	//reset dealer after last player index
+	// 	if (this._dealerIndex > this._players.length - 1) {
+	// 		this._dealerIndex = 0;
+	// 	}
+	// 	this._currPlayerIndex = this._dealerIndex + 1;
 
-		//proclaim dealer
-		this._speaker.say("Current dealer is: " + this._players[0].name);
-	}
+	// 	//proclaim dealer
+	// 	this._speaker.say("Current dealer is: " + this._players[0].name);
+	// }
 
-	nextPlayer() {
-		tools.log('about to run nextPlayer()');
-		this._currPlayerIndex++;
+	// nextPlayer() {
+	// 	tools.log('about to run nextPlayer()');
+	// 	this._currPlayerIndex++;
 		
-		if (this._currPlayerIndex > this._dealerIndex - 1) {
-			// this.dispatchEvent(this._event_endTurn);
-			this.state = Game.STATE_END_TURN;
-		}
-	}
+	// 	if (this._currPlayerIndex > this._dealerIndex - 1) {
+	// 		// this.dispatchEvent(this._event_endTurn);
+	// 		this.state = Game.STATE_END_TURN;
+	// 	}
+	// }
 
 		/**
 	 * Returns the player next to current player. 
 	 * If next player is dealer, then returning object with name 'deck'.
 	 */
-	getPlayerNextTo() {
-		let withPlayer = { name: 'deck' };
-		let index = this._currPlayerIndex;
+	// getPlayerNextTo() {
+	// 	let withPlayer = { name: 'deck' };
+	// 	let index = this._currPlayerIndex;
 
-		if (this._currPlayerIndex !== this._dealerIndex) {
-			tools.log('current player is not dealer.');
-			if (this._currPlayerIndex === this._players.length - 1) {
-				index = 0;
-			} else {
-				index = this._currPlayerIndex + 1;
-			}
+	// 	if (this._currPlayerIndex !== this._dealerIndex) {
+	// 		tools.log('current player is not dealer.');
+	// 		if (this._currPlayerIndex === this._players.length - 1) {
+	// 			index = 0;
+	// 		} else {
+	// 			index = this._currPlayerIndex + 1;
+	// 		}
 
-			withPlayer = this._players[index];
-		}
+	// 		withPlayer = this._players[index];
+	// 	}
 
-		console.log(withPlayer);
-		return withPlayer;
-	}
+	// 	console.log(withPlayer);
+	// 	return withPlayer;
+	// }
 
 	isGameOver() {
 		return (this._value >= this._maxValue);
@@ -367,11 +372,6 @@ export default class Game extends EventTarget {
 		if (this._playType > 0) {
 			this._value = score;
 		} 
-	}
-
-	async nextTurn() {
-		this._turn++;
-		this.state = Game.STATE_START_TURN;
 	}
 
 	/**

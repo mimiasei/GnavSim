@@ -9,14 +9,11 @@ export default class PlayerStack {
     }
 
     next() {
-        const player = this._player[this._pos++];
-
-        if (!this.hasNext()) {
-            this.nextDealer();
-            this._pos = 0;
+        if (this.hasNext()) {
+            return this._player[++this._pos];
+        } else {
+            return false;
         } 
-
-        return player;
     }
 
     hasNext() {
