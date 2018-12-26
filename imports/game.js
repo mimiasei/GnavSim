@@ -190,7 +190,7 @@ export default class Game extends EventTarget {
 			}
 		});
 
-		this._event_decidedSwap = new CustomEvent('event_afterSwap', {
+		this._event_afterSwap = new CustomEvent('event_afterSwap', {
 			detail: {
 				player: this.currentPlayer
 			}
