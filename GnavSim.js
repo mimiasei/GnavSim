@@ -14,11 +14,12 @@ $(document).ready(function() {
 	//Player:
 	Player.index = 1;
 	//Game:
-	Game.STATE_START_TURN = 'state_startTurn';
-	Game.STATE_BEFORE_SWAP = 'state_beforeSwap';
-	Game.STATE_DECIDED_SWAP = 'state_decidedSwap';
-	Game.STATE_AFTER_SWAP = 'state_afterSwap';
-	Game.STATE_END_TURN = 'state_endTurn';
+	Game.STATE_START_TURN = 'sStartTurn';
+	Game.STATE_BEFORE_SWAP = 'sBeforeSwap';
+	Game.STATE_DECIDED_SWAP = 'sDecidedSwap';
+	Game.STATE_SKIPPED_SWAP = 'sSkippedSwap';
+	Game.STATE_AFTER_SWAP = 'sAfterSwap';
+	Game.STATE_END_TURN = 'sEndTurn';
 
 	//hide all game UI
 	hideAll();

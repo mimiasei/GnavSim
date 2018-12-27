@@ -1,7 +1,7 @@
 'use strict';
 
 import Player from './player.js';
-import Card from './card.js';
+import Game from './game.js';
 import * as tools from './gnavtools.js';
 
 export default class Human extends Player {
@@ -51,10 +51,9 @@ export default class Human extends Player {
 			}
 
 			let callbackFn = (result) => {
-				tools.log("human ask result: ", result);
+				tools.log("human ask result: " + result ? 'yes' : 'no');
 				this._game.speaker.hideNextTurnButton(true);
-				obj.result = result ? 'yes' : 'no';
-				return result;
+				this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
 			};
 
 			this._game.speaker.ask(text, 0, callbackFn);

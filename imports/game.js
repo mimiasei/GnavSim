@@ -70,12 +70,13 @@ export default class Game extends EventTarget {
 
 	//state handler in the state setter
 	set state(value) {
-		tools.log('STATE: old: ' + this._state);
+		const oldState = this._state;
+
 		if (this._state !== value) {
 			this._state = value;
 			$("#prettyInfo").text('Current state: ' + this._state);
-			tools.log('STATE: new: ' + this._state);
-			(async () => await this.stateChanged());
+			tools.log(`STATE: ${oldState} ==> ${this._state}`);
+			this.stateChanged();
 		} else {
 			tools.log('not changing state as new value === old value');
 		}
@@ -92,31 +93,38 @@ export default class Game extends EventTarget {
 	 * 		b. go to next player after swapping stage is finished
 	 * 5. end of turn, go next turn (back to 1.)
 	 */
-	async stateChanged() {		
+	stateChanged() {		
 		// this.counter++;
 		switch (this.state) {
 			case (Game.STATE_START_TURN):
-				tools.log('awaiting start turn');
-				await this.startTurn();
-				tools.log('has awaited start turn');
+				this.startTurn();
+				this.checkCards();
 				this.state = Game.STATE_BEFORE_SWAP;
 				break;
 			case (Game.STATE_BEFORE_SWAP):
+				this.checkCards();
 				this.prepareSwap();
 				break;
-			case (Game.STATE_DECIDED_SWAP): //after callback from deciding yes/no for swapping
-
+			case (Game.STATE_DECIDED_SWAP): //after callback from deciding YES for swapping
+				this.checkCards();
+				this.finalizeSwap(true);
+				break;
+			case (Game.STATE_SKIPPED_SWAP): //after callback from deciding NO for swapping
+				this.checkCards();
+				this.finalizeSwap(false);
 				break;
 			case (Game.STATE_AFTER_SWAP):
+				this.checkCards();
 				this.nextPlayer();
 				break;
 			case (Game.STATE_END_TURN):
 				//show next turn button
+				this.checkCards();
 				this._speaker.hideNextTurnButton(true);
 				this._speaker.addSpace();
 				//Calculate scores and stats
-				await this._speaker.sumUpGameTurn();
-				await this.nextTurn();
+				this._speaker.sumUpGameTurn().then(() => { tools.log('turn summed up.') });
+				this.nextTurn();
 				tools.log('turn ended successfully.');
 				break;
 		}
@@ -125,12 +133,28 @@ export default class Game extends EventTarget {
 		// tools.log(`statechanged counter: ${this.counter}, current turn: ${this._turn}`);
 	}
 
+	//DEBUG!
+	checkCards() {
+		this._players.forEach(player => {
+			if (!player.heldCard) {
+				tools.log(`${player.name} doesn't have valid card!`);
+				console.log(player.heldCard);
+			}
+		});
+	}
+
 	prepareSwap() {
 		const nextPlayer = this._playerStack.nextTo();
+		this.currentPlayer.testForSwap(nextPlayer);
+	}
 
-		if (this.currentPlayer.testForSwap(nextPlayer)) {
-			tools.log(`${this.currentPlayer.name} swaps with ${nextPlayer.name}`);
+	finalizeSwap(result) {
+		if (result) {
+			const nextPlayer = this._playerStack.nextTo();
+			this._speaker.say(`${this.currentPlayer.name} swaps with ${nextPlayer.name}`);
 			this.currentPlayer.cardSwap(nextPlayer);
+		} else {
+			this._speaker.say(`${this.currentPlayer.name} doesn't want to swap.`);
 		}
 
 		// this.currentPlayer.wantsToSwapTest(withPlayer);
@@ -283,7 +307,7 @@ export default class Game extends EventTarget {
 		tools.log('initgame done.');
 	}
 
-	async nextTurn() {
+	nextTurn() {
 		this._turn++;
 
 		//set next dealer
@@ -295,12 +319,12 @@ export default class Game extends EventTarget {
 		return true;
 	}
 
-	async startTurn() {
-		//clear main output element
+	startTurn() {
+		//clear main output elementæ
 		this._speaker.clear();
 
 		//refresh table of player stats
-		// this._speaker.refreshStatsTable(this._players);
+		this._speaker.refreshStatsTable(this._players);
 
 		//print round
 		this._speaker.printRound();
@@ -310,10 +334,10 @@ export default class Game extends EventTarget {
 		// this.nextDealer();
 
 		//Draw cards for each player
-		await this.dealOutCards();
+		this.dealOutCards();
 	}
 
-	async dealOutCards() {
+	dealOutCards() {
 		for (const player of this._players) {
 			player.drawFromDeck(this._deck);
 
@@ -327,20 +351,15 @@ export default class Game extends EventTarget {
 	}
 
 	nextPlayer() {
-		tools.log(`!! current player was: ${this.currentPlayer.name}`);
-		// this._currPlayerIndex++;
-		
-		// if (this._currPlayerIndex > this._dealerIndex - 1) {
-			// 	// this.dispatchEvent(this._event_endTurn);
-			// 	this.state = Game.STATE_END_TURN;
-			// }
+		const oldPlayer = this.currentPlayer.name;
 
-		tools.log('do we have a next player in this turn? ' + this._playerStack.hasNext());
-			
 		if (!this._playerStack.next()) {
 			this.state = Game.STATE_END_TURN;
-		} 
-		tools.log(`!! current player is now: ${this.currentPlayer.name}`);
+		} else {
+			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`);
+			
+			this.state = Game.STATE_BEFORE_SWAP;
+		}
 	}
 
 	isGameOver() {
@@ -358,7 +377,9 @@ export default class Game extends EventTarget {
 	 * Returns player with highest score
 	 */
 	async findWinner() {
-		let maxVal = await tools.extreme(this._players, 'heldCard.value'); //maxval is default when not passing 3rd param
+		tools.log('players:');
+		console.log(this._players);
+		const maxVal = await tools.extreme(this._players, 'heldCard.value'); //maxval is default when not passing 3rd param
 		let winner = this._players[maxVal.mostIndex];
 		winner.hasHighscore = true;
 		return winner;
@@ -368,8 +389,18 @@ export default class Game extends EventTarget {
 	 * Returns player with lowest score
 	 */
 	async findLoser() {
-		let minVal = await tools.extreme(this._players, 'heldCard.value', tools.FIND_MIN); //tools.FIND_MIN === true
+		tools.log('players:');
+		console.log(this._players);
+		const minVal = await tools.extreme(this._players, 'heldCard.value', true); //tools.FIND_MIN === true
 		return this._players[minVal.mostIndex];
+	}
+
+	getMinY() {
+		return data.reduce((min, p) => p.y < min ? p.y : min, data[0].y);
+	}
+
+	getMaxY() {
+		return data.reduce((max, p) => p.y > max ? p.y : max, data[0].y);
 	}
 
 	subractFromAllPlayers(players) {

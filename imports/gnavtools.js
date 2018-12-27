@@ -1,6 +1,6 @@
 'use strict';
 
-export const PLAYERS = ["Kristoffer", "Matias"]; //, "Johannes", "Miriam", "Mikkel", "Emil", "Øivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"];
+export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam"]; //, "Mikkel", "Emil", "Øivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"];
 export const MAX_ROUNDS = 1;
 export const SWAP_THRESHOLDNUMBER = 4;
 export const SWAP_FUZZINESS = 0.08; //Simulates human error. 0.1 = 10% chance of making a mistake.
@@ -67,7 +67,9 @@ export async function extreme(array, attr, findMin) {
 
 	const parts = attr ? attr.split('.') : null;
 
+	log('listing array:');
 	for (let index = 0; index < array.length; index++) {
+		console.log(array[index]);
 		const value = parts ? (parts.length > 1 ? array[index][parts[0]][parts[1]] : array[index][parts[0]]) : array[index];
 		obj.currentIndex = index;
 		promises.push(compare(value, obj));

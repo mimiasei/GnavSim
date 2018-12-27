@@ -10,7 +10,10 @@ export default class PlayerStack {
 
     next() {
         if (this.hasNext()) {
+            this._players[this._pos].isCurrent = false;
             this._pos++;
+            this._players[this._pos].isCurrent = true;
+            this.current();
             return true;
         } else {
             this._pos = 0;

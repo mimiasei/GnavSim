@@ -1,7 +1,6 @@
 'use strict';
 
 import * as tools from './gnavtools.js';
-// import CardClass from './cardclass.js';
 
 export default class Card {
 

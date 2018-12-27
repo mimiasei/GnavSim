@@ -1,8 +1,6 @@
 'use strict';
 
-import Deck from './deck.js';
-import Card from './card.js';
-import CardClass from './cardclass.js';
+import Game from './game.js';
 import * as tools from './gnavtools.js';
 
 export default class Player {
@@ -22,6 +20,7 @@ export default class Player {
 		this._losses = 0;
 		this._neverSwapsWithDeck = false;
 		this._hasHighscore = false;
+		this._isCurrent = false;
 	}
 
 	get name() { return this._name; }
@@ -32,22 +31,24 @@ export default class Player {
 	get losses() { return this._losses; }
 	get neverSwapsWithDeck() { return this._neverSwapsWithDeck; }
 	get hasHighscore() { return this._hasHighscore; }
+	get isCurrent() { return this._isCurrent; }
 
 	set name(value) { this._name = value }
 	set score(value) { 
 		this._score = value;
 		this._game.speaker.updateStats(this);
 	}
-	set heldCard(value) { this._heldCard = value } //Card.clone(value) . eller . $.extend(true, {}, value)
-	set wins(value) { this._wins = value }
-	set losses(value) { this._losses = value }
-	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value }
+	set heldCard(value) { this._heldCard = value; } //Card.clone(value) . eller . $.extend(true, {}, value)
+	set wins(value) { this._wins = value; }
+	set losses(value) { this._losses = value; }
+	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value; }
 	set hasHighscore(value) {
 		this._hasHighscore = value;
 		if (this._hasHighscore) {
 			this._game.speaker.say(`${this._name} now has highest score.`);
 		}
 	}
+	set isCurrent(value) { this._isCurrent = value; }
 
 	getIndex() {
 		return Player.index++;
@@ -237,6 +238,16 @@ export default class Player {
 			} else if (chance > (1 - tools.SWAP_FUZZINESS)) {
 				swap++;
 			}
+
+			//for testing, show modal
+			const text = `${this._name} wants to swap: ${this._heldCard.name} this badly: ${swap}`;
+
+			let callbackFn = (result) => {
+				tools.log('player ask result: ' + result ? 'yes' : 'no');
+				this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
+			};
+
+			this._game.speaker.ask(text, 0, callbackFn);
 
 			return !(this._heldCard.value > swap);
 		}

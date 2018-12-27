@@ -62,6 +62,12 @@ export default class Speaker {
 			layout: "fitColumns",
 			responsiveLayout: "hide",
 			tooltipsHeader: false,
+			rowFormatter: function(row) {
+				if (row.getData().current) {
+					// console.log(row.getElement());
+					row.getElement().style['font-weight'] = 'bold';
+				}
+			},
 			columns: [
 				{ title: 'Name', field: 'name', headerSort: false, widthGrow: 2, responsive: 0, minWidth: 70 },
 				{ title: 'Score', field: 'score', align: 'center', headerSort: false, minWidth: 40 },
@@ -259,6 +265,7 @@ export default class Speaker {
 				score: player.score,
 				wins: player.wins,
 				losses: player.losses,
+				current: player.isCurrent,
 			};
 			this._tableData.push(obj);
 		}
@@ -295,14 +302,18 @@ export default class Speaker {
 
 	async sumUpGameTurn() {
 		//DEBUG, skip this method for now
-		return true;
+		// return true;
 
 		//find winner
-		let winner = this._parent.findWinner();
+		const winner = await this._parent.findWinner();
+		tools.log(`winner this turn: ${winner.name}`);
+		console.log(winner.heldCard);
 		winner.wins++;
 		
 		//find loser
-		let loser = this._parent.findLoser();
+		const loser = await this._parent.findLoser();
+		tools.log(`loser this turn: ${loser.name}`);
+		console.log(loser.heldCard);
 		loser.losses++;
 	
 		this.say("Winner of this turn is " + winner.name + " with the card " + winner.heldCard.name);
@@ -311,30 +322,30 @@ export default class Speaker {
 		loser.addToScore(-1);
 	
 		//All game.players toss their card in the discard pile and search for Narren
-		for (let player of this.parent.players) {
+		for (let player of this._parent.players) {
 			if (player.heldCard.ifFool) {
 				this.say("Unfortunately, " + player.name + "'s card at end of turn is Narren.");
 				player.addToScore(-1);
 			}
-			player.discard(this.parent.deck); //toss card to deck's discard pile
+			player.discard(this._parent.deck); //toss card to deck's discard pile
 		}
 	
 		//DEBUG:
 		// deck.testLengthSum();
 	
 		//most wins
-		maxVal = await tools.extreme(this.parent.players, 'wins');
-		let ply_mostWins = this.parent.players[maxVal.mostIndex];
+		let maxVal = await tools.extreme(this._parent.players, 'wins');
+		let ply_mostWins = this._parent.players[maxVal.mostIndex];
 		//most losses
-		maxVal = await tools.extreme(this.parent.players, 'losses');
-		let ply_mostLosses = this.parent.players[maxVal.mostIndex];
+		maxVal = await tools.extreme(this._parent.players, 'losses');
+		let ply_mostLosses = this.paren_parentt.players[maxVal.mostIndex];
 		// highest score
-		maxVal = await tools.extreme(this.parent.players, 'score');
-		let highestScore = this.parent.players[maxVal.mostIndex];
+		maxVal = await tools.extreme(this._parent.players, 'score');
+		let highestScore = this._parent.players[maxVal.mostIndex];
 	
 		let scoreLine = '';
 	
-		for (let player of this.parent.players) {
+		for (let player of this._parent.players) {
 			let thisPly = player.name;
 			if (player.pid === highestScorePlayers.pid) {
 				thisPly = "**" + thisPly.toUpperCase() + "**";
@@ -347,24 +358,24 @@ export default class Speaker {
 		this.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
 	
 		//Set highest score
-		if (highestScore > this.parent.highestScorePlayers[0]) {
-			this.parent.highestScorePlayers.pop(); //remove last item
-			this.parent.highestScorePlayers.unshift(highestScore); //set current highest score player as first item
+		if (highestScore > this._parent.highestScorePlayers[0]) {
+			this._parent.highestScorePlayers.pop(); //remove last item
+			this._parent.highestScorePlayers.unshift(highestScore); //set current highest score player as first item
 	
-			this.say("INFO: Setting " + this.parent.highestScorePlayers[0].score + " as new best score value for game.");
+			this.say("INFO: Setting " + this._parent.highestScorePlayers[0].score + " as new best score value for game.");
 		}
 		
-		this.parent.setHighestScore(this.parent.highestScorePlayers[0].score);
+		this._parent.setHighestScore(this._parent.highestScorePlayers[0].score);
 		this.addSpace();	
 	}
 
 	proclaimWinner(player) {
 		this.addSpace();
 		let text = "<<<<<<<<<<<<<<<<<< ";
-		if (this.parent.playType === 0) {
-			text += `The winner of ${this.parent.maxValue} turns of GNAV is...`;
+		if (this._parent.playType === 0) {
+			text += `The winner of ${this._parent.maxValue} turns of GNAV is...`;
 		} else {
-			text += `The winner after ${this.parent.turn} turns reaching score ${this.parent.maxValue} is...`;
+			text += `The winner after ${this._parent.turn} turns reaching score ${this._parent.maxValue} is...`;
 		}
 		text += " >>>>>>>>>>>>>>>>>>";
 		this.say (text);
