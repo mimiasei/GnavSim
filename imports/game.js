@@ -56,9 +56,7 @@ export default class Game extends EventTarget {
 	get playerStack() { return this._playerStack }
 
 	//Special getters
-	// get currentPlayer() { return this._players[this._currPlayerIndex] }
 	get currentPlayer() { return this._playerStack.current() }
-	// get currentDealer() { return this._players[this._dealerIndex] }
 	get currentDealer() { return this._playerStack.dealer() }
 
 	//setters
@@ -330,9 +328,6 @@ export default class Game extends EventTarget {
 		this._speaker.printRound();
 		this._speaker.addSpace();
 	
-		//set next dealer
-		// this.nextDealer();
-
 		//Draw cards for each player
 		this.dealOutCards();
 	}
@@ -357,6 +352,7 @@ export default class Game extends EventTarget {
 			this.state = Game.STATE_END_TURN;
 		} else {
 			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`);
+			this._speaker.refreshStatsTable();
 			
 			this.state = Game.STATE_BEFORE_SWAP;
 		}
@@ -376,10 +372,11 @@ export default class Game extends EventTarget {
 	/**
 	 * Returns player with highest score
 	 */
-	async findWinner() {
+	findWinner() {
 		tools.log('players:');
 		console.log(this._players);
-		const maxVal = await tools.extreme(this._players, 'heldCard.value'); //maxval is default when not passing 3rd param
+		// const maxVal = await tools.extreme(this._players, 'heldCard.value'); //maxval is default when not passing 3rd param
+		const maxVal = tools.getExtreme(this._players, 'heldCard.value', true); //true means get max value
 		let winner = this._players[maxVal.mostIndex];
 		winner.hasHighscore = true;
 		return winner;
@@ -388,19 +385,12 @@ export default class Game extends EventTarget {
 	/**
 	 * Returns player with lowest score
 	 */
-	async findLoser() {
+	findLoser() {
 		tools.log('players:');
 		console.log(this._players);
-		const minVal = await tools.extreme(this._players, 'heldCard.value', true); //tools.FIND_MIN === true
+		// const minVal = await tools.extreme(this._players, 'heldCard.value', true); //tools.FIND_MIN === true
+		const minVal = tools.getExtreme(this._players, 'heldCard.value', false); //false means get min value
 		return this._players[minVal.mostIndex];
-	}
-
-	getMinY() {
-		return data.reduce((min, p) => p.y < min ? p.y : min, data[0].y);
-	}
-
-	getMaxY() {
-		return data.reduce((max, p) => p.y > max ? p.y : max, data[0].y);
 	}
 
 	subractFromAllPlayers(players) {

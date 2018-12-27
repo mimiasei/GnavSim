@@ -6,6 +6,7 @@ export default class PlayerStack {
         this._players = players;
         this._size = players.length;
         this._pos = 0;
+        this._players[0].isCurrent = true;
     }
 
     next() {
@@ -13,7 +14,6 @@ export default class PlayerStack {
             this._players[this._pos].isCurrent = false;
             this._pos++;
             this._players[this._pos].isCurrent = true;
-            this.current();
             return true;
         } else {
             this._pos = 0;

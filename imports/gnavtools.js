@@ -100,6 +100,31 @@ export function log(message) {
     console.log(caller + ":" + message);
 }
 
+export function getExtreme(array, attr, getMax) {
+	getMax = getMax || true;
+
+	const parts = attr ? attr.split('.') : null;
+	let extreme = false;
+
+	if (parts) {
+		if (parts.length > 1) {
+			if (getMax) {
+				extreme = array.reduce((max, p) => p[parts[0]][parts[1]] > max ? p[parts[0]][parts[1]] : max, array[0][parts[0]][parts[1]]);
+			} else {
+				extreme = array.reduce((min, p) => p[parts[0]][parts[1]] < min ? p[parts[0]][parts[1]] : min, array[0][parts[0]][parts[1]]);
+			}
+		} else {
+			if (getMax) {
+				extreme = array.reduce((max, p) => p[parts[0]] > max ? p[parts[0]] : max, array[0][parts[0]]);
+			} else {
+				extreme = array.reduce((min, p) => p[parts[0]] < min ? p[parts[0]] : min, array[0][parts[0]]);
+			}
+		}
+	}
+
+	return extreme;
+}
+
 /**
  * Usage example:
  * 

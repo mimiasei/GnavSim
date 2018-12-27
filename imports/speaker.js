@@ -64,8 +64,8 @@ export default class Speaker {
 			tooltipsHeader: false,
 			rowFormatter: function(row) {
 				if (row.getData().current) {
-					// console.log(row.getElement());
-					row.getElement().style['font-weight'] = 'bold';
+					row.getElement().style['font-weight'] = '1000';
+					row.getElement().style['font-size'] = '15px';
 				}
 			},
 			columns: [
@@ -305,13 +305,13 @@ export default class Speaker {
 		// return true;
 
 		//find winner
-		const winner = await this._parent.findWinner();
+		const winner = this._parent.findWinner();
 		tools.log(`winner this turn: ${winner.name}`);
 		console.log(winner.heldCard);
 		winner.wins++;
 		
 		//find loser
-		const loser = await this._parent.findLoser();
+		const loser = this._parent.findLoser();
 		tools.log(`loser this turn: ${loser.name}`);
 		console.log(loser.heldCard);
 		loser.losses++;

@@ -138,6 +138,10 @@ td:nth-child(3) {
   margin: 0;
 }
 
+.tabulator-current {
+  color: var(--color-txt-special);
+}
+
 #info {
   border: 2px;
   background: var(--color-bg-main);
