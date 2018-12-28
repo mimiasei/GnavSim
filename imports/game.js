@@ -32,14 +32,11 @@ export default class Game extends EventTarget {
 		this._isHuman = isHuman;
 		this._speaker = null;
 		this._players = [];
-		this._highestScorePlayers = [];
 		this._dealerIndex = 0;
 		// this._currPlayerIndex = 0;
 		this._deck = null;
 		this._state = null;
 		this._playerStack = null;
-
-		this.counter = 0;
 	}
 
 	//getters
@@ -92,7 +89,6 @@ export default class Game extends EventTarget {
 	 * 5. end of turn, go next turn (back to 1.)
 	 */
 	stateChanged() {		
-		// this.counter++;
 		switch (this.state) {
 			case (Game.STATE_START_TURN):
 				this.startTurn();
@@ -121,14 +117,12 @@ export default class Game extends EventTarget {
 				this._speaker.hideNextTurnButton(true);
 				this._speaker.addSpace();
 				//Calculate scores and stats
-				this._speaker.sumUpGameTurn().then(() => { tools.log('turn summed up.', this) });
-				this.nextTurn();
+				this._speaker.sumUpGameTurn();
 				tools.log('turn ended successfully.', this);
 				break;
 		}
 
 		return true;
-		// tools.log(`statechanged counter: ${this.counter}, current turn: ${this._turn}`);
 	}
 
 	//DEBUG!
@@ -164,34 +158,21 @@ export default class Game extends EventTarget {
 	async init() {
 		
 		//function for when next turn button is clicked
-		const nextTurnCallback = (async (result) => {			
-			// First create the event
-			const event = new CustomEvent('event_endTurn', {
-				detail: {
-					player: this.currentPlayer
-				}
-			});
-			
-			// Trigger it!
-			this.dispatchEvent(event);
-			
-			this.nextTurn = result;
+		const nextTurnCallback = (result) => {			
+			this.dispatchEvent(this._event_startTurn);	
 			this.speaker.hideNextTurnButton();
-		});
+		};
 		
 		//function for when knock button is clicked
-		let knockCallback = (async (result) => {
-			// First create the event
+		let knockCallback = (result) => {
 			const event = new CustomEvent('event_knock', {
 				detail: {
 					player: this.currentPlayer
 				}
 			});
-			// Trigger it!
-			this.dispatchEvent(event);
 
-			tools.log("knocking: " + result, this);
-		});
+			this.dispatchEvent(event);
+		};
 		
 		//create new speaker
 		this._speaker = new Speaker(this);
@@ -202,10 +183,9 @@ export default class Game extends EventTarget {
 		this._deck = new Deck();
 		await this._deck.init();
 
-		//set players as best and second best score
-		this._highestScorePlayers = [this._players[0], this._players[1]]; 
-
 		//create events
+		this._event_startTurn = new CustomEvent('event_startTurn', {});
+
 		this._event_beforeSwap = new CustomEvent('event_beforeSwap', {
 			// detail: {
 			// 	player: this.currentPlayer
@@ -238,6 +218,13 @@ export default class Game extends EventTarget {
 				console.log("event_knock called by player: ", event.detail.player);
 
 				this.tableKnocked();
+			}
+		);
+
+		this.addEventListener(
+			'event_startTurn', 
+			(event) => {
+				this.state = Game.STATE_START_TURN;
 			}
 		);
 

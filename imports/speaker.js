@@ -304,31 +304,24 @@ export default class Speaker {
 		return type + '_' + text.split(' ')[0] + this._elemId++;
 	}
 
-	async sumUpGameTurn() {
-		//DEBUG, skip this method for now
-		// return true;
-
+	sumUpGameTurn() {
 		//find winner
 		const winner = this._parent.findWinner();
-		tools.log(`winner this turn: ${winner.name}`);
-		console.log(winner.heldCard);
 		winner.wins++;
 		
 		//find loser
 		const loser = this._parent.findLoser();
-		tools.log(`loser this turn: ${loser.name}`);
-		console.log(loser.heldCard);
 		loser.losses++;
 	
-		this.say("Winner of this turn is " + winner.name + " with the card " + winner.heldCard.name);
+		this.say(`Winner of this turn is ${winner.name} with the card ${winner.heldCard.name}.`);
 		winner.addToScore(1);
-		this.say("Loser of this turn is " + loser.name + " with the card " + loser.heldCard.name);
+		this.say(`Loser of this turn is ${loser.name} with the card ${loser.heldCard.name}.`);
 		loser.addToScore(-1);
 	
 		//All game.players toss their card in the discard pile and search for Narren
 		for (let player of this._parent.players) {
 			if (player.heldCard.isFool) {
-				this.say("Unfortunately, " + player.name + "'s card at end of turn is Narren.");
+				this.say(`Unfortunately, ${player.name}'s card at end of turn is Narren.`);
 				player.addToScore(-1);
 			}
 			player.discard(this._parent.deck); //toss card to deck's discard pile
@@ -338,38 +331,19 @@ export default class Speaker {
 		// deck.testLengthSum();
 	
 		//most wins
-		let maxVal = await tools.extreme(this._parent.players, 'wins');
-		let ply_mostWins = this._parent.players[maxVal.mostIndex];
+		const ply_mostWins = tools.getExtreme(this._parent.players, 'wins');
 		//most losses
-		maxVal = await tools.extreme(this._parent.players, 'losses');
-		let ply_mostLosses = this._parent.players[maxVal.mostIndex];
+		const ply_mostLosses = tools.getExtreme(this._parent.players, 'losses');
 		// highest score
-		maxVal = await tools.extreme(this._parent.players, 'score');
-		let highestScore = this._parent.players[maxVal.mostIndex];
+		const ply_highestScore = tools.getExtreme(this._parent.players, 'score');
 	
 		let scoreLine = '';
-	
-		for (let player of this._parent.players) {
-			let thisPly = player.name;
-			if (player.pid === this._parent.highestScorePlayers.pid) {
-				thisPly = "**" + thisPly.toUpperCase() + "**";
-			}
-			scoreLine += thisPly + ": " + player.score + ", ";
-		}
-	
+		const thisPly = '**' + ply_highestScore.name.toUpperCase() + '**';
+		scoreLine += thisPly + ': ' + ply_highestScore.score + ', ';
+
 		this.addSpace();
 		this.say (scoreLine.slice(0, scoreLine.len - 2));
-		this.say ("GAME STATS: Most wins -> " + ply_mostWins.name + ": " + ply_mostWins.wins + ", most losses -> " + ply_mostLosses.name + ": " + ply_mostLosses.losses);
-	
-		//Set highest score
-		if (highestScore > this._parent.highestScorePlayers[0]) {
-			this._parent.highestScorePlayers.pop(); //remove last item
-			this._parent.highestScorePlayers.unshift(highestScore); //set current highest score player as first item
-	
-			this.say("INFO: Setting " + this._parent.highestScorePlayers[0].score + " as new best score value for game.");
-		}
-		
-		this._parent.setHighestScore(this._parent.highestScorePlayers[0].score);
+		this.say (`GAME STATS: Most wins -> ${ply_mostWins.name}: ${ply_mostWins.wins}, most losses -> ${ply_mostLosses.name}: ${ply_mostLosses.losses}`);
 		this.addSpace();	
 	}
 
