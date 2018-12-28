@@ -265,7 +265,7 @@ export default class Speaker {
 
 		for (const player of this._parent.players) {
 			let obj = { 
-				name: player.name,
+				name: player.name + (player.heldCard ? player.heldCard.value : ''),
 				score: player.score,
 				wins: player.wins,
 				losses: player.losses,
@@ -327,7 +327,7 @@ export default class Speaker {
 	
 		//All game.players toss their card in the discard pile and search for Narren
 		for (let player of this._parent.players) {
-			if (player.heldCard.ifFool) {
+			if (player.heldCard.isFool) {
 				this.say("Unfortunately, " + player.name + "'s card at end of turn is Narren.");
 				player.addToScore(-1);
 			}
@@ -342,7 +342,7 @@ export default class Speaker {
 		let ply_mostWins = this._parent.players[maxVal.mostIndex];
 		//most losses
 		maxVal = await tools.extreme(this._parent.players, 'losses');
-		let ply_mostLosses = this.paren_parentt.players[maxVal.mostIndex];
+		let ply_mostLosses = this._parent.players[maxVal.mostIndex];
 		// highest score
 		maxVal = await tools.extreme(this._parent.players, 'score');
 		let highestScore = this._parent.players[maxVal.mostIndex];
@@ -351,7 +351,7 @@ export default class Speaker {
 	
 		for (let player of this._parent.players) {
 			let thisPly = player.name;
-			if (player.pid === highestScorePlayers.pid) {
+			if (player.pid === this._parent.highestScorePlayers.pid) {
 				thisPly = "**" + thisPly.toUpperCase() + "**";
 			}
 			scoreLine += thisPly + ": " + player.score + ", ";

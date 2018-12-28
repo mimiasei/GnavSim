@@ -94,35 +94,44 @@ export async function extreme(array, attr, findMin) {
 	}
 }
 
-export function log(message) {
+export function log(message, game) {
+	game = game || null;
     let stack = new Error().stack,
         caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
-    console.log(caller + ":" + message);
+    console.log(caller + (game && game.playerStack && game.playerStack.current() ? '|' + game.playerStack.current().name : '') + ":" + message);
 }
 
 export function getExtreme(array, attr, getMax) {
 	getMax = getMax || true;
 
 	const parts = attr ? attr.split('.') : null;
-	let extreme = false;
+	let extremeIndex = false;
 
 	if (parts) {
 		if (parts.length > 1) {
 			if (getMax) {
-				extreme = array.reduce((max, p) => p[parts[0]][parts[1]] > max ? p[parts[0]][parts[1]] : max, array[0][parts[0]][parts[1]]);
+				// extreme = array.reduce((max, p) => p[parts[0]][parts[1]] > max ? p[parts[0]][parts[1]] : max, array[0][parts[0]][parts[1]]);
+				const extremeVal = Math.max.apply(Math, array.map((o) => { return o[parts[0]][parts[1]]; }))
+				return array.find((o) => { return o[parts[0]][parts[1]] === extremeVal; });
 			} else {
-				extreme = array.reduce((min, p) => p[parts[0]][parts[1]] < min ? p[parts[0]][parts[1]] : min, array[0][parts[0]][parts[1]]);
+				// extremeIndex = array.reduce((min, p) => p[parts[0]][parts[1]] < min ? p[parts[0]][parts[1]] : min, array[0][parts[0]][parts[1]]);
+				const extremeVal = Math.min.apply(Math, array.map((o) => { return o[parts[0]][parts[1]]; }))
+				return array.find((o) => { return o[parts[0]][parts[1]] === extremeVal; });
 			}
 		} else {
 			if (getMax) {
-				extreme = array.reduce((max, p) => p[parts[0]] > max ? p[parts[0]] : max, array[0][parts[0]]);
+				// extremeIndex = array.reduce((max, p) => p[parts[0]] > max ? p[parts[0]] : max, array[0][parts[0]]);
+				const extremeVal = Math.max.apply(Math, array.map((o) => { return o[parts[0]]; }))
+				return array.find((o) => { return o[parts[0]] === extremeVal; });
 			} else {
-				extreme = array.reduce((min, p) => p[parts[0]] < min ? p[parts[0]] : min, array[0][parts[0]]);
+				// extremeIndex = array.reduce((min, p) => p[parts[0]] < min ? p[parts[0]] : min, array[0][parts[0]]);
+				const extremeVal = Math.min.apply(Math, array.map((o) => { return o[parts[0]]; }))
+				return array.find((o) => { return o[parts[0]] === extremeVal; });
 			}
 		}
 	}
 
-	return extreme;
+	return extremeIndex;
 }
 
 /**

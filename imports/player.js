@@ -44,7 +44,7 @@ export default class Player {
 	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value; }
 	set hasHighscore(value) {
 		this._hasHighscore = value;
-		if (this._hasHighscore) {
+		if ((this._hasHighscore !== undefined && this._hasHighscore !== null)) {
 			this._game.speaker.say(`${this._name} now has highest score.`);
 		}
 	}
@@ -57,7 +57,7 @@ export default class Player {
 	drawFromDeck() {
 		this.discard(); //discard currently held card
 		this.heldCard = this._game.deck.draw();
-		tools.log(`${this._name} drew from deck: ${this.heldCard.name}`)
+		tools.log(`${this._name} drew from deck: ${this.heldCard.name}`, this._game)
 	}
 
 	discard() {
@@ -69,13 +69,16 @@ export default class Player {
 
 	cardSwap(nextPlayer) {
 		const card = this._heldCard;
-		this._heldCard = nextPlayer.heldCard;
-		nextPlayer.heldCard = card;
+		if (!nextPlayer.isDeck) {
+			this._heldCard = nextPlayer.heldCard;
+			nextPlayer.heldCard = card;
+		} else {
+			this.drawFromDeck();
+		}
 	}
 
 	//todo: hoping to get rid of this silly method!
 	wantsToSwapTest(withPlayer) {
-
 		if (!withPlayer.isDeck) {
 	
 			return this.testForSwap(); //Do small chance check if player has forgotten someone knocked 3 times.
@@ -131,7 +134,7 @@ export default class Player {
 	}
 
 	async askPlayers() {
-		tools.log('ASKPLAYERS: entered askPlayers() with index for player: ' + this._name);
+		tools.log('ASKPLAYERS: entered askPlayers() with index for player: ' + this._name, this._game);
 		let gotoNextPlayer = false;
 		let hasSwapped, abortSwap = false;
 		let returnedCard = null;
@@ -160,7 +163,7 @@ export default class Player {
 					gotoNextPlayer = true; //horse, house
 				}
 			} else {
-				tools.log('ASKPLAYERS: card is NOT matador. going to swapwithplayer...');
+				tools.log('ASKPLAYERS: card is NOT matador. going to swapwithplayer...', this._game);
 				await this.swapWithPlayer(nextPlayer); //The two players Swap cards
 				hasSwapped = true;
 			}
@@ -190,12 +193,12 @@ export default class Player {
 	}
 
 	async swapWithPlayer(fromPlayer) {
-		tools.log(`${this._name} swaps ${this._heldCard.name} with ${fromPlayer.name}'s ${fromPlayer.heldCard.name}...`);
+		tools.log(`${this._name} swaps ${this._heldCard.name} with ${fromPlayer.name}'s ${fromPlayer.heldCard.name}...`, this._game);
 		this._game.speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
 		const card = CardClass.deepCopy(this._heldCard);
 		this._heldCard = CardClass.deepCopy(fromPlayer.heldCard);
 		fromPlayer.heldCard = card;
-		tools.log(`${this._name} now has ${this._heldCard.name} and ${fromPlayer.name} has ${fromPlayer.heldCard.name}.`);
+		tools.log(`${this._name} now has ${this._heldCard.name} and ${fromPlayer.name} has ${fromPlayer.heldCard.name}.`, this._game);
 	}
 
 	addToScore(value) {
@@ -239,25 +242,16 @@ export default class Player {
 				swap++;
 			}
 
-			//pause 1 second
-			tools.log('before pause.')
-			setTimeout(() => { tools.log('paused 1 sec...'); }, 1000);
-
-			//for testing, show modal
-			// const text = `${this._name} wants to swap: ${this._heldCard.name} this badly: ${swap}`;
-
-			// let callbackFn = (result) => {
-			// 	tools.log('player ask result: ' + result ? 'yes' : 'no');
-			// 	this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
-			// };
-
-			// this._game.speaker.ask(text, 0, callbackFn);
-
-			// return !(this._heldCard.value > swap);
-
 			const result = !(this._heldCard.value > swap);
 
+			//pause 1 second
+			tools.log(`before pause. Has card: ${this._heldCard.name}`, this._game)
+			// setTimeout(() => { tools.log(`${this._name} paused. result: ${(result ? 'swapping' : 'not swapping')}`); }, 0);
+			tools.log(`paused. RESULT: ${(result ? 'swapping' : 'not swapping')}`, this._game);
+
 			this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
+		} else {
+			tools.log(`ERROR: ${this._name} doesn't have valid card!`, this._game);
 		}
 		return false;
 	}

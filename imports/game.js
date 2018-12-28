@@ -73,10 +73,10 @@ export default class Game extends EventTarget {
 		if (this._state !== value) {
 			this._state = value;
 			$("#prettyInfo").text('Current state: ' + this._state);
-			tools.log(`STATE: ${oldState} ==> ${this._state}`);
+			tools.log(`STATE: ${oldState} ==> ${this._state}`, this);
 			this.stateChanged();
 		} else {
-			tools.log('not changing state as new value === old value');
+			tools.log('not changing state as new value === old value', this);
 		}
 	}
 
@@ -121,9 +121,9 @@ export default class Game extends EventTarget {
 				this._speaker.hideNextTurnButton(true);
 				this._speaker.addSpace();
 				//Calculate scores and stats
-				this._speaker.sumUpGameTurn().then(() => { tools.log('turn summed up.') });
+				this._speaker.sumUpGameTurn().then(() => { tools.log('turn summed up.', this) });
 				this.nextTurn();
-				tools.log('turn ended successfully.');
+				tools.log('turn ended successfully.', this);
 				break;
 		}
 
@@ -135,7 +135,7 @@ export default class Game extends EventTarget {
 	checkCards() {
 		this._players.forEach(player => {
 			if (!player.heldCard) {
-				tools.log(`${player.name} doesn't have valid card!`);
+				tools.log(`${player.name} doesn't have valid card!`, this);
 				console.log(player.heldCard);
 			}
 		});
@@ -150,7 +150,9 @@ export default class Game extends EventTarget {
 		if (result) {
 			const nextPlayer = this._playerStack.nextTo();
 			this._speaker.say(`${this.currentPlayer.name} swaps with ${nextPlayer.name}`);
+			tools.log(`before swap has card: ${this.currentPlayer.heldCard.name}`);
 			this.currentPlayer.cardSwap(nextPlayer);
+			tools.log(`AFTER swap has card: ${this.currentPlayer.heldCard.name}`);
 		} else {
 			this._speaker.say(`${this.currentPlayer.name} doesn't want to swap.`);
 		}
@@ -188,7 +190,7 @@ export default class Game extends EventTarget {
 			// Trigger it!
 			this.dispatchEvent(event);
 
-			tools.log("knocking: ", result);
+			tools.log("knocking: " + result, this);
 		});
 		
 		//create new speaker
@@ -302,7 +304,7 @@ export default class Game extends EventTarget {
 		//set first turn
 		this.nextTurn();
 
-		tools.log('initgame done.');
+		tools.log('initgame done.', this);
 	}
 
 	nextTurn() {
@@ -352,7 +354,7 @@ export default class Game extends EventTarget {
 		if (!this._playerStack.next()) {
 			this.state = Game.STATE_END_TURN;
 		} else {
-			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`);
+			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`, this);
 			this._speaker.refreshStatsTable();
 			this._speaker.updateCurrentPlayer();
 			
@@ -375,11 +377,10 @@ export default class Game extends EventTarget {
 	 * Returns player with highest score
 	 */
 	findWinner() {
-		tools.log('players:');
-		console.log(this._players);
 		// const maxVal = await tools.extreme(this._players, 'heldCard.value'); //maxval is default when not passing 3rd param
-		const maxVal = tools.getExtreme(this._players, 'heldCard.value', true); //true means get max value
-		let winner = this._players[maxVal.mostIndex];
+		const winner = tools.getExtreme(this._players, 'heldCard.value', true); //true means get max value
+		tools.log('found winner:');
+		console.log(winner);
 		winner.hasHighscore = true;
 		return winner;
 	}
@@ -388,11 +389,11 @@ export default class Game extends EventTarget {
 	 * Returns player with lowest score
 	 */
 	findLoser() {
-		tools.log('players:');
-		console.log(this._players);
 		// const minVal = await tools.extreme(this._players, 'heldCard.value', true); //tools.FIND_MIN === true
-		const minVal = tools.getExtreme(this._players, 'heldCard.value', false); //false means get min value
-		return this._players[minVal.mostIndex];
+		const loser = tools.getExtreme(this._players, 'heldCard.value', false); //false means get min value
+		tools.log('found loser:');
+		console.log(loser);
+		return loser;
 	}
 
 	subractFromAllPlayers(players) {
