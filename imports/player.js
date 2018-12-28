@@ -239,17 +239,25 @@ export default class Player {
 				swap++;
 			}
 
+			//pause 1 second
+			tools.log('before pause.')
+			setTimeout(() => { tools.log('paused 1 sec...'); }, 1000);
+
 			//for testing, show modal
-			const text = `${this._name} wants to swap: ${this._heldCard.name} this badly: ${swap}`;
+			// const text = `${this._name} wants to swap: ${this._heldCard.name} this badly: ${swap}`;
 
-			let callbackFn = (result) => {
-				tools.log('player ask result: ' + result ? 'yes' : 'no');
-				this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
-			};
+			// let callbackFn = (result) => {
+			// 	tools.log('player ask result: ' + result ? 'yes' : 'no');
+			// 	this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
+			// };
 
-			this._game.speaker.ask(text, 0, callbackFn);
+			// this._game.speaker.ask(text, 0, callbackFn);
 
-			return !(this._heldCard.value > swap);
+			// return !(this._heldCard.value > swap);
+
+			const result = !(this._heldCard.value > swap);
+
+			this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
 		}
 		return false;
 	}

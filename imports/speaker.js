@@ -20,6 +20,7 @@ export default class Speaker {
 		this._statsTableBody = $("#stats_table tbody");
 		this._nextTurnButton = $("#btnNextTurn");
 		this._knockButton = $("#btnKnock");
+		this._currentPlayerText = $("#currentPlayer");
 		this._statsElems = [];
 		this._elemId = 0;
 		this._parent = parent;
@@ -88,6 +89,9 @@ export default class Speaker {
 		$('#stats_table').show();
 	}
 
+	updateCurrentPlayer() {
+		this._currentPlayerText.text(this._parent.playerStack.current().name);
+	}
 	
 	hideNextTurnButton(show) {
 		show = show || false;

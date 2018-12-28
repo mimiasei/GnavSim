@@ -300,7 +300,7 @@ export default class Game extends EventTarget {
 		this._speaker.refreshStatsTable();
 		
 		//set first turn
-		await this.nextTurn();
+		this.nextTurn();
 
 		tools.log('initgame done.');
 	}
@@ -323,6 +323,7 @@ export default class Game extends EventTarget {
 
 		//refresh table of player stats
 		this._speaker.refreshStatsTable(this._players);
+		this._speaker.updateCurrentPlayer();
 
 		//print round
 		this._speaker.printRound();
@@ -353,6 +354,7 @@ export default class Game extends EventTarget {
 		} else {
 			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`);
 			this._speaker.refreshStatsTable();
+			this._speaker.updateCurrentPlayer();
 			
 			this.state = Game.STATE_BEFORE_SWAP;
 		}

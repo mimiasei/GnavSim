@@ -52,6 +52,15 @@ img {
   border-radius: 50%; /*round images*/
 }
 
+.simple-flex {
+  display: flex;
+}
+
+.flex-space-around {
+  display: flex;
+  justify-content: space-around;
+}
+
 .btn {
   box-shadow: -1px 1px 1px rgba(255,255,255,0.5), /*bottom external highlight*/
     1px -1px 1px rgba(0,0,0,0.25), /*top external shadow*/ 
@@ -83,7 +92,11 @@ td:nth-child(3) {
 .actionBtn {
   position: fixed;
   top: 20px;
-  right: auto;
+  /* right: auto; */
+}
+
+.current-player {
+  margin-top: 30px; 
 }
 
 .actionBtn:focus, button:focus {
@@ -136,10 +149,6 @@ td:nth-child(3) {
   border: none;
   padding: 0;
   margin: 0;
-}
-
-.tabulator-current {
-  color: var(--color-txt-special);
 }
 
 #info {
