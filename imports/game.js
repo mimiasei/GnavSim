@@ -366,8 +366,6 @@ export default class Game extends EventTarget {
 	findWinner() {
 		// const maxVal = await tools.extreme(this._players, 'heldCard.value'); //maxval is default when not passing 3rd param
 		const winner = tools.getExtreme(this._players, 'heldCard.value', true); //true means get max value
-		tools.log('found winner:');
-		console.log(winner);
 		winner.hasHighscore = true;
 		return winner;
 	}
@@ -378,8 +376,6 @@ export default class Game extends EventTarget {
 	findLoser() {
 		// const minVal = await tools.extreme(this._players, 'heldCard.value', true); //tools.FIND_MIN === true
 		const loser = tools.getExtreme(this._players, 'heldCard.value', false); //false means get min value
-		tools.log('found loser:');
-		console.log(loser);
 		return loser;
 	}
 

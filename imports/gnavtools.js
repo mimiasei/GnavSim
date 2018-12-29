@@ -102,31 +102,25 @@ export function log(message, game) {
 }
 
 export function getExtreme(array, attr, getMax) {
-	getMax = getMax || true;
-
 	const parts = attr ? attr.split('.') : null;
 	let extremeIndex = false;
 
 	if (parts) {
 		if (parts.length > 1) {
 			if (getMax) {
-				// extreme = array.reduce((max, p) => p[parts[0]][parts[1]] > max ? p[parts[0]][parts[1]] : max, array[0][parts[0]][parts[1]]);
-				const extremeVal = Math.max.apply(Math, array.map((o) => { return o[parts[0]][parts[1]]; }))
-				return array.find((o) => { return o[parts[0]][parts[1]] === extremeVal; });
+				const extremeVal = Math.max.apply(Math, array.map((o) => { return o[parts[0]][parts[1]]; }));
+				return array.find((o) => { return o[parts[0]][parts[1]] == extremeVal; });
 			} else {
-				// extremeIndex = array.reduce((min, p) => p[parts[0]][parts[1]] < min ? p[parts[0]][parts[1]] : min, array[0][parts[0]][parts[1]]);
-				const extremeVal = Math.min.apply(Math, array.map((o) => { return o[parts[0]][parts[1]]; }))
-				return array.find((o) => { return o[parts[0]][parts[1]] === extremeVal; });
+				const extremeVal = Math.min.apply(Math, array.map((o) => { return o[parts[0]][parts[1]]; }));
+				return array.find((o) => { return o[parts[0]][parts[1]] == extremeVal; });
 			}
 		} else {
 			if (getMax) {
-				// extremeIndex = array.reduce((max, p) => p[parts[0]] > max ? p[parts[0]] : max, array[0][parts[0]]);
-				const extremeVal = Math.max.apply(Math, array.map((o) => { return o[parts[0]]; }))
-				return array.find((o) => { return o[parts[0]] === extremeVal; });
+				const extremeVal = Math.max.apply(Math, array.map((o) => { return o[parts[0]]; }));
+				return array.find((o) => { return o[parts[0]] == extremeVal; });
 			} else {
-				// extremeIndex = array.reduce((min, p) => p[parts[0]] < min ? p[parts[0]] : min, array[0][parts[0]]);
-				const extremeVal = Math.min.apply(Math, array.map((o) => { return o[parts[0]]; }))
-				return array.find((o) => { return o[parts[0]] === extremeVal; });
+				const extremeVal = Math.min.apply(Math, array.map((o) => { return o[parts[0]]; }));
+				return array.find((o) => { return o[parts[0]] == extremeVal; });
 			}
 		}
 	}

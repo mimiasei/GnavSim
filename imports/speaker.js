@@ -21,6 +21,7 @@ export default class Speaker {
 		this._nextTurnButton = $("#btnNextTurn");
 		this._knockButton = $("#btnKnock");
 		this._currentPlayerText = $("#currentPlayer");
+		this._currentDealerText = $("#currentDealer");
 		this._statsElems = [];
 		this._elemId = 0;
 		this._parent = parent;
@@ -91,6 +92,7 @@ export default class Speaker {
 
 	updateCurrentPlayer() {
 		this._currentPlayerText.text(this._parent.playerStack.current().name);
+		this._currentDealerText.text(this._parent.playerStack.dealer().name);
 	}
 	
 	hideNextTurnButton(show) {
