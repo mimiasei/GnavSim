@@ -192,13 +192,23 @@ export default class Player {
 		return this._heldCard;
 	}
 
-	async swapWithPlayer(fromPlayer) {
-		tools.log(`${this._name} swaps ${this._heldCard.name} with ${fromPlayer.name}'s ${fromPlayer.heldCard.name}...`, this._game);
-		this._game.speaker.say (`INFO: ${this.name} swaps cards with ${fromPlayer.name}.`);
-		const card = CardClass.deepCopy(this._heldCard);
-		this._heldCard = CardClass.deepCopy(fromPlayer.heldCard);
-		fromPlayer.heldCard = card;
-		tools.log(`${this._name} now has ${this._heldCard.name} and ${fromPlayer.name} has ${fromPlayer.heldCard.name}.`, this._game);
+	prepareSwap() {
+		const nextPlayer = this._playerStack.nextTo();
+		this.testForSwap(nextPlayer);
+	}
+
+	finalizeSwap(result) {
+		if (result) {
+			const nextPlayer = this._playerStack.nextTo();
+			this._speaker.say(`${this._name} swaps with ${nextPlayer.name}`);
+			tools.log(`before swap has card: ${this._heldCard.name}`);
+			this.cardSwap(nextPlayer);
+			tools.log(`AFTER swap has card: ${this._heldCard.name}`);
+		} else {
+			this._speaker.say(`${this._name} doesn't want to swap.`);
+		}
+
+		this._game.state = Game.STATE_AFTER_SWAP;
 	}
 
 	addToScore(value) {

@@ -97,15 +97,15 @@ export default class Game extends EventTarget {
 				break;
 			case (Game.STATE_BEFORE_SWAP):
 				this.checkCards();
-				this.prepareSwap();
+				this.currentPlayer.prepareSwap();
 				break;
 			case (Game.STATE_DECIDED_SWAP): //after callback from deciding YES for swapping
 				this.checkCards();
-				this.finalizeSwap(true);
+				this.currentPlayer.finalizeSwap(true);
 				break;
 			case (Game.STATE_SKIPPED_SWAP): //after callback from deciding NO for swapping
 				this.checkCards();
-				this.finalizeSwap(false);
+				this.currentPlayer.finalizeSwap(false);
 				break;
 			case (Game.STATE_AFTER_SWAP):
 				this.checkCards();
@@ -133,26 +133,6 @@ export default class Game extends EventTarget {
 				console.log(player.heldCard);
 			}
 		});
-	}
-
-	prepareSwap() {
-		const nextPlayer = this._playerStack.nextTo();
-		this.currentPlayer.testForSwap(nextPlayer);
-	}
-
-	finalizeSwap(result) {
-		if (result) {
-			const nextPlayer = this._playerStack.nextTo();
-			this._speaker.say(`${this.currentPlayer.name} swaps with ${nextPlayer.name}`);
-			tools.log(`before swap has card: ${this.currentPlayer.heldCard.name}`);
-			this.currentPlayer.cardSwap(nextPlayer);
-			tools.log(`AFTER swap has card: ${this.currentPlayer.heldCard.name}`);
-		} else {
-			this._speaker.say(`${this.currentPlayer.name} doesn't want to swap.`);
-		}
-
-		// this.currentPlayer.wantsToSwapTest(withPlayer);
-		this.state = Game.STATE_AFTER_SWAP;
 	}
 
 	async init() {
