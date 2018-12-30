@@ -186,10 +186,10 @@ export default class Speaker {
 		
 		this.hideNextTurnButton();
 
-		await this.openModal(question, answers, callbackFn);
+		this.openModal(question, answers, callbackFn);
 	}
 	
-	async openModal(question, answers, callbackFn, useCloseBtn) {
+	openModal(question, answers, callbackFn, useCloseBtn) {
 		useCloseBtn = useCloseBtn || false;
 		tools.log("opening modal...");
 
@@ -230,18 +230,6 @@ export default class Speaker {
 		let element = $(`<button type="button" class="btn btn-primary margin-left-10">${name}</button>`);
 		element.click(() => { callbackFn(true); });
 		return element;
-	}
-
-	async input(question, callbackFn) {
-		let div = this.createElem(null, null, 'margin-top-10'); //create button group div
-		div.append(this.say(question, 'span', 'margin-right-10', false));
-		let group = this.createElem('', 'div', 'flex'); //create empty flex div
-		let $inputElem = $('<input type="text"/>');
-		$inputElem.id = this.makeid(question.split(' ')[0], 'inp');
-		group.append($inputElem);
-		let element = this.createBtn('Enter', callbackFn);
-		group.append(element);
-		this._output.append(group);
 	}
 
 	updateStats(player) {

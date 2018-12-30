@@ -21,6 +21,7 @@ export default class Player {
 		this._neverSwapsWithDeck = false;
 		this._hasHighscore = false;
 		this._isCurrent = false;
+		this._hasKnocked = false;
 	}
 
 	get name() { return this._name; }
@@ -32,13 +33,14 @@ export default class Player {
 	get neverSwapsWithDeck() { return this._neverSwapsWithDeck; }
 	get hasHighscore() { return this._hasHighscore; }
 	get isCurrent() { return this._isCurrent; }
+	get hasKnocked() { return this._hasKnocked; }
 
 	set name(value) { this._name = value }
 	set score(value) { 
 		this._score = value;
 		this._game.speaker.updateStats(this);
 	}
-	set heldCard(value) { this._heldCard = value; } //Card.clone(value) . eller . $.extend(true, {}, value)
+	set heldCard(value) { this._heldCard = value; }
 	set wins(value) { this._wins = value; }
 	set losses(value) { this._losses = value; }
 	set neverSwapsWithDeck(value) { this._neverSwapsWithDeck = value; }
@@ -69,117 +71,70 @@ export default class Player {
 
 	cardSwap(nextPlayer) {
 		const card = this._heldCard;
-		if (!nextPlayer.isDeck) {
-			this._heldCard = nextPlayer.heldCard;
-			nextPlayer.heldCard = card;
-		} else {
-			this.drawFromDeck();
-		}
+		// if (!nextPlayer.isDeck) {
+		this._heldCard = nextPlayer.heldCard;
+		nextPlayer.heldCard = card;
+		// } 
+		// else {
+		// 	this.drawFromDeck();
+		// }
 	}
 
-	//todo: hoping to get rid of this silly method!
-	wantsToSwapTest(withPlayer) {
-		if (!withPlayer.isDeck) {
-	
-			return this.testForSwap(); //Do small chance check if player has forgotten someone knocked 3 times.
-	
-		} else {
-			if (this.testForSwap('deck')) { //Only swap if card is 4 or less.
-				this._game.speaker.say (this._name + ' draws from the deck.');
-				this.drawFromDeck(); //Draw from deck if noone else to swap with.
+	askPlayerLoop() {
+		let hasSwapped = false;
+		let abortSwap = false;
+		let nextPlayer = this._game.getPlayerNextTo(true);
+
+		let counter = 0;
+
+		while (nextPlayer && !hasSwapped && !abortSwap && counter++ < this._game.players.length) {
+			tools.log(`${this._name} tries to swap with ${nextPlayer.name}...`);
+			if (!nextPlayer.isDeck) {
+				this.requestSwap(nextPlayer);
+				const returnedCard = nextPlayer.answerSwap(this);
+				
+				if (returnedCard.isFool) {
+					this._game.speaker.say (`Everyone starts laughing and says 'Men " + ${nextPlayer.name} + " har jo narren!'`);
+				}
+
+				if (returnedCard.isMatador) {
+
+					//-1 score?
+					if (returnedCard.causeLosePoint) {
+						this.addToScore(-1);
+					}
+					//no more swap?
+					if (returnedCard.causeNoMoreSwap || returnedCard.causeAllLosePointAndStopGame) {
+						abortSwap = true;
+					}
+					//cuckoo?
+					if (returnedCard.causeAllLosePointAndStopGame) {
+						this._game.subractFromAllPlayers(nextPlayer);
+						this._game.state = Game.STATE_END_TURN;
+					}
+
+				} else {
+					//if card is not a matador, swap normally
+					this.cardSwap(nextPlayer);
+
+					hasSwapped = true;
+				}
+				
 			} else {
-				this._game.speaker.say (this.sayPass());
-			}
-		}
-	}
-
-	/**
-	 * result = button click result. yes = true, no = false.
-	 * 
-	 * @param Player withPlayer 
-	 * @param bool result 
-	 * @param bool wantsToSwap 
-	 */
-	async swapCards(withPlayer) {
-		let sayPass = '';
-		let wantsToSwap = false;
-
-		if (withPlayer && withPlayer.heldCard && withPlayer.heldCard.isFool) { //If the other player has Narren...
-			if (result) {
-				wantsToSwap = true;
-			}
-			else {
-				sayPass = this.sayNoFool(withPlayer);
-			}
-		}
-		else {
-			if (!this._neverSwapsWithDeck && this.testForSwap(withPlayer)) { //Only ask to swap if card is 4 or less.
-				wantsToSwap = true;
-			}
-			else {
+				//next player is the deck, so draw from it
 				if (this._neverSwapsWithDeck) {
 					this._game.speaker.say(this._name + " never swaps!");
-				}
-			}
-		}
-		if (wantsToSwap) {
-			const result = await this.askPlayers();
-			if (!result) { //Check if Staa for gjok! is called.
-				// running = false;
-			}
-		}
-		else {
-			this._game.speaker.say(sayPass);
-		}
-	}
-
-	async askPlayers() {
-		tools.log('ASKPLAYERS: entered askPlayers() with index for player: ' + this._name, this._game);
-		let gotoNextPlayer = false;
-		let hasSwapped, abortSwap = false;
-		let returnedCard = null;
-		let nextPlayer = this._game.getPlayerNextTo();
-
-		while (!hasSwapped && !abortSwap && nextPlayer.name !== 'deck') {
-
-			this.requestSwap(nextPlayer);
-			returnedCard = nextPlayer.answerSwap(this);
-	
-			if (returnedCard.isFool) {
-				this._game.speaker.say ("Everyone starts laughing and says 'Men " + nextPlayer.name + " har jo narren!'");
-			}
-	
-			if (returnedCard.isMatador) {
-				if (returnedCard.causeAllLosePointAndStopGame) { //gjøken
-					subractFromAllPlayers(nextPlayer, this._game.players);
-				} else if (returnedCard.causeLosePoint) { //cat, dragoon
-					this.addToScore(-1);
-					if (returnedCard.causeNoMoreSwap) { //dragoon
-						abortSwap = true;
-					} else {
-						gotoNextPlayer = true; //cat
-					}
 				} else {
-					gotoNextPlayer = true; //horse, house
+					this._game.speaker.say(this._name + " draws from the deck.");
+					this.drawFromDeck();
 				}
-			} else {
-				tools.log('ASKPLAYERS: card is NOT matador. going to swapwithplayer...', this._game);
-				await this.swapWithPlayer(nextPlayer); //The two players Swap cards
+
 				hasSwapped = true;
 			}
-	
-			//If player still hasn't swapped after being last in round
-			if (!hasSwapped) {
-				this._game.speaker.say (this._name + " draws from the deck.");
-				this.drawFromDeck();
-			}
 
-			if (gotoNextPlayer) {
-				nextPlayer = this._game.getPlayerNextTo();
-			}
-		}
+			nextPlayer = this._game.getPlayerNextTo(true);
+		} 
 
-		return true;
 	}
 	
 	requestSwap(toPlayer) {
@@ -193,19 +148,23 @@ export default class Player {
 	}
 
 	prepareSwap() {
-		const nextPlayer = this._playerStack.nextTo();
+		const nextPlayer = this._game.getPlayerNextTo();
 		this.testForSwap(nextPlayer);
 	}
 
 	finalizeSwap(result) {
 		if (result) {
-			const nextPlayer = this._playerStack.nextTo();
-			this._speaker.say(`${this._name} swaps with ${nextPlayer.name}`);
-			tools.log(`before swap has card: ${this._heldCard.name}`);
-			this.cardSwap(nextPlayer);
-			tools.log(`AFTER swap has card: ${this._heldCard.name}`);
+			// const nextPlayer = this._playerStack.nextTo();
+			// this._speaker.say(`${this._name} swaps with ${nextPlayer.name}`);
+			// tools.log(`before swap has card: ${this._heldCard.name}`);
+			// this.cardSwap(nextPlayer);
+			// tools.log(`AFTER swap has card: ${this._heldCard.name}`);
+
+			this.askPlayerLoop();
+
+			this._hasKnocked = false; //reset hasknocked after swap is done.
 		} else {
-			this._speaker.say(`${this._name} doesn't want to swap.`);
+			this._game.speaker.say(`${this._name} doesn't want to swap.`);
 		}
 
 		this._game.state = Game.STATE_AFTER_SWAP;
@@ -228,11 +187,12 @@ export default class Player {
 	}
 
 	sayNoFool(player) {
-		return tools.highlight(tools.TXT_NO_WAY_FOOL, player.name);
+		this._game.speaker.say(tools.TXT_NO_WAY_FOOL, player.name);
 	}
 
 	knockOnTable() {
 		this._game.speaker.say (this._name + tools.TXT_KNOCK);
+		this._hasKnocked = true;
 		return true;
 	}
 
@@ -241,11 +201,13 @@ export default class Player {
 	 * so AI doesn't always use threshold nbr as reference
 	 * for swapping or not.
 	 */
-	testForSwap() {
+	testForSwap(nextPlayer) {
+		nextPlayer = nextPlayer || null;
+
 		if (this._heldCard) {
 			let swap = tools.SWAP_THRESHOLDNUMBER + 4;
 			const chance = Math.random();
-
+ 
 			if (chance < tools.SWAP_FUZZINESS) {
 				swap--;
 			} else if (chance > (1 - tools.SWAP_FUZZINESS)) {
@@ -254,12 +216,18 @@ export default class Player {
 
 			const result = !(this._heldCard.value > swap);
 
-			//pause 1 second
-			tools.log(`before pause. Has card: ${this._heldCard.name}`, this._game)
-			// setTimeout(() => { tools.log(`${this._name} paused. result: ${(result ? 'swapping' : 'not swapping')}`); }, 0);
-			tools.log(`paused. RESULT: ${(result ? 'swapping' : 'not swapping')}`, this._game);
+			//if nextPlayer has knocked, meaning he/she has the Fool
+			if (nextPlayer && nextPlayer.hasKnocked) {
+				if (chance > tools.SWAP_FUZZINESS) {
+					this.sayNoFool(nextPlayer);
+					result = false;
+				} else {
+					result = true;
+				}
+			}
 
 			this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
+
 		} else {
 			tools.log(`ERROR: ${this._name} doesn't have valid card!`, this._game);
 		}

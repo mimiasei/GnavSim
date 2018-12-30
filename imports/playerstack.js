@@ -6,6 +6,8 @@ export default class PlayerStack {
         this._players = players;
         this._size = players.length;
         this._pos = 0;
+        this._posAdder = 0;
+
         this._players[0].isCurrent = true;
     }
 
@@ -21,17 +23,25 @@ export default class PlayerStack {
         } 
     }
 
-    hasNext() {
-        return this._pos < this._size - 1;
+    hasNext(pos) {
+        pos = pos || this._pos;
+
+        return pos < this._size - 1;
     }
 
     current() {
         return this._players[this._pos];
     }
 
-    nextTo() {
-        if (this.hasNext()) {
-            return this._players[this._pos + 1];
+    nextTo(usePos) {
+        let add = 1;
+        if (usePos) {
+            this._posAdder++
+            add = this._posAdder;
+        };
+
+        if (this.hasNext(this._pos + add - 1)) {
+            return this._players[this._pos + add];
         } else {
             return { name: 'deck', isDeck: true };
         }

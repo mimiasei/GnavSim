@@ -166,30 +166,13 @@ export default class Game extends EventTarget {
 		//create events
 		this._event_startTurn = new CustomEvent('event_startTurn', {});
 
-		this._event_beforeSwap = new CustomEvent('event_beforeSwap', {
-			// detail: {
-			// 	player: this.currentPlayer
-			// }
-		});
+		this._event_beforeSwap = new CustomEvent('event_beforeSwap', {});
 
-		this._event_decidedSwap = new CustomEvent('event_decidedSwap', {
-			// detail: {
-			// 	player: this.currentPlayer,
-			// 	result: false
-			// }
-		});
+		this._event_decidedSwap = new CustomEvent('event_decidedSwap', {});
 
-		this._event_afterSwap = new CustomEvent('event_afterSwap', {
-			// detail: {
-			// 	player: this.currentPlayer
-			// }
-		});
+		this._event_afterSwap = new CustomEvent('event_afterSwap', {});
 
-		this._event_endTurn = new CustomEvent('event_endTurn', {
-			// detail: {
-			// 	player: this.currentPlayer
-			// }
-		});
+		this._event_endTurn = new CustomEvent('event_endTurn', {});
 
 		//create event listeners
 		this.addEventListener(
@@ -329,6 +312,10 @@ export default class Game extends EventTarget {
 		}
 	}
 
+	getPlayerNextTo(usePos) {
+		return this._playerStack.nextTo(usePos);
+	}
+
 	isGameOver() {
 		return (this._value >= this._maxValue);
 	}
@@ -359,9 +346,11 @@ export default class Game extends EventTarget {
 		return loser;
 	}
 
-	subractFromAllPlayers(players) {
+	subractFromAllPlayers(cardHolder) {
+		this._speaker.say(`All players lose 1 score except ${cardHolder.name}.`);
+
 		for (let player of players) {
-			if (player.pid !== this.currentPlayer.pid) { //Subtract 1 score one from all players except current
+			if (player.pid !== cardHolder.pid) { //Subtract 1 score one from all players except the card holder
 				player.addToScore(-1);
 			}
 		}
