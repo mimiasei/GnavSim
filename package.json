@@ -6,7 +6,8 @@
     "express": "latest",
     "p-iteration": "^1.1.7",
     "socket.io": "^2.1.1",
-    "tabulator-tables": "^4.1.1"
+    "tabulator-tables": "^4.1.1",
+    "two.js": "^0.7.0-beta.3"
   },
   "name": "gnavsim_server",
   "description": "Simulates a Gnav card game for n rounds with x players, simply to establish whether the scores remain basically identical to their starting values of 5. A playable game is under development which will be multiplayer and (hopefully) with a server on internet.",
