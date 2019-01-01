@@ -1,6 +1,6 @@
 'use strict';
 
-export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam"]; //, "Mikkel", "Emil", "Øivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"];
+export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Emil", "Øivind"]; //, "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"
 export const MAX_ROUNDS = 1;
 export const SWAP_THRESHOLDNUMBER = 4;
 export const SWAP_FUZZINESS = 0.08; //Simulates human error. 0.1 = 10% chance of making a mistake.
@@ -48,52 +48,6 @@ export async function shuffle(array) {
 	return array; //returns Promise with shuffled array
 }
 
-export async function extreme(array, attr, findMin) {
-	array = array || [];
-	attr = attr || null;
-	findMin = findMin || false;
-	if (array.length < 1) {
-		return -1;
-	}
-	
-	let obj = {
-		most : findMin ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER,
-		mostIndex : 0,
-		currentIndex : 0,
-		findMin : findMin,
-		attr : attr
-	}
-	let promises = [];
-
-	const parts = attr ? attr.split('.') : null;
-
-	log('listing array:');
-	for (let index = 0; index < array.length; index++) {
-		console.log(array[index]);
-		const value = parts ? (parts.length > 1 ? array[index][parts[0]][parts[1]] : array[index][parts[0]]) : array[index];
-		obj.currentIndex = index;
-		promises.push(compare(value, obj));
-	}
-
-	const result = await Promise.all(promises);
-	return Array.isArray(result) ? result[0] : result;
-
-	async function compare(value, obj) {
-		if (obj.findMin) {
-			if (value < obj.most) {
-				obj.most = value;
-				obj.mostIndex = obj.currentIndex;
-			}
-		} else {
-			if (value > obj.most) {
-				obj.most = value;
-				obj.mostIndex = obj.currentIndex;
-			}
-		}
-		return obj;
-	}
-}
-
 export function log(message, game) {
 	game = game || null;
     let stack = new Error().stack,
@@ -103,7 +57,6 @@ export function log(message, game) {
 
 export function getExtreme(array, attr, getMax) {
 	const parts = attr ? attr.split('.') : null;
-	let extremeIndex = false;
 
 	if (parts) {
 		if (parts.length > 1) {
@@ -125,7 +78,7 @@ export function getExtreme(array, attr, getMax) {
 		}
 	}
 
-	return extremeIndex;
+	return null;
 }
 
 /**

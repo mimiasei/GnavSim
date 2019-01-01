@@ -154,21 +154,6 @@ export default class Speaker {
 		this.say('', 'div', 'margin-top-' + n * 10);
 	}
 	
-	static async answerObj(arrayText, arrayValues) {
-		arrayValues = arrayValues || [];
-		let array = [];
-		for (let i = 0; i < arrayText.length; i++) {
-			if (typeof arrayValues[i] === 'undefined') {
-				arrayValues[i] = i;
-			}
-			array.push({
-				text: arrayText[i],
-				value: arrayValues[i]
-			});
-		}
-		return array;
-	}
-	
 	async ask(question, answers, callbackFn) {
 		//if answers === 0 : default yes/no answers
 		if (answers === 0) {
@@ -234,7 +219,8 @@ export default class Speaker {
 
 	updateStats(player) {
 		const index = this.getStatsIndex(player);
-		tools.log(`found stats index for ${player.name}: ${index}`);
+		// tools.log(`found stats index for ${player.name}: ${index}`);
+
 		if (index >= 0) {
 			this._tableData[index].score = player.score;
 			this._statsTable.updateData([{ id: index, score: player.score }]);
@@ -267,7 +253,6 @@ export default class Speaker {
 		this._statsTable.clearData();
 		this._statsTable.replaceData(this._tableData).then(() => {
 			this._statsTable.redraw();
-			tools.log("table updated!");
 		});
 	}
 
@@ -353,4 +338,19 @@ export default class Speaker {
 		this.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
 		this.say ('<'.repeat(text.length / 2) + '>'.repeat(text.length / 2));
 	}
+
+	// static async answerObj(arrayText, arrayValues) {
+	// 	arrayValues = arrayValues || [];
+	// 	let array = [];
+	// 	for (let i = 0; i < arrayText.length; i++) {
+	// 		if (typeof arrayValues[i] === 'undefined') {
+	// 			arrayValues[i] = i;
+	// 		}
+	// 		array.push({
+	// 			text: arrayText[i],
+	// 			value: arrayValues[i]
+	// 		});
+	// 	}
+	// 	return array;
+	// }
 }

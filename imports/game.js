@@ -94,19 +94,19 @@ export default class Game extends EventTarget {
 		switch (this.state) {
 			case (Game.STATE_START_TURN):
 				this.startTurn();
-				this.checkCards();
+				// this.checkCards();
 				this.state = Game.STATE_BEFORE_SWAP;
 				break;
 			case (Game.STATE_BEFORE_SWAP):
-				this.checkCards();
+				// this.checkCards();
 				this.currentPlayer.prepareSwap();
 				break;
 			case (Game.STATE_DECIDED_SWAP): //after callback from deciding YES for swapping
-				this.checkCards();
+				// this.checkCards();
 				this.currentPlayer.finalizeSwap(true);
 				break;
 			case (Game.STATE_SKIPPED_SWAP): //after callback from deciding NO for swapping
-				this.checkCards();
+				// this.checkCards();
 				this.currentPlayer.finalizeSwap(false);
 				break;
 			case (Game.STATE_AFTER_SWAP):
@@ -114,8 +114,8 @@ export default class Game extends EventTarget {
 				this.nextPlayer();
 				break;
 			case (Game.STATE_END_TURN):
+				// this.checkCards();
 				//show next turn button
-				this.checkCards();
 				this._speaker.hideNextTurnButton(true);
 				this._speaker.addSpace();
 				//Calculate scores and stats
@@ -249,7 +249,7 @@ export default class Game extends EventTarget {
 		}
 
 		//draw gui stuff
-		this._gui.circleGroup(this._players.length);
+		this._gui.circleGroup(this._players);
 		this._gui.update();
 
 		let playersPromise = tools.shuffle(this._players);
@@ -358,7 +358,7 @@ export default class Game extends EventTarget {
 	subractFromAllPlayers(cardHolder) {
 		this._speaker.say(`All players lose 1 score except ${cardHolder.name}.`);
 
-		for (let player of players) {
+		for (const player of this._players) {
 			if (player.pid !== cardHolder.pid) { //Subtract 1 score one from all players except the card holder
 				player.addToScore(-1);
 			}

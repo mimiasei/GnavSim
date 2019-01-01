@@ -214,7 +214,7 @@ export default class Player {
 				swap++;
 			}
 
-			const result = !(this._heldCard.value > swap);
+			let result = !(this._heldCard.value > swap);
 
 			//if nextPlayer has knocked, meaning he/she has the Fool
 			if (nextPlayer && nextPlayer.hasKnocked) {
