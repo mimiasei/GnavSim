@@ -6,6 +6,7 @@ import Player from './player.js';
 import Human from './human.js';
 import PlayerStack from './playerstack.js';
 import * as tools from './gnavtools.js';
+import Gui from './gui.js';
 
 export default class Game extends EventTarget {
 
@@ -33,10 +34,10 @@ export default class Game extends EventTarget {
 		this._speaker = null;
 		this._players = [];
 		this._dealerIndex = 0;
-		// this._currPlayerIndex = 0;
 		this._deck = null;
 		this._state = null;
 		this._playerStack = null;
+		this._gui = null;
 	}
 
 	//getters
@@ -51,6 +52,7 @@ export default class Game extends EventTarget {
 	get speaker() { return this._speaker }
 	get deck() { return this._deck }
 	get playerStack() { return this._playerStack }
+	get gui() { return this._gui }
 
 	//Special getters
 	get currentPlayer() { return this._playerStack.current() }
@@ -163,6 +165,9 @@ export default class Game extends EventTarget {
 		this._deck = new Deck();
 		await this._deck.init();
 
+		//create GUI
+		this._gui = new Gui(this);
+
 		//create events
 		this._event_startTurn = new CustomEvent('event_startTurn', {});
 
@@ -242,6 +247,10 @@ export default class Game extends EventTarget {
 			}
 			this._players.push(newPlayer);
 		}
+
+		//draw gui stuff
+		this._gui.circleGroup(this._players.length);
+		this._gui.update();
 
 		let playersPromise = tools.shuffle(this._players);
 		//wait for shuffle to finish
