@@ -110,7 +110,9 @@ export default class Player {
 					//cuckoo?
 					if (returnedCard.causeAllLosePointAndStopGame) {
 						this._game.subractFromAllPlayers(nextPlayer);
-						this._game.state = Game.STATE_END_TURN;
+
+						// this._game.state = Game.STATE_END_TURN;
+						this._game.startEvent('endTurn');
 					}
 
 				} else {
@@ -167,7 +169,8 @@ export default class Player {
 			this._game.speaker.say(`${this._name} doesn't want to swap.`);
 		}
 
-		this._game.state = Game.STATE_AFTER_SWAP;
+		// this._game.state = Game.STATE_AFTER_SWAP;
+		this._game.startEvent('afterSwap');
 	}
 
 	addToScore(value) {
@@ -226,7 +229,9 @@ export default class Player {
 				}
 			}
 
-			this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
+			this._game.state = result ? //Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP; 
+				this._game.startEvent('decidedSwap') : 
+				this._game.startEvent('skippedSwap');
 
 		} else {
 			tools.log(`ERROR: ${this._name} doesn't have valid card!`, this._game);

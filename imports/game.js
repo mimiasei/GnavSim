@@ -95,7 +95,8 @@ export default class Game extends EventTarget {
 			case (Game.STATE_START_TURN):
 				this.startTurn();
 				// this.checkCards();
-				this.state = Game.STATE_BEFORE_SWAP;
+				// this.state = Game.STATE_BEFORE_SWAP;
+				this.startEvent('beforeSwap');	
 				break;
 			case (Game.STATE_BEFORE_SWAP):
 				// this.checkCards();
@@ -141,19 +142,22 @@ export default class Game extends EventTarget {
 		
 		//function for when next turn button is clicked
 		const nextTurnCallback = (result) => {			
-			this.dispatchEvent(this._event_startTurn);	
+			this.startEvent('startTurn');	
 			this.speaker.hideNextTurnButton();
 		};
 		
 		//function for when knock button is clicked
 		let knockCallback = (result) => {
-			const event = new CustomEvent('event_knock', {
-				detail: {
-					player: this.currentPlayer
-				}
-			});
+			// const event = new CustomEvent('event_knock', {
+			// 	detail: {
+			// 		player: this.currentPlayer
+			// 	},
+			// 	bubbles: true,
+			// });
 
-			this.dispatchEvent(event);
+			// this.dispatchEvent(event);
+
+			this.startEvent('knock');
 		};
 		
 		//create new speaker
@@ -169,15 +173,12 @@ export default class Game extends EventTarget {
 		this._gui = new Gui(this);
 
 		//create events
-		this._event_startTurn = new CustomEvent('event_startTurn', {});
-
-		this._event_beforeSwap = new CustomEvent('event_beforeSwap', {});
-
-		this._event_decidedSwap = new CustomEvent('event_decidedSwap', {});
-
-		this._event_afterSwap = new CustomEvent('event_afterSwap', {});
-
-		this._event_endTurn = new CustomEvent('event_endTurn', {});
+		// this._event_startTurn = new CustomEvent('event_startTurn', {bubbles: true}, { detail: { player: null, }, });
+		// this._event_beforeSwap = new CustomEvent('event_beforeSwap', {bubbles: true}, { detail: { player: null, }, });
+		// this._event_decidedSwap = new CustomEvent('event_decidedSwap', {bubbles: true}, { detail: { player: null, }, });
+		// this._event_skippedSwap = new CustomEvent('event_skippedSwap', {bubbles: true}, { detail: { player: null, }, });
+		// this._event_afterSwap = new CustomEvent('event_afterSwap', {bubbles: true}, { detail: { player: null, }, });
+		// this._event_endTurn = new CustomEvent('event_endTurn', {bubbles: true}, { detail: { player: null, }, });
 
 		//create event listeners
 		this.addEventListener(
@@ -211,6 +212,14 @@ export default class Game extends EventTarget {
 				this.state = Game.STATE_DECIDED_SWAP;
 			}
 		);
+
+		this.addEventListener(
+			'event_skippedSwap', 
+			(event) => {
+				console.log("event_skippedSwap called by player: ", event.detail.player);
+				this.state = Game.STATE_SKIPPED_SWAP;
+			}
+		);
 		
 		this.addEventListener(
 			'event_afterSwap', 
@@ -229,6 +238,15 @@ export default class Game extends EventTarget {
 		);
 	}
 
+	startEvent(event) {	
+		tools.log(event);
+		const stack = new Error().stack;
+		const caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
+		
+		let newEvent = new CustomEvent(`event_${event}`, { detail: { player: `${this.currentPlayer.name}:${caller}`, }, bubbles: true });
+		this.dispatchEvent(newEvent);
+	}
+
 	async initGame() {
 		tools.log('starting initgame...');
 		//show knock button
@@ -242,9 +260,9 @@ export default class Game extends EventTarget {
 		for (const name of tools.PLAYERS) {
 			let newPlayer = new Player(name, this);
 			//Test, make Johannes a player that never swaps with anyone nor the deck
-			if (name === 'Johannes') {
-				newPlayer.neverSwapsWithDeck = true;
-			}
+			// if (name === 'Johannes') {
+			// 	newPlayer.neverSwapsWithDeck = true;
+			// }
 			this._players.push(newPlayer);
 		}
 
@@ -271,24 +289,25 @@ export default class Game extends EventTarget {
 
 		//set next dealer
 		this._playerStack.nextDealer();
-		this._speaker.say(`Current dealer is: ${this._players[0].name}`);
-
-		this.state = Game.STATE_START_TURN;
-
+		
+		// this.state = Game.STATE_START_TURN;
+		this.startEvent('startTurn');
+		
 		return true;
 	}
-
+	
 	startTurn() {
 		//clear main output elementæ
 		this._speaker.clear();
-
+		
 		//refresh table of player stats
 		this._speaker.refreshStatsTable(this._players);
 		this._speaker.updateCurrentPlayer();
-
+		
 		//print round
 		this._speaker.printRound();
 		this._speaker.addSpace();
+		this._speaker.say(`Current dealer is: ${this._playerStack.dealer().name}`);
 	
 		//Draw cards for each player
 		this.dealOutCards();
@@ -311,13 +330,15 @@ export default class Game extends EventTarget {
 		const oldPlayer = this.currentPlayer.name;
 
 		if (!this._playerStack.next()) {
-			this.state = Game.STATE_END_TURN;
+			// this.state = Game.STATE_END_TURN;
+			this.startEvent('endTurn');
 		} else {
 			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`, this);
 			this._speaker.refreshStatsTable();
 			this._speaker.updateCurrentPlayer();
 			
-			this.state = Game.STATE_BEFORE_SWAP;
+			// this.state = Game.STATE_BEFORE_SWAP;
+			this.startEvent('beforeSwap');
 		}
 	}
 

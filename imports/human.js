@@ -53,7 +53,10 @@ export default class Human extends Player {
 			let callbackFn = (result) => {
 				tools.log("human ask result: " + result ? 'yes' : 'no');
 				this._game.speaker.hideNextTurnButton(true);
-				this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP;
+
+				this._game.state = result ? //Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP; 
+				this._game.startEvent('decidedSwap') : 
+				this._game.startEvent('skippedSwap');
 			};
 
 			this._game.speaker.ask(text, 0, callbackFn);
