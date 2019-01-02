@@ -172,14 +172,6 @@ export default class Game extends EventTarget {
 		//create GUI
 		this._gui = new Gui(this);
 
-		//create events
-		// this._event_startTurn = new CustomEvent('event_startTurn', {bubbles: true}, { detail: { player: null, }, });
-		// this._event_beforeSwap = new CustomEvent('event_beforeSwap', {bubbles: true}, { detail: { player: null, }, });
-		// this._event_decidedSwap = new CustomEvent('event_decidedSwap', {bubbles: true}, { detail: { player: null, }, });
-		// this._event_skippedSwap = new CustomEvent('event_skippedSwap', {bubbles: true}, { detail: { player: null, }, });
-		// this._event_afterSwap = new CustomEvent('event_afterSwap', {bubbles: true}, { detail: { player: null, }, });
-		// this._event_endTurn = new CustomEvent('event_endTurn', {bubbles: true}, { detail: { player: null, }, });
-
 		//create event listeners
 		this.addEventListener(
 			'event_knock', 
@@ -238,8 +230,13 @@ export default class Game extends EventTarget {
 		);
 	}
 
-	startEvent(event) {	
+	/**
+	 * event names: 
+	 * startTurn, beforeSwap, decidedSwap, skippedSwap, afterSwap, endTurn
+	 */
+	startEvent(event) {
 		tools.log(event);
+
 		const stack = new Error().stack;
 		const caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
 		
