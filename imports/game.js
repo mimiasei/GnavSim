@@ -169,9 +169,6 @@ export default class Game extends EventTarget {
 		this._deck = new Deck();
 		await this._deck.init();
 
-		//create GUI
-		this._gui = new Gui(this);
-
 		//create event listeners
 		this.addEventListener(
 			'event_knock', 
@@ -263,8 +260,11 @@ export default class Game extends EventTarget {
 			this._players.push(newPlayer);
 		}
 
+		//create GUI
+		this._gui = new Gui(this);
+
 		//draw gui stuff
-		this._gui.circleGroup(this._players);
+		this._gui.drawGroup();
 		this._gui.update();
 
 		let playersPromise = tools.shuffle(this._players);
@@ -299,7 +299,7 @@ export default class Game extends EventTarget {
 		
 		//refresh table of player stats
 		this._speaker.refreshStatsTable(this._players);
-		this._speaker.updateCurrentPlayer();
+		// this._speaker.updateCurrentPlayer();
 		
 		//print round
 		this._speaker.printRound();
@@ -333,6 +333,8 @@ export default class Game extends EventTarget {
 			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`, this);
 			this._speaker.refreshStatsTable();
 			this._speaker.updateCurrentPlayer();
+			this._gui.selectPlayer(this.currentPlayer.name);
+			this._gui.update();
 			
 			// this.state = Game.STATE_BEFORE_SWAP;
 			this.startEvent('beforeSwap');
