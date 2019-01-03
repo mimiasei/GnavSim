@@ -264,8 +264,9 @@ export default class Game extends EventTarget {
 		this._gui = new Gui(this);
 
 		//draw gui stuff
-		this._gui.drawGroup();
 		this._gui.update();
+		this._gui.drawGroup();
+		// this._gui.rotateGroup();
 
 		let playersPromise = tools.shuffle(this._players);
 		//wait for shuffle to finish
