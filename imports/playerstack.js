@@ -3,13 +3,15 @@
 export default class PlayerStack {
 
 	constructor(players) {
-        this._players = players;
+        this._players = players.slice();
         this._size = players.length;
         this._pos = 0;
         this._posAdder = 0;
 
         this._players[0].isCurrent = true;
     }
+
+    get players() { return this._players }
 
     next() {
         if (this.hasNext()) {

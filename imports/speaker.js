@@ -19,6 +19,7 @@ export default class Speaker {
 		this._tableData = [];
 		this._statsTableBody = $("#stats_table tbody");
 		this._nextTurnButton = $("#btnNextTurn");
+		this._nextPlayerButton = $("#btnNextPlayer");
 		this._knockButton = $("#btnKnock");
 		this._currentPlayerText = $("#currentPlayer");
 		this._currentDealerText = $("#currentDealer");
@@ -40,6 +41,7 @@ export default class Speaker {
 	get tableData() { return this._tableData }
 	//buttons
 	get nextTurnButton() { return this._nextTurnButton }
+	get nextPlayerButton() { return this._nextPlayerButton }
 	get knockButton() { return this._knockButton }
 
 	set output(value) { this._output = $.extend(true, {}, value) }
@@ -54,9 +56,10 @@ export default class Speaker {
 		return cloned;
 	}
 
-	initialize(nextTurnCallback, knockCallback) {
-		this._nextTurnButton.click(() => { nextTurnCallback(true); });
-		this._knockButton.click(() => { knockCallback(true); });
+	initialize(callbacks) {
+		this._nextTurnButton.click(() => { callbacks.nextTurnCallback(true); });
+		this._nextPlayerButton.click(() => { callbacks.nextPlayerCallback(true); });
+		this._knockButton.click(() => { callbacks.knockCallback(true); });
 
 		//init stats table
 		this._statsTable = new Tabulator('#stats_table', {
@@ -94,22 +97,20 @@ export default class Speaker {
 		this._currentPlayerText.text(this._parent.playerStack.current().name);
 		this._currentDealerText.text(this._parent.playerStack.dealer().name);
 	}
-	
-	hideNextTurnButton(show) {
-		show = show || false;
-		if (show) {
-			this._nextTurnButton.show();
-		} else {
-			this._nextTurnButton.hide();
-		}
-	}
 
-	hideKnockButton(show) {
-		show = show || false;
-		if (show) {
-			this._knockButton.show();
-		} else {
-			this._knockButton.hide();
+	hideButton(type, show) {
+		switch(type) {
+			case 'turn':
+			case 0: show ? this._nextTurnButton.show() : this._nextTurnButton.hide();
+					break;
+
+			case 'player':
+			case 1: show ? this._nextPlayerButton.show() : this._nextPlayerButton.hide();
+					break;
+
+			case 'knock':
+			case 2: show ? this._knockButton.show() :  this._knockButton.hide();
+					break;
 		}
 	}
 	
@@ -169,7 +170,7 @@ export default class Speaker {
 			];
 		}
 		
-		this.hideNextTurnButton();
+		this.hideButton('turn');
 
 		this.openModal(question, answers, callbackFn);
 	}

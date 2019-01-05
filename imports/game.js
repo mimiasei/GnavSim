@@ -112,12 +112,20 @@ export default class Game extends EventTarget {
 				break;
 			case (Game.STATE_AFTER_SWAP):
 				this.checkCards();
-				this.nextPlayer();
+				// this.nextPlayer();
+				this.startEvent('endPlayer');
+				break;
+			case (Game.STATE_END_PLAYER):
+				// this.checkCards();
+				//show next player button
+				this._speaker.hideButton('player', true);
+				this._speaker.addSpace();
+				tools.log('player turn ended successfully.', this);
 				break;
 			case (Game.STATE_END_TURN):
 				// this.checkCards();
 				//show next turn button
-				this._speaker.hideNextTurnButton(true);
+				this._speaker.hideButton('turn', true);
 				this._speaker.addSpace();
 				//Calculate scores and stats
 				this._speaker.sumUpGameTurn();
@@ -143,8 +151,19 @@ export default class Game extends EventTarget {
 		//function for when next turn button is clicked
 		const nextTurnCallback = (result) => {			
 			this.startEvent('startTurn');	
-			this.speaker.hideNextTurnButton();
+			this._speaker.hideButton('turn');
 		};
+
+		//function for when next player button is clicked
+		const nextPlayerCallback = (result) => {			
+			this._speaker.hideButton('player');
+			
+			if (!this._playerStack.next()) {
+				this.startEvent('endTurn');
+			} else {
+				this.nextPlayer();
+			}
+		}
 		
 		//function for when knock button is clicked
 		let knockCallback = (result) => {
@@ -163,7 +182,12 @@ export default class Game extends EventTarget {
 		//create new speaker
 		this._speaker = new Speaker(this);
 		//initialize, assign callback functions to speaker
-		this._speaker.initialize(nextTurnCallback, knockCallback);
+		const callbacks = {
+			'nextTurnCallback': nextTurnCallback,
+			'nextPlayerCallback': nextPlayerCallback,
+			'knockCallback': knockCallback,
+		};
+		this._speaker.initialize(callbacks);
 
 		//create and init new deck
 		this._deck = new Deck();
@@ -174,7 +198,6 @@ export default class Game extends EventTarget {
 			'event_knock', 
 			(event) => {
 				console.log("event_knock called by player: ", event.detail.player);
-
 				this.tableKnocked();
 			}
 		);
@@ -182,6 +205,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_startTurn', 
 			(event) => {
+				console.log("event_startTurn called by player: ", event.detail.player);
 				this.state = Game.STATE_START_TURN;
 			}
 		);
@@ -219,6 +243,14 @@ export default class Game extends EventTarget {
 		);
 
 		this.addEventListener(
+			'event_endPlayer', 
+			(event) => {
+				console.log("event_endPlayer called by player: ", event.detail.player);
+				this.state = Game.STATE_END_PLAYER;
+			}
+		);
+
+		this.addEventListener(
 			'event_endTurn', 
 			(event) => {
 				console.log("event_endTurn called by player: ", event.detail.player);
@@ -229,7 +261,7 @@ export default class Game extends EventTarget {
 
 	/**
 	 * event names: 
-	 * startTurn, beforeSwap, decidedSwap, skippedSwap, afterSwap, endTurn
+	 * startTurn, beforeSwap, decidedSwap, skippedSwap, afterSwap, endPlayer, endTurn
 	 */
 	startEvent(event) {
 		tools.log(event);
@@ -244,7 +276,7 @@ export default class Game extends EventTarget {
 	async initGame() {
 		tools.log('starting initgame...');
 		//show knock button
-		this._speaker.hideKnockButton(true);
+		this._speaker.hideButton('knock', true);
 
 		if (this._isHuman && this._speaker.humanName) {
 			let human = new Human(this._speaker.humanName, this);
@@ -260,14 +292,6 @@ export default class Game extends EventTarget {
 			this._players.push(newPlayer);
 		}
 
-		//create GUI
-		this._gui = new Gui(this);
-
-		//draw gui stuff
-		this._gui.update();
-		this._gui.drawGroup();
-		// this._gui.rotateGroup();
-
 		let playersPromise = tools.shuffle(this._players);
 		//wait for shuffle to finish
 		this._players = await playersPromise;
@@ -275,6 +299,13 @@ export default class Game extends EventTarget {
 		this._playerStack = new PlayerStack(this._players);
 		//redraw stats table
 		this._speaker.refreshStatsTable();
+
+		//create GUI
+		this._gui = new Gui(this);
+
+		//draw gui stuff
+		this._gui.drawGroup();
+		this._gui.update();
 		
 		//set first turn
 		this.nextTurn();
@@ -293,14 +324,33 @@ export default class Game extends EventTarget {
 		
 		return true;
 	}
+
+	nextPlayer() {
+		const oldPlayer = this.currentPlayer.name;
+
+		// if (!this._playerStack.next()) {
+		// 	// this.state = Game.STATE_END_TURN;
+		// 	this.startEvent('endTurn');
+		// } else {
+			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`, this);
+			this._speaker.refreshStatsTable();
+			this._speaker.updateCurrentPlayer();
+			this._gui.selectPlayer(this.currentPlayer.name);
+			this._gui.displayCard();
+			// this._gui.play();
+			this._gui.update();
+			
+			// this.state = Game.STATE_BEFORE_SWAP;
+			this.startEvent('beforeSwap');
+		// }
+	}
 	
 	startTurn() {
-		//clear main output elementæ
+		//clear main output elements
 		this._speaker.clear();
 		
 		//refresh table of player stats
-		this._speaker.refreshStatsTable(this._players);
-		// this._speaker.updateCurrentPlayer();
+		this._speaker.refreshStatsTable();
 		
 		//print round
 		this._speaker.printRound();
@@ -321,24 +371,6 @@ export default class Game extends EventTarget {
 					player.addToScore(1);
 				}
 			}
-		}
-	}
-
-	nextPlayer() {
-		const oldPlayer = this.currentPlayer.name;
-
-		if (!this._playerStack.next()) {
-			// this.state = Game.STATE_END_TURN;
-			this.startEvent('endTurn');
-		} else {
-			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`, this);
-			this._speaker.refreshStatsTable();
-			this._speaker.updateCurrentPlayer();
-			this._gui.selectPlayer(this.currentPlayer.name);
-			this._gui.update();
-			
-			// this.state = Game.STATE_BEFORE_SWAP;
-			this.startEvent('beforeSwap');
 		}
 	}
 

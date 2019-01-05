@@ -42,6 +42,7 @@ function hideAll() {
 	$('#stats_table').hide();
 	$('#settingsForm').hide();
 	$('#btnNextTurn').hide();
+	$('#btnNextPlayer').hide();
 	$('#btnKnock').hide();
 	$('#btnMenu').hide();
 }
