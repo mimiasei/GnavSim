@@ -267,12 +267,6 @@ export default class Speaker {
 		});
 	}
 
-	async sayFromStats(what, type) {
-		type = type || 'div';
-		let $elem = this.createElem(what, type);
-		this._stats.append($elem);
-	}
-
 	makeid(text, type) {
 		text = text || 'elem';
 		type = type || 'div';
@@ -339,19 +333,4 @@ export default class Speaker {
 		this.say ('<<' +  ' '.repeat(text.length - 4) + '>>');
 		this.say ('<'.repeat(text.length / 2) + '>'.repeat(text.length / 2));
 	}
-
-	// static async answerObj(arrayText, arrayValues) {
-	// 	arrayValues = arrayValues || [];
-	// 	let array = [];
-	// 	for (let i = 0; i < arrayText.length; i++) {
-	// 		if (typeof arrayValues[i] === 'undefined') {
-	// 			arrayValues[i] = i;
-	// 		}
-	// 		array.push({
-	// 			text: arrayText[i],
-	// 			value: arrayValues[i]
-	// 		});
-	// 	}
-	// 	return array;
-	// }
 }

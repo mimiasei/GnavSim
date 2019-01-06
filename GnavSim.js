@@ -19,6 +19,7 @@ $(document).ready(function() {
 	Game.STATE_DECIDED_SWAP = 'sDecidedSwap';
 	Game.STATE_SKIPPED_SWAP = 'sSkippedSwap';
 	Game.STATE_AFTER_SWAP = 'sAfterSwap';
+	Game.STATE_END_PLAYER = 'sEndPlayer';
 	Game.STATE_END_TURN = 'sEndTurn';
 
 	//hide all game UI

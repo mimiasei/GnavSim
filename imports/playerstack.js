@@ -6,6 +6,7 @@ export default class PlayerStack {
         this._players = players.slice();
         this._size = players.length;
         this._pos = 0;
+        this._posDealer = 0;
         this._posAdder = 0;
 
         this._players[0].isCurrent = true;
@@ -50,13 +51,26 @@ export default class PlayerStack {
     }
 
     nextDealer() {
-        const oldDealer = this._players.pop(); //pop out current dealer player
-        this._players.unshift(oldDealer); //insert that player at start of array
+        // const oldDealer = this._players.pop(); //pop out current dealer player
+        // this._players.unshift(oldDealer); //insert that player at start of array
+
+        if (this.hasNext(this._posDealer)) {
+            this._posDealer++;
+            //set current player to player after dealer
+            if (this.hasNext(this._posDealer)) {
+                this._pos = this._posDealer + 1;
+            } else {
+                this._pos = 0;
+            }
+        } else {
+            this._posDealer = 0;
+        }
 
         console.log(`Dealer is now: ${this.dealer().name}`);
     }
 
     dealer() {
-        return this._players[this._size - 1];
+        // return this._players[this._size - 1];
+        return this._players[this._posDealer];
     }
 }

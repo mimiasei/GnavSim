@@ -158,7 +158,7 @@ export default class Game extends EventTarget {
 		const nextPlayerCallback = (result) => {			
 			this._speaker.hideButton('player');
 			
-			if (!this._playerStack.next()) {
+			if (!this._playerStack.hasNext()) {
 				this.startEvent('endTurn');
 			} else {
 				this.nextPlayer();
@@ -305,6 +305,10 @@ export default class Game extends EventTarget {
 
 		//draw gui stuff
 		this._gui.drawGroup();
+		// this.nextPlayer(true);
+		this._gui.selectPlayer(this.currentPlayer.name);
+		this._gui.displayCard();
+		// this._gui.play();
 		this._gui.update();
 		
 		//set first turn
@@ -325,24 +329,28 @@ export default class Game extends EventTarget {
 		return true;
 	}
 
-	nextPlayer() {
+	nextPlayer(skipNext) {
+		skipNext = skipNext || false;
+
 		const oldPlayer = this.currentPlayer.name;
 
-		// if (!this._playerStack.next()) {
-		// 	// this.state = Game.STATE_END_TURN;
-		// 	this.startEvent('endTurn');
-		// } else {
-			tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`, this);
-			this._speaker.refreshStatsTable();
-			this._speaker.updateCurrentPlayer();
-			this._gui.selectPlayer(this.currentPlayer.name);
-			this._gui.displayCard();
-			// this._gui.play();
-			this._gui.update();
-			
-			// this.state = Game.STATE_BEFORE_SWAP;
-			this.startEvent('beforeSwap');
-		// }
+		tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`, this);
+
+		//advance player stack one player 
+		if (!skipNext) {
+			this._playerStack.next();
+		}
+
+		this._speaker.refreshStatsTable();
+		this._speaker.updateCurrentPlayer();
+		this._gui.selectPlayer(this.currentPlayer.name);
+		this._gui.displayCard();
+		// this._gui.play();
+		this._gui.update();
+		
+		// this.state = Game.STATE_BEFORE_SWAP;
+		console.log('starting event beforeswap @nextPlayer()...');
+		this.startEvent('beforeSwap');
 	}
 	
 	startTurn() {
