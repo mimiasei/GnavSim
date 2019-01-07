@@ -26,7 +26,6 @@ export function highlight(strings, ...values) {
 }
 
 export function range(start, end) {
-	log(`start: ${start}, end: ${end}`);
 	let array = [];
 
 	for (let i = start; i <= end; i++) {

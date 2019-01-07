@@ -229,9 +229,8 @@ export default class Player {
 				}
 			}
 
-			this._game.state = result ? //Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP; 
-				this._game.startEvent('decidedSwap') : 
-				this._game.startEvent('skippedSwap');
+			//this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP; 
+			result ? this._game.startEvent('decidedSwap') : this._game.startEvent('skippedSwap');
 
 		} else {
 			tools.log(`ERROR: ${this._name} doesn't have valid card!`, this._game);

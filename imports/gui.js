@@ -1,7 +1,7 @@
 'use strict';
 
 // import Game from './game.js';
-// import * as tools from './gnavtools.js';
+import * as tools from './gnavtools.js';
 
 export default class Gui {
 
@@ -56,6 +56,7 @@ export default class Gui {
     }
 
     displayCard() {
+        tools.log('+++++ calling displayCard()!');
         let heldCard = this._game.currentPlayer.heldCard;
         if (heldCard) {
             heldCard = heldCard.name.replace('(', '').replace(')', '');
@@ -72,6 +73,8 @@ export default class Gui {
         };
 
         this.text(this._posX, this._posY, heldCard, styles);
+
+        this.update();
     }
 
     circle(x, y, size, blurStart) {
@@ -153,6 +156,8 @@ export default class Gui {
     selectPlayer(name) {
         const i = this._group.findIndex((o) => { return o.name == name; });
         if (i > -1) {
+            this.drawGroup(i);
+
             const styles = {
                 fill: '#ffffff',
                 weight: 'bold',
@@ -160,10 +165,14 @@ export default class Gui {
                 opacity: 1.0,
             };
 
-            //reset all other players
-            this.drawGroup(i);
+            if (this._game.currentDealer.pid == this._group[i].pid) {
+                styles.fill = '#ffff00';
+            }
+
             this.circle(this._group[i].x, this._group[i].y, this._group[i].size * 1.5, 0.97);
             this.text(this._group[i].x, this._group[i].y, this._group[i].name, styles);
+        } else {
+            tools.log(`----- couldn't find player: ${name}`)
         }
     }
 

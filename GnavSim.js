@@ -27,7 +27,18 @@ $(document).ready(function() {
 
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
-		settingsPart();
+
+		//Create default game object
+		const game = new Game( 
+			$('#form_winType').val(), 
+			$('#form_winValue').val(), 
+			!$('#form_computerOnly').is(':checked')
+		);
+
+		//set up speaker and state event listeners
+		game.init();
+
+		settingsPart(game);
 	});
 
 	var active_chat = false;
@@ -48,7 +59,7 @@ function hideAll() {
 	$('#btnMenu').hide();
 }
 
-function settingsPart() {
+function settingsPart(game) {
 	$('#chat_section').hide();
 	$('#settingsForm').show();
 
@@ -85,26 +96,16 @@ function settingsPart() {
 
 	$('#btn_playGame').click(async () => {
 		$('#settingsForm').hide();
-		
-		//Create default game object
-		const game = new Game( 
-			$('#form_winType').val(), 
-			$('#form_winValue').val(), 
-			!$('#form_computerOnly').is(':checked')
-		);
-
-		//set up speaker and state event listeners
-		await game.init();
 
 		startGame(game);
 	});
 }
 
-async function startGame(game) {
+function startGame(game) {
 	if (game.speaker.multiplayer) {
 		//todo: implement multiplayer code
 	} else {
-		await game.initGame();
+		game.initGame();
 	}
 }
 

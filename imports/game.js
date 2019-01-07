@@ -91,12 +91,13 @@ export default class Game extends EventTarget {
 	 * 5. end of turn, go next turn (back to 1.)
 	 */
 	stateChanged() {		
-		switch (this.state) {
+		switch (this._state) {
 			case (Game.STATE_START_TURN):
-				this.startTurn();
-				// this.checkCards();
-				// this.state = Game.STATE_BEFORE_SWAP;
-				this.startEvent('beforeSwap');	
+				this.startTurn().then(() => {
+					// this.checkCards();
+					// this.state = Game.STATE_BEFORE_SWAP;
+					this.startEvent('beforeSwap');	
+				});
 				break;
 			case (Game.STATE_BEFORE_SWAP):
 				// this.checkCards();
@@ -131,6 +132,9 @@ export default class Game extends EventTarget {
 				this._speaker.sumUpGameTurn();
 				tools.log('turn ended successfully.', this);
 				break;
+			default:
+				tools.log('state to change to not recognized: ' + this._state);
+				break;
 		}
 
 		return true;
@@ -146,8 +150,7 @@ export default class Game extends EventTarget {
 		});
 	}
 
-	async init() {
-		
+	init() {
 		//function for when next turn button is clicked
 		const nextTurnCallback = (result) => {			
 			this.startEvent('startTurn');	
@@ -158,7 +161,7 @@ export default class Game extends EventTarget {
 		const nextPlayerCallback = (result) => {			
 			this._speaker.hideButton('player');
 			
-			if (!this._playerStack.hasNext()) {
+			if (!this._playerStack.hasNextPlayer()) {
 				this.startEvent('endTurn');
 			} else {
 				this.nextPlayer();
@@ -191,72 +194,11 @@ export default class Game extends EventTarget {
 
 		//create and init new deck
 		this._deck = new Deck();
-		await this._deck.init();
+		this._deck.init().then(() => {
+			tools.log('deck has finished init.');
+		});
 
-		//create event listeners
-		this.addEventListener(
-			'event_knock', 
-			(event) => {
-				console.log("event_knock called by player: ", event.detail.player);
-				this.tableKnocked();
-			}
-		);
-
-		this.addEventListener(
-			'event_startTurn', 
-			(event) => {
-				console.log("event_startTurn called by player: ", event.detail.player);
-				this.state = Game.STATE_START_TURN;
-			}
-		);
-
-		this.addEventListener(
-			'event_beforeSwap', 
-			(event) => {
-				console.log("event_beforeSwap called by player: ", event.detail.player);
-				this.state = Game.STATE_BEFORE_SWAP;
-			}
-		);
-
-		this.addEventListener(
-			'event_decidedSwap', 
-			(event) => {
-				console.log("event_decidedSwap called by player: ", event.detail.player);
-				this.state = Game.STATE_DECIDED_SWAP;
-			}
-		);
-
-		this.addEventListener(
-			'event_skippedSwap', 
-			(event) => {
-				console.log("event_skippedSwap called by player: ", event.detail.player);
-				this.state = Game.STATE_SKIPPED_SWAP;
-			}
-		);
-		
-		this.addEventListener(
-			'event_afterSwap', 
-			(event) => {
-				console.log("event_afterSwap called by player: ", event.detail.player);
-				this.state = Game.STATE_AFTER_SWAP;
-			}
-		);
-
-		this.addEventListener(
-			'event_endPlayer', 
-			(event) => {
-				console.log("event_endPlayer called by player: ", event.detail.player);
-				this.state = Game.STATE_END_PLAYER;
-			}
-		);
-
-		this.addEventListener(
-			'event_endTurn', 
-			(event) => {
-				console.log("event_endTurn called by player: ", event.detail.player);
-				this.state = Game.STATE_END_TURN;
-			}
-		);
+		this.createEventListeners();
 	}
 
 	/**
@@ -264,8 +206,6 @@ export default class Game extends EventTarget {
 	 * startTurn, beforeSwap, decidedSwap, skippedSwap, afterSwap, endPlayer, endTurn
 	 */
 	startEvent(event) {
-		tools.log(event);
-
 		const stack = new Error().stack;
 		const caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
 		
@@ -275,6 +215,10 @@ export default class Game extends EventTarget {
 
 	async initGame() {
 		tools.log('starting initgame...');
+
+		//show stats table
+		this._speaker.hideStatsTable(true);
+
 		//show knock button
 		this._speaker.hideButton('knock', true);
 
@@ -295,6 +239,7 @@ export default class Game extends EventTarget {
 		let playersPromise = tools.shuffle(this._players);
 		//wait for shuffle to finish
 		this._players = await playersPromise;
+
 		//create player stack for handling players in game turn.
 		this._playerStack = new PlayerStack(this._players);
 		//redraw stats table
@@ -307,7 +252,6 @@ export default class Game extends EventTarget {
 		this._gui.drawGroup();
 		// this.nextPlayer(true);
 		this._gui.selectPlayer(this.currentPlayer.name);
-		this._gui.displayCard();
 		// this._gui.play();
 		this._gui.update();
 		
@@ -319,9 +263,14 @@ export default class Game extends EventTarget {
 
 	nextTurn() {
 		this._turn++;
-
+		
 		//set next dealer
+		tools.log('calling nextDealer()...');
 		this._playerStack.nextDealer();
+		this._playerStack.setFirst();
+		//print current player in bold white 
+		this._gui.selectPlayer(this.currentPlayer.name);
+		this._gui.update();
 		
 		// this.state = Game.STATE_START_TURN;
 		this.startEvent('startTurn');
@@ -349,11 +298,11 @@ export default class Game extends EventTarget {
 		this._gui.update();
 		
 		// this.state = Game.STATE_BEFORE_SWAP;
-		console.log('starting event beforeswap @nextPlayer()...');
+		console.log('**** starting event beforeswap @nextPlayer()...');
 		this.startEvent('beforeSwap');
 	}
 	
-	startTurn() {
+	async startTurn() {
 		//clear main output elements
 		this._speaker.clear();
 		
@@ -363,13 +312,21 @@ export default class Game extends EventTarget {
 		//print round
 		this._speaker.printRound();
 		this._speaker.addSpace();
-		this._speaker.say(`Current dealer is: ${this._playerStack.dealer().name}`);
+		tools.log(`current player: ${this.currentPlayer.name}.`);
+		tools.log(`current dealer: ${this.currentDealer.name}.`);
+		tools.log(`current playerstack dealer: ${this._playerStack.dealer().name}.`);
+		this._speaker.say(`Current dealer is: ${this.currentDealer.name}`);
+		this._speaker.say(`Current Player is: ${this.currentPlayer.name}`);
 	
 		//Draw cards for each player
-		this.dealOutCards();
+		tools.log('CAAAARDS: dealing out cards...');
+		this.dealOutCards().then(() => {
+			tools.log('CAAAARDS: done with dealing out cards.');
+			this._gui.displayCard();
+		});
 	}
 
-	dealOutCards() {
+	async dealOutCards() {
 		for (const player of this._players) {
 			player.drawFromDeck(this._deck);
 
@@ -434,5 +391,71 @@ export default class Game extends EventTarget {
 		} else {
 			this._speaker.say(`${this.currentPlayer.name} knocked on the table for no apparent reason.`);
 		}
+	}
+
+	createEventListeners() {
+		this.addEventListener(
+			'event_knock', 
+			(event) => {
+				console.log("event_knock called by player: ", event.detail.player);
+				this.tableKnocked();
+			}
+		);
+
+		this.addEventListener(
+			'event_startTurn', 
+			(event) => {
+				console.log("event_startTurn called by player: ", event.detail.player);
+				this.state = Game.STATE_START_TURN;
+			}
+		);
+
+		this.addEventListener(
+			'event_beforeSwap', 
+			(event) => {
+				console.log("event_beforeSwap called by player: ", event.detail.player);
+				this.state = Game.STATE_BEFORE_SWAP;
+			}
+		);
+
+		this.addEventListener(
+			'event_decidedSwap', 
+			(event) => {
+				console.log("event_decidedSwap called by player: ", event.detail.player);
+				this.state = Game.STATE_DECIDED_SWAP;
+			}
+		);
+
+		this.addEventListener(
+			'event_skippedSwap', 
+			(event) => {
+				console.log("event_skippedSwap called by player: ", event.detail.player);
+				this.state = Game.STATE_SKIPPED_SWAP;
+			}
+		);
+		
+		this.addEventListener(
+			'event_afterSwap', 
+			(event) => {
+				console.log("event_afterSwap called by player: ", event.detail.player);
+				this.state = Game.STATE_AFTER_SWAP;
+			}
+		);
+
+		this.addEventListener(
+			'event_endPlayer', 
+			(event) => {
+				console.log("event_endPlayer called by player: ", event.detail.player);
+				this.state = Game.STATE_END_PLAYER;
+			}
+		);
+
+		this.addEventListener(
+			'event_endTurn', 
+			(event) => {
+				console.log("event_endTurn called by player: ", event.detail.player);
+				this.state = Game.STATE_END_TURN;
+			}
+		);
 	}
 }

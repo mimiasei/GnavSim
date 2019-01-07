@@ -1,5 +1,7 @@
 'use strict';
 
+import * as tools from './gnavtools.js';
+
 export default class PlayerStack {
 
 	constructor(players) {
@@ -13,6 +15,17 @@ export default class PlayerStack {
     }
 
     get players() { return this._players }
+
+    setFirst() {
+        //set first player to player after dealer
+        if (this.hasNext(this._posDealer)) {
+            this._pos = this._posDealer + 1;
+        } else {
+            this._pos = 0;
+        }
+
+        tools.log(`setting first player to ${this._players[this._pos].name}.`)
+    }
 
     next() {
         if (this.hasNext()) {
@@ -32,12 +45,19 @@ export default class PlayerStack {
         return pos < this._size - 1;
     }
 
+    hasNextPlayer(pos) {
+        pos = pos || this._pos;
+        
+        return pos !== this._posDealer;
+    }
+
     current() {
         return this._players[this._pos];
     }
 
     nextTo(usePos) {
         let add = 1;
+        
         if (usePos) {
             this._posAdder++
             add = this._posAdder;
@@ -56,17 +76,11 @@ export default class PlayerStack {
 
         if (this.hasNext(this._posDealer)) {
             this._posDealer++;
-            //set current player to player after dealer
-            if (this.hasNext(this._posDealer)) {
-                this._pos = this._posDealer + 1;
-            } else {
-                this._pos = 0;
-            }
         } else {
             this._posDealer = 0;
         }
 
-        console.log(`Dealer is now: ${this.dealer().name}`);
+        tools.log(`Dealer is now: ${this.dealer().name}`);
     }
 
     dealer() {

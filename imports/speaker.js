@@ -89,8 +89,16 @@ export default class Speaker {
 				);
 			}
 		});
-		//show stats table
-		$('#stats_table').show();
+	}
+
+	hideStatsTable(show) {
+		show = show || false;
+
+		if (show) {
+			$('#stats_table').show();
+		} else {
+			$('#stats_table').hide();
+		}
 	}
 
 	updateCurrentPlayer() {
