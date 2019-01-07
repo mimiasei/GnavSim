@@ -140,12 +140,14 @@ export default class Player {
 	}
 	
 	requestSwap(toPlayer) {
-		this._game.speaker.say (this.sayTo(toPlayer, 0) + tools.quote(tools.TXT_WANT_TO_SWAP));
+		// this._game.speaker.say (this.sayTo(toPlayer, 0) + tools.quote(tools.TXT_WANT_TO_SWAP));
+		this._game.speaker.speech(this._name, tools.quote(tools.TXT_WANT_TO_SWAP));
 	}
 
 	answerSwap(fromPlayer) {
 		const quote = this._heldCard.isMatador ? this._heldCard.statement : tools.TXT_ACCEPT_SWAP;
-		this._game.speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(quote));
+		// this._game.speaker.say (this.sayTo(fromPlayer, 1) + tools.quote(quote));
+		this._game.speaker.speech(this._name, tools.quote(quote));
 		return this._heldCard;
 	}
 

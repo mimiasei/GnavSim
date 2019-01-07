@@ -55,6 +55,17 @@ export default class Gui {
         }
     }
 
+    findPlayer(name) {
+        const index = this._group.findIndex((o) => { 
+            return o.name == name; 
+        });
+
+        return {
+            player: index > -1 ? this._group[index] : null,
+            index: index
+        };
+    }
+
     displayCard() {
         tools.log('+++++ calling displayCard()!');
         let heldCard = this._game.currentPlayer.heldCard;
@@ -102,6 +113,26 @@ export default class Gui {
         card.noStroke();
         card.opacity = 0.75;
     }
+
+    speech(name, message) {
+        const obj = this.findPlayer(name);
+
+        if (obj.player) {
+            // this.speechBox(obj.player.x, obj.player.y, 50);
+            this.text(obj.player.x + 40, obj.player.y + 60, `${name}: ${message}`);
+        }
+    }
+
+    // speechBox(x, y, size) {
+    //     let card = this._two.makeRoundedRectangle(x, y, size * 1.5, size, 5);
+    //     card.fill = '#00bfb6';
+    //     card.noStroke();
+    //     card.opacity = 0.75;
+    //     let pointer = this._two.makePolygon(x - 40, y, x, y + 30);
+    //     pointer.fill = '#00bfb6';
+    //     pointer.noStroke();
+    //     pointer.opacity = 0.75;
+    // }
 
     text(x, y, message, styles) {
         styles = {
@@ -154,9 +185,10 @@ export default class Gui {
     }
 
     selectPlayer(name) {
-        const i = this._group.findIndex((o) => { return o.name == name; });
-        if (i > -1) {
-            this.drawGroup(i);
+        const obj = this.findPlayer(name);
+
+        if (obj.player) {
+            this.drawGroup(obj.index);
 
             const styles = {
                 fill: '#ffffff',
@@ -165,12 +197,12 @@ export default class Gui {
                 opacity: 1.0,
             };
 
-            if (this._game.currentDealer.pid == this._group[i].pid) {
+            if (this._game.currentDealer.pid == obj.player.pid) {
                 styles.fill = '#ffff00';
             }
 
-            this.circle(this._group[i].x, this._group[i].y, this._group[i].size * 1.5, 0.97);
-            this.text(this._group[i].x, this._group[i].y, this._group[i].name, styles);
+            this.circle(obj.player.x, obj.player.y, obj.player.size * 1.5, 0.97);
+            this.text(obj.player.x, obj.player.y, obj.player.name, styles);
         } else {
             tools.log(`----- couldn't find player: ${name}`)
         }

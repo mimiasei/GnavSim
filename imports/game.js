@@ -270,6 +270,7 @@ export default class Game extends EventTarget {
 		this._playerStack.setFirst();
 		//print current player in bold white 
 		this._gui.selectPlayer(this.currentPlayer.name);
+		
 		this._gui.update();
 		
 		// this.state = Game.STATE_START_TURN;

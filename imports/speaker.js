@@ -226,6 +226,11 @@ export default class Speaker {
 		return element;
 	}
 
+	speech(name, message) {
+		this._parent.gui.speech(name, message);
+		this._parent.gui.update();
+	}
+
 	updateStats(player) {
 		const index = this.getStatsIndex(player);
 		// tools.log(`found stats index for ${player.name}: ${index}`);
