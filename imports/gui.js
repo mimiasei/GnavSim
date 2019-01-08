@@ -45,9 +45,29 @@ export default class Gui {
             const x = Math.cos(angle) * radius + this._posX;
             const y = Math.sin(angle) * radius + this._posY;
 
+            let pos = { x: 0, y: 0 };
+
+            if (angle >= 0 && angle < Math.PI / 4) {
+                pos = { x: 100, y: 50 };
+            } else if (angle >= Math.PI / 4 && angle < Math.PI / 2) {
+                pos = { x: 40, y: -50 };
+            } else if (angle >= Math.PI / 2 && angle < 3 * Math.PI / 4) {
+                pos = { x: -40, y: -50 };
+            } else if (angle >= 3 * Math.PI / 4 && angle < Math.PI) {
+                pos = { x: -100, y: -50 };
+            } else if (angle >= Math.PI && angle < 5 * Math.PI / 4) {
+                pos = { x: -100, y: 50 };
+            } else if (angle >= 5 * Math.PI / 4 && angle < 3 * Math.PI / 2) {
+                pos = { x: -50, y: 50 };
+            } else if (angle > 3 * Math.PI / 2 && angle <= 2 * Math.PI) {
+                pos = { x: 50, y: 50 };
+            }
+
             this._group.push({
                 x: x,
                 y: y,
+                angle: angle,
+                pos: pos,
                 size: size,
                 pid: players[i].pid,
                 name: players[i].name,
@@ -94,15 +114,15 @@ export default class Gui {
         const gradient = this._two.makeRadialGradient(
             0, 0,
             size,
-            new Two.Stop(0, 'rgba(255, 255, 255, 1)', 2),
-            new Two.Stop(blurStart, 'rgba(255, 255, 255, 1)', 1),
-            new Two.Stop(1.0, 'rgba(255, 255, 255, 0)', 0)
+            new Two.Stop(0, 'rgba(185, 193, 123, 1)', 2),
+            new Two.Stop(blurStart, 'rgba(185, 193, 123, 1)', 1),
+            new Two.Stop(1.0, 'rgba(185, 193, 123, 0)', 0)
         );
 
         let circle = this._two.makeCircle(x, y, size); //x, y, radius
         circle.fill = gradient;
         circle.noStroke();
-        circle.opacity = 0.25;
+        circle.opacity = 0.4;
 
         return circle;
     }
@@ -119,7 +139,15 @@ export default class Gui {
 
         if (obj.player) {
             // this.speechBox(obj.player.x, obj.player.y, 50);
-            this.text(obj.player.x + 40, obj.player.y + 60, `${name}: ${message}`);
+
+            let line = this._two.makeLine(
+                obj.player.x + obj.player.pos.x / 2, obj.player.y + obj.player.pos.y / 2, 
+                obj.player.x + obj.player.pos.x, obj.player.y + obj.player.pos.y);
+            line.stroke = '#ffffff';
+            line.opacity = 0.75;
+            line.lineWidth = 2;
+
+            this.text(obj.player.x + obj.player.pos.x, obj.player.y + obj.player.pos.y, `${name}: ${message}`);
         }
     }
 
@@ -138,7 +166,7 @@ export default class Gui {
         styles = {
             fill: styles && styles.fill ? styles.fill : '#ffffff',
             weight: styles && styles.weight ? styles.weight : 'normal',
-            opacity: styles && styles.opacity ? styles.opacity : 0.5,
+            opacity: styles && styles.opacity ? styles.opacity : 0.75,
             size: styles && styles.size ? styles.size : 13,
         };
 

@@ -47,11 +47,15 @@ export async function shuffle(array) {
 	return array; //returns Promise with shuffled array
 }
 
-export function log(message, game) {
+export function log(message, game, use) {
 	game = game || null;
-    let stack = new Error().stack,
-        caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
-    console.log(caller + (game && game.playerStack && game.playerStack.current() ? '|' + game.playerStack.current().name : '') + ":" + message);
+	use = use || false;
+
+	if (use) {
+		let stack = new Error().stack,
+			caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
+		console.log(caller + (game && game.playerStack && game.playerStack.current() ? '|' + game.playerStack.current().name : '') + ":" + message);
+	}
 }
 
 export function getExtreme(array, attr, getMax) {

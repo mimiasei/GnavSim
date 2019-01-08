@@ -3,15 +3,15 @@
   --body-fontsize: '32px';
   /*bg colours*/
   /*--color-bg-main: rgba(7, 79, 87, 1); midnight green*/
-  --color-bg-main: rgb(59, 55, 0); /*midnight green*/
+  --color-bg-main: #36393B; /*onyx*/
   /*--color-bg-output: #416165;  deep space sparkle*/
-  --color-bg-output: rgb(77, 71, 0);  /*deep space sparkle*/
+  --color-bg-output: #36393B; /*onyx*/
   --color-bg-round: rgba(7, 113, 135, 1); /*metallic seaweed*/
   --color-bg-modal: rgba(116, 165, 127, 1); /*shiny shamrock*/
   /*txt colours*/
   --color-txt-main: lightgray;
   --color-txt-table: rgba(187, 219, 180, 1); /*light moss green*/
-  --color-txt-special: #b9c17b;
+  --color-txt-special: rgba(185, 193, 123, 1);
   --color-txt-option: rgba(252, 240, 204, 1); /*blanched almond*/
 }
 
