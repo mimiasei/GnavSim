@@ -17,6 +17,7 @@ export default class PlayerStack {
     get players() { return this._players }
 
     setFirst() {
+        tools.log('', null, true);
         //set first player to player after dealer
         if (this.hasNext(this._posDealer)) {
             this._pos = this._posDealer + 1;
@@ -28,6 +29,7 @@ export default class PlayerStack {
     }
 
     next() {
+        tools.log('', null, true);
         if (this.hasNext()) {
             this._players[this._pos].isCurrent = false;
             this._pos++;
@@ -40,12 +42,14 @@ export default class PlayerStack {
     }
 
     hasNext(pos) {
+        tools.log('', null, true);
         pos = pos || this._pos;
 
         return pos < this._size - 1;
     }
 
     hasNextPlayer(pos) {
+        tools.log('', null, true);
         pos = pos || this._pos;
         
         return pos !== this._posDealer;
@@ -56,6 +60,7 @@ export default class PlayerStack {
     }
 
     nextTo(usePos) {
+        tools.log('', null, true);
         let add = 1;
         
         if (usePos) {
@@ -71,6 +76,7 @@ export default class PlayerStack {
     }
 
     nextDealer() {
+        tools.log('', null, true);
         // const oldDealer = this._players.pop(); //pop out current dealer player
         // this._players.unshift(oldDealer); //insert that player at start of array
 

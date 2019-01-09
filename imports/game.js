@@ -151,6 +151,7 @@ export default class Game extends EventTarget {
 	}
 
 	init() {
+		tools.log('', this, true);
 		//function for when next turn button is clicked
 		const nextTurnCallback = (result) => {			
 			this.startEvent('startTurn');	
@@ -214,6 +215,7 @@ export default class Game extends EventTarget {
 	}
 
 	async initGame() {
+		tools.log('', this, true);
 		tools.log('starting initgame...');
 
 		//show stats table
@@ -251,7 +253,7 @@ export default class Game extends EventTarget {
 		//draw gui stuff
 		this._gui.drawGroup();
 		// this.nextPlayer(true);
-		this._gui.selectPlayer(this.currentPlayer.name);
+		// this._gui.selectPlayer(this.currentPlayer.name);
 		// this._gui.play();
 		this._gui.update();
 		
@@ -262,6 +264,7 @@ export default class Game extends EventTarget {
 	}
 
 	nextTurn() {
+		tools.log(this._turn, this, true);
 		this._turn++;
 		
 		//set next dealer
@@ -269,7 +272,10 @@ export default class Game extends EventTarget {
 		this._playerStack.nextDealer();
 		this._playerStack.setFirst();
 		//print current player in bold white 
-		this._gui.selectPlayer(this.currentPlayer.name);
+		// this._gui.selectPlayer(this.currentPlayer.name);
+		this._gui.drawGroup();
+		//everyone must say hello!
+		this._gui.groupSpeech('hallo!');
 		
 		this._gui.update();
 		
@@ -280,6 +286,7 @@ export default class Game extends EventTarget {
 	}
 
 	nextPlayer(skipNext) {
+		tools.log('', this, true);
 		skipNext = skipNext || false;
 
 		const oldPlayer = this.currentPlayer.name;
@@ -293,7 +300,8 @@ export default class Game extends EventTarget {
 
 		this._speaker.refreshStatsTable();
 		this._speaker.updateCurrentPlayer();
-		this._gui.selectPlayer(this.currentPlayer.name);
+		// this._gui.selectPlayer(this.currentPlayer.name);
+		this._gui.drawGroup();
 		this._gui.displayCard();
 		// this._gui.play();
 		this._gui.update();
@@ -304,6 +312,7 @@ export default class Game extends EventTarget {
 	}
 	
 	async startTurn() {
+		tools.log('', this, true);
 		//clear main output elements
 		this._speaker.clear();
 		
@@ -328,6 +337,7 @@ export default class Game extends EventTarget {
 	}
 
 	async dealOutCards() {
+		tools.log('', this, true);
 		for (const player of this._players) {
 			player.drawFromDeck(this._deck);
 
@@ -341,14 +351,17 @@ export default class Game extends EventTarget {
 	}
 
 	getPlayerNextTo(usePos) {
+		tools.log('', this, true);
 		return this._playerStack.nextTo(usePos);
 	}
 
 	isGameOver() {
+		tools.log('', this, true);
 		return (this._value >= this._maxValue);
 	}
 
 	setHighestScore(score) {
+		tools.log('', this, true);
 		this._highscore = score;
 		if (this._playType > 0) {
 			this._value = score;
@@ -395,6 +408,7 @@ export default class Game extends EventTarget {
 	}
 
 	createEventListeners() {
+		tools.log('', this, true);
 		this.addEventListener(
 			'event_knock', 
 			(event) => {

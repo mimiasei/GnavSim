@@ -16,6 +16,8 @@ export default class Gui {
         this._height = height;
         this._posX = 0;
         this._posY = 0;
+        this._offsetX = 50;
+        this._offsetY = 20;
 
         this._group = [];
         this._twoGroup = null;
@@ -36,8 +38,8 @@ export default class Gui {
         const size = Math.min(this._width, this._height) / 12;
         //circle path to draw circles
         const radius = Math.min(this._height, this._width) / 2 - size / 2 - 4;
-        this._posX = (this._width / 2) + size;
-        this._posY = (this._height / 2) + size;
+        this._posX = (this._width / 2) + size + this._offsetX;
+        this._posY = (this._height / 2) + size + this._offsetY;
         this._twoGroup.translation.set(this._posX, this._posY);
 
         for (let i = 0; i < players.length; i++) {
@@ -47,20 +49,22 @@ export default class Gui {
 
             let pos = { x: 0, y: 0 };
 
-            if (angle >= 0 && angle < Math.PI / 4) {
-                pos = { x: 100, y: 50 };
-            } else if (angle >= Math.PI / 4 && angle < Math.PI / 2) {
-                pos = { x: 40, y: -50 };
-            } else if (angle >= Math.PI / 2 && angle < 3 * Math.PI / 4) {
-                pos = { x: -40, y: -50 };
-            } else if (angle >= 3 * Math.PI / 4 && angle < Math.PI) {
-                pos = { x: -100, y: -50 };
-            } else if (angle >= Math.PI && angle < 5 * Math.PI / 4) {
-                pos = { x: -100, y: 50 };
-            } else if (angle >= 5 * Math.PI / 4 && angle < 3 * Math.PI / 2) {
-                pos = { x: -50, y: 50 };
-            } else if (angle > 3 * Math.PI / 2 && angle <= 2 * Math.PI) {
-                pos = { x: 50, y: 50 };
+            if (angle >= 0 && angle < (Math.PI / 4)) {
+                pos = { x: 50, y: 50, i: 0 };
+            } else if (angle >= (Math.PI / 4) && angle < (Math.PI / 2)) {
+                pos = { x: 0, y: 50, i: 1 };
+            } else if (angle >= (Math.PI / 2) && angle < (3 * Math.PI / 4)) {
+                pos = { x: 0, y: 50, i: 2 };
+            } else if (angle >= (3 * Math.PI / 4) && angle < Math.PI) {
+                pos = { x: -50, y: 50, i: 3 };
+            } else if (angle >= Math.PI && angle < (5 * Math.PI / 4)) {
+                pos = { x: -50, y: -50, i: 4 };
+            } else if (angle >= (5 * Math.PI / 4) && angle < (3 * Math.PI / 2)) {
+                pos = { x: 0, y: -50, i: 5 };
+            } else if (angle > (3 * Math.PI / 2) && angle <= (7 * Math.PI / 4)) {
+                pos = { x: 0, y: -50, i: 6 };
+            } else if (angle > (7 * Math.PI / 4) && angle <= (2 * Math.PI)) {
+                pos = { x: 50, y: -50, i: 7 };
             }
 
             this._group.push({
@@ -138,17 +142,28 @@ export default class Gui {
         const obj = this.findPlayer(name);
 
         if (obj.player) {
-            // this.speechBox(obj.player.x, obj.player.y, 50);
-
-            let line = this._two.makeLine(
-                obj.player.x + obj.player.pos.x / 2, obj.player.y + obj.player.pos.y / 2, 
-                obj.player.x + obj.player.pos.x, obj.player.y + obj.player.pos.y);
-            line.stroke = '#ffffff';
-            line.opacity = 0.75;
-            line.lineWidth = 2;
-
-            this.text(obj.player.x + obj.player.pos.x, obj.player.y + obj.player.pos.y, `${name}: ${message}`);
+            this.doSpeech(obj.player, message);
         }
+    }
+
+    groupSpeech(message) {
+        this._group.forEach(player => {
+            this.doSpeech(player, message);
+        });
+    }
+
+    doSpeech(player, message) {
+        const offset = player.pos.y > 0 ? 10 : -10;
+
+        let line = this._two.makeLine(
+            player.x, player.y + offset, 
+            player.x + player.pos.x, player.y + player.pos.y);
+        line.stroke = '#ffffff';
+        line.opacity = 0.75;
+        line.lineWidth = 2;
+
+
+        this.text(player.x + player.pos.x, player.y + player.pos.y + offset, `${player.name}: ${message}`);
     }
 
     // speechBox(x, y, size) {
@@ -180,10 +195,12 @@ export default class Gui {
         thisGroup.translation.set(this._posX, this._posY);
         // thisGroup.rotation = thisGroup.scale = 0.0;
 
-        for (let i = 0; i < this._group.length; i++) {         
-            if (skipIndex !== undefined && skipIndex !== null && skipIndex !== i) {
+        for (let i = 0; i < this._group.length; i++) {
+            if (skipIndex !== i) {
                 
                 let styles = {};
+                let sizeScale = 1;
+
                 if (this._game.currentDealer.pid == this._group[i].pid) {
                     styles = {
                         fill: '#ffff00',
@@ -191,8 +208,20 @@ export default class Gui {
                     };
                 }
 
-                const circle = this.circle(this._group[i].x, this._group[i].y, this._group[i].size);
-                const text = this.text(this._group[i].x, this._group[i].y, this._group[i].name, styles);
+                if (this._game.currentPlayer.pid == this._group[i].pid) {
+                    styles = {
+                        fill: '#ffffff',
+                        weight: 'bold',
+                        size: 15,
+                        opacity: 1.0,
+                    };
+                    sizeScale = 1.5;
+                }
+
+                const name = `${this._group[i].name}:(${this._group[i].pos.i}):${this._group[i].pos.x},${this._group[i].pos.y}`
+
+                const circle = this.circle(this._group[i].x, this._group[i].y, this._group[i].size * sizeScale);
+                const text = this.text(this._group[i].x, this._group[i].y, name, styles);
 
                 let grp = this._two.makeGroup(circle, text);
                 thisGroup.add(grp);
