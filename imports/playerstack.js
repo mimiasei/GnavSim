@@ -16,11 +16,6 @@ export default class PlayerStack {
 
     get players() { return this._players }
 
-    resetForNewTurn() {
-        this._pos = 0;
-        this._posAdder = 0;
-    }
-
     setFirst() {
         tools.log('', null, true);
         //set first player to player after dealer
@@ -29,6 +24,8 @@ export default class PlayerStack {
         } else {
             this._pos = 0;
         }
+
+        this._posAdder = 0;
 
         tools.log(`setting first player to ${this._players[this._pos].name}.`)
     }
@@ -49,11 +46,9 @@ export default class PlayerStack {
 
     hasNext(pos) {
         tools.log('', null, true);
-        pos = pos || this._pos;
+        pos = (pos == undefined || pos == NaN) ? this._pos : pos;
 
         if (pos < this._size - 1) {
-            return true;
-        } else if (this.hasNextPlayer(pos)) {
             return true;
         }
 
@@ -61,7 +56,7 @@ export default class PlayerStack {
     }
 
     hasNextPlayer(pos) {
-        pos = pos || this._pos;
+        pos = (pos == undefined || pos == NaN) ? this._pos : pos;
         
         return pos != this._posDealer;
     }
@@ -72,6 +67,7 @@ export default class PlayerStack {
 
     nextTo(usePos) {
         tools.log('', null, true);
+        
         let add = 1;
         
         if (usePos) {

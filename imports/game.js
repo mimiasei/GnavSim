@@ -95,7 +95,6 @@ export default class Game extends EventTarget {
 			case (Game.STATE_START_TURN):
 				this.startTurn().then(() => {
 					// this.checkCards();
-					// this.state = Game.STATE_BEFORE_SWAP;
 					this.startEvent('beforeSwap');	
 				});
 				break;
@@ -268,20 +267,22 @@ export default class Game extends EventTarget {
 		this._turn++;
 		
 		//set next dealer
-		tools.log('calling nextDealer()...');
-		this._playerStack.resetForNewTurn();
 		this._playerStack.nextDealer();
+
+		//reset player stack to first player after dealer
 		this._playerStack.setFirst();
-		this._speaker.updateCurrentPlayer();
+
 		//print current player in bold white 
+		this._speaker.updateCurrentPlayer();
+
 		// this._gui.selectPlayer(this.currentPlayer.name);
 		this._gui.drawGroup();
+
 		//everyone must say hello!
 		// this._gui.groupSpeech('hallo!');
 		
 		this._gui.update();
 		
-		// this.state = Game.STATE_START_TURN;
 		this.startEvent('startTurn');
 		
 		return true;
@@ -310,7 +311,6 @@ export default class Game extends EventTarget {
 
 		this._playerStack.printPlayers();
 		
-		// this.state = Game.STATE_BEFORE_SWAP;
 		console.log('**** starting event beforeswap @nextPlayer()...');
 		this.startEvent('beforeSwap');
 	}
