@@ -16,6 +16,11 @@ export default class PlayerStack {
 
     get players() { return this._players }
 
+    resetForNewTurn() {
+        this._pos = 0;
+        this._posAdder = 0;
+    }
+
     setFirst() {
         tools.log('', null, true);
         //set first player to player after dealer
@@ -33,6 +38,7 @@ export default class PlayerStack {
         if (this.hasNext()) {
             this._players[this._pos].isCurrent = false;
             this._pos++;
+            this._posAdder = 0;
             this._players[this._pos].isCurrent = true;
             return true;
         } else {
@@ -45,14 +51,19 @@ export default class PlayerStack {
         tools.log('', null, true);
         pos = pos || this._pos;
 
-        return pos < this._size - 1;
+        if (pos < this._size - 1) {
+            return true;
+        } else if (this.hasNextPlayer(pos)) {
+            return true;
+        }
+
+        return false;
     }
 
     hasNextPlayer(pos) {
-        tools.log('', null, true);
         pos = pos || this._pos;
         
-        return pos !== this._posDealer;
+        return pos != this._posDealer;
     }
 
     current() {
@@ -70,6 +81,8 @@ export default class PlayerStack {
 
         if (this.hasNext(this._pos + add - 1)) {
             return this._players[this._pos + add];
+        } else if (this.hasNextPlayer()) {
+
         } else {
             return { name: 'deck', isDeck: true };
         }
@@ -92,5 +105,42 @@ export default class PlayerStack {
     dealer() {
         // return this._players[this._size - 1];
         return this._players[this._posDealer];
+    }
+
+    printPlayers() {
+        let pos = this._pos;
+
+        console.log('pos: ' + pos);
+        console.log('posDealer: ' + this._posDealer);
+
+        let array = [];
+        let counter = 0;
+        let exit = false;
+        while (!exit) {
+            array.push(pos + ':' + this._players[pos].name);
+            pos = this.getNextPos(pos);
+            console.log('pos returned: ' + pos);
+            if (!this.hasNextPlayer(pos)) {
+                exit = true;
+            }
+            counter++;
+            if (counter >= this._size) {
+                exit = true;
+                console.log('exiting while-loop');
+            }
+        }
+
+        console.log(array);
+    }
+
+    getNextPos(pos) {
+        pos = (pos == undefined || pos == NaN) ? this._pos : pos;
+
+        if (pos < this._size - 1) {
+            pos++;
+            return pos;
+        } else if (this.hasNextPlayer(pos)) {
+            return 0;
+        }
     }
 }

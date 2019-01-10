@@ -264,18 +264,20 @@ export default class Game extends EventTarget {
 	}
 
 	nextTurn() {
-		tools.log(this._turn, this, true);
+		tools.log('', this, true);
 		this._turn++;
 		
 		//set next dealer
 		tools.log('calling nextDealer()...');
+		this._playerStack.resetForNewTurn();
 		this._playerStack.nextDealer();
 		this._playerStack.setFirst();
+		this._speaker.updateCurrentPlayer();
 		//print current player in bold white 
 		// this._gui.selectPlayer(this.currentPlayer.name);
 		this._gui.drawGroup();
 		//everyone must say hello!
-		this._gui.groupSpeech('hallo!');
+		// this._gui.groupSpeech('hallo!');
 		
 		this._gui.update();
 		
@@ -305,6 +307,8 @@ export default class Game extends EventTarget {
 		this._gui.displayCard();
 		// this._gui.play();
 		this._gui.update();
+
+		this._playerStack.printPlayers();
 		
 		// this.state = Game.STATE_BEFORE_SWAP;
 		console.log('**** starting event beforeswap @nextPlayer()...');
@@ -351,17 +355,15 @@ export default class Game extends EventTarget {
 	}
 
 	getPlayerNextTo(usePos) {
-		tools.log('', this, true);
+		tools.log('usePos: ' + usePos, this, true);
 		return this._playerStack.nextTo(usePos);
 	}
 
 	isGameOver() {
-		tools.log('', this, true);
 		return (this._value >= this._maxValue);
 	}
 
 	setHighestScore(score) {
-		tools.log('', this, true);
 		this._highscore = score;
 		if (this._playType > 0) {
 			this._value = score;
@@ -408,7 +410,6 @@ export default class Game extends EventTarget {
 	}
 
 	createEventListeners() {
-		tools.log('', this, true);
 		this.addEventListener(
 			'event_knock', 
 			(event) => {

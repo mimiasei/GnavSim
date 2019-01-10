@@ -218,10 +218,10 @@ export default class Gui {
                     sizeScale = 1.5;
                 }
 
-                const name = `${this._group[i].name}:(${this._group[i].pos.i}):${this._group[i].pos.x},${this._group[i].pos.y}`
+                // const name = `${this._group[i].name}:(${this._group[i].pos.i}):${this._group[i].pos.x},${this._group[i].pos.y}`
 
                 const circle = this.circle(this._group[i].x, this._group[i].y, this._group[i].size * sizeScale);
-                const text = this.text(this._group[i].x, this._group[i].y, name, styles);
+                const text = this.text(this._group[i].x, this._group[i].y, this._group[i].name, styles);
 
                 let grp = this._two.makeGroup(circle, text);
                 thisGroup.add(grp);

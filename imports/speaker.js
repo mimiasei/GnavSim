@@ -102,6 +102,7 @@ export default class Speaker {
 	}
 
 	updateCurrentPlayer() {
+		tools.log('', this._parent, true);
 		this._currentPlayerText.text(this._parent.playerStack.current().name);
 		this._currentDealerText.text(this._parent.playerStack.dealer().name);
 	}
@@ -123,7 +124,6 @@ export default class Speaker {
 	}
 	
 	clear() {
-		tools.log('', this._parent, true);
 		this._output.html('');
 		for (let btn of this._outputBtns) {
 			btn.html('');
@@ -154,7 +154,6 @@ export default class Speaker {
 	}
 	
 	printRound() {
-		tools.log('', this._parent, true);
 		this.say(`Turn: ${this._parent.turn}. Card pile length: ${this._parent.deck.getLength()}`, 'span', 'print-round');
 	}
 	
@@ -234,7 +233,6 @@ export default class Speaker {
 	}
 
 	updateStats(player) {
-		tools.log('', this._parent, true);
 		const index = this.getStatsIndex(player);
 		// tools.log(`found stats index for ${player.name}: ${index}`);
 
@@ -248,14 +246,12 @@ export default class Speaker {
 	}
 
 	addToStats(name, type) {
-		tools.log('', this._parent, true);
 		let $elem = this.createElem(name, type);
 		this._statsElems.push($elem);
 		this._stats.append($elem);
 	}
 
 	refreshStatsTable() {
-		tools.log('', this._parent, true);
 		this._tableData = [];
 
 		for (const player of this._parent.players) {
@@ -293,7 +289,6 @@ export default class Speaker {
 	}
 
 	sumUpGameTurn() {
-		tools.log('', this._parent, true);
 		//find winner
 		const winner = this._parent.findWinner();
 		winner.wins++;
