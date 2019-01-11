@@ -38,6 +38,8 @@ export default class Game extends EventTarget {
 		this._state = null;
 		this._playerStack = null;
 		this._gui = null;
+
+		this._stack = null;
 	}
 
 	//getters
@@ -282,6 +284,11 @@ export default class Game extends EventTarget {
 		// this._gui.groupSpeech('hallo!');
 		
 		this._gui.update();
+
+		//testing stack
+		this._stack = tools.stack(this._players, this._playerStack.posDealer);
+		const newPlayer = this._stack.next().value;
+		console.log('next turn stack: ' + newPlayer.name, this, true);		
 		
 		this.startEvent('startTurn');
 		
@@ -310,6 +317,9 @@ export default class Game extends EventTarget {
 		this._gui.update();
 
 		this._playerStack.printPlayers();
+
+		const newPlayer = this._stack.next().value;
+		console.log('next player stack: ' + newPlayer.name, this, true);
 		
 		console.log('**** starting event beforeswap @nextPlayer()...');
 		this.startEvent('beforeSwap');
