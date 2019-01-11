@@ -423,7 +423,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_knock', 
 			(event) => {
-				console.log("event_knock called by player: ", event.detail.player);
+				// console.log("event_knock called by player: ", event.detail.player);
 				this.tableKnocked();
 			}
 		);
@@ -431,7 +431,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_startTurn', 
 			(event) => {
-				console.log("event_startTurn called by player: ", event.detail.player);
+				// console.log("event_startTurn called by player: ", event.detail.player);
 				this.state = Game.STATE_START_TURN;
 			}
 		);
@@ -439,7 +439,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_beforeSwap', 
 			(event) => {
-				console.log("event_beforeSwap called by player: ", event.detail.player);
+				// console.log("event_beforeSwap called by player: ", event.detail.player);
 				this.state = Game.STATE_BEFORE_SWAP;
 			}
 		);
@@ -463,7 +463,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_afterSwap', 
 			(event) => {
-				console.log("event_afterSwap called by player: ", event.detail.player);
+				// console.log("event_afterSwap called by player: ", event.detail.player);
 				this.state = Game.STATE_AFTER_SWAP;
 			}
 		);
@@ -471,7 +471,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_endPlayer', 
 			(event) => {
-				console.log("event_endPlayer called by player: ", event.detail.player);
+				// console.log("event_endPlayer called by player: ", event.detail.player);
 				this.state = Game.STATE_END_PLAYER;
 			}
 		);
@@ -479,7 +479,7 @@ export default class Game extends EventTarget {
 		this.addEventListener(
 			'event_endTurn', 
 			(event) => {
-				console.log("event_endTurn called by player: ", event.detail.player);
+				// console.log("event_endTurn called by player: ", event.detail.player);
 				this.state = Game.STATE_END_TURN;
 			}
 		);

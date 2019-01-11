@@ -63,7 +63,7 @@ img {
 
 .btn {
   box-shadow: -1px 1px 1px rgba(255,255,255,0.5), /*bottom external highlight*/
-    1px -1px 1px rgba(0,0,0,0.25), /*top external shadow*/ 
+    1px -1px 1px rgba(0,0,0,0.35), /*top external shadow*/ 
     inset 1px -1px 1px rgba(0,0,0,0.25), /*bottom internal shadow*/ 
     inset -1px 1px 2px rgba(255,255,255,0.7); /*top internal highlight*/
 }
@@ -137,6 +137,8 @@ td:nth-child(3) {
   padding: 0;
   margin: 0;
   font-weight: normal;
+  font-size: 18;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.29);
 }
 
 .tabulator .tabulator-tableHolder {
@@ -151,6 +153,7 @@ td:nth-child(3) {
   border: none;
   padding: 0;
   margin: 0;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.28);
 }
 
 #info {
@@ -234,6 +237,10 @@ td:nth-child(3) {
 
 .no-border {
   border: none;
+}
+
+.text-shadow {
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.28);
 }
 
 /* The Modal (background) */

@@ -128,16 +128,12 @@ export default class PlayerStack {
     printPlayers() {
         let pos = this._pos;
 
-        console.log('pos: ' + pos);
-        console.log('posDealer: ' + this._posDealer);
-
         let array = [];
         let counter = 0;
         let exit = false;
         while (!exit) {
             array.push(pos + ':' + this._players[pos].name);
             pos = this.getNextPos(pos);
-            console.log('pos returned: ' + pos);
             if (!this.hasNextPlayer(pos)) {
                 exit = true;
             }

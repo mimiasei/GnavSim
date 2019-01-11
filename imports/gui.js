@@ -26,11 +26,13 @@ export default class Gui {
     }
 
     initialize() {
-        const params = { width: 600, height: 600 };
+        const params = { width: 800, height: 800 };
+
         this._two = new Two(params).appendTo(this._canvas);
         this._two.type = Two.Types.canvas;
         this._twoGroup = this._two.makeGroup();
         this._twoGroup.id = 'two_Group';
+
         this.circleGroup(this._game.playerStack.players);
     }
 
@@ -102,8 +104,8 @@ export default class Gui {
         this.card(this._posX, this._posY, 90);
 
         const styles = { 
-            fill: '#000', 
-            size: 15, 
+            fill: 'black', 
+            size: 17, 
             weight: 'bold',
         };
 
@@ -112,30 +114,48 @@ export default class Gui {
         this.update();
     }
 
-    circle(x, y, size, blurStart) {
+    circle(x, y, size, blurStart, styles) {
         blurStart = blurStart || 0.8;
 
+        styles = {
+            fill: styles && styles.fill ? styles.fill : 'rgba(155, 163, 93, 1)',
+        };
+        
         const gradient = this._two.makeRadialGradient(
             0, 0,
             size,
-            new Two.Stop(0, 'rgba(185, 193, 123, 1)', 2),
-            new Two.Stop(blurStart, 'rgba(185, 193, 123, 1)', 1),
-            new Two.Stop(1.0, 'rgba(185, 193, 123, 0)', 0)
+            new Two.Stop(0, 'rgba(0, 0, 0, 1)', 2),
+            new Two.Stop(0.75, 'rgba(0, 0, 0, 1)', 1), //blurStart
+            new Two.Stop(1.0, 'rgba(0, 0, 0, 0)', 0)
         );
 
         let circle = this._two.makeCircle(x, y, size); //x, y, radius
-        circle.fill = gradient;
+        circle.fill = styles.fill; //gradient
         circle.noStroke();
-        circle.opacity = 0.4;
+        circle.opacity = 1.0;
 
-        return circle;
+        let circleShadow = this._two.makeCircle(x + 5, y + 5, size + 5); //x, y, radius
+        circleShadow.fill = gradient;
+        circleShadow.noStroke();
+        circleShadow.opacity = 0.4;
+
+        let group = this._two.makeGroup(circleShadow, circle);
+
+        return group;
     }
 
     card(x, y, size) {
+        let cardShadow = this._two.makeRoundedRectangle(x + 5, y + 5, size, size * 1.25, 5);
+        cardShadow.fill = 'black';
+        cardShadow.noStroke();
+        cardShadow.opacity = 0.2;
+
         let card = this._two.makeRoundedRectangle(x, y, size, size * 1.25, 5);
-        card.fill = '#ffffff';
+        card.fill = '#bbbbbb';
         card.noStroke();
-        card.opacity = 0.75;
+        card.opacity = 1.0;
+
+        this._two.makeGroup(cardShadow, card);
     }
 
     speech(name, message) {
@@ -181,7 +201,7 @@ export default class Gui {
         styles = {
             fill: styles && styles.fill ? styles.fill : '#ffffff',
             weight: styles && styles.weight ? styles.weight : 'normal',
-            opacity: styles && styles.opacity ? styles.opacity : 0.75,
+            opacity: styles && styles.opacity ? styles.opacity : 1.0,
             size: styles && styles.size ? styles.size : 13,
         };
 
@@ -200,6 +220,7 @@ export default class Gui {
                 
                 let styles = {};
                 let sizeScale = 1;
+                let circleStyle = {};
 
                 if (this._game.currentDealer.pid == this._group[i].pid) {
                     styles = {
@@ -215,12 +236,14 @@ export default class Gui {
                         size: 15,
                         opacity: 1.0,
                     };
-                    sizeScale = 1.5;
+
+                    sizeScale = 1.4;
+                    circleStyle.fill = 'rgba(115, 123, 53, 1)';
                 }
 
                 // const name = `${this._group[i].name}:(${this._group[i].pos.i}):${this._group[i].pos.x},${this._group[i].pos.y}`
 
-                const circle = this.circle(this._group[i].x, this._group[i].y, this._group[i].size * sizeScale);
+                const circle = this.circle(this._group[i].x, this._group[i].y, this._group[i].size * sizeScale, 0.8, circleStyle);
                 const text = this.text(this._group[i].x, this._group[i].y, this._group[i].name, styles);
 
                 let grp = this._two.makeGroup(circle, text);
