@@ -5,7 +5,7 @@ var path = require('path');
 //App setup
 var app = express();
 
-var server = app.listen(8000, function() {
+var server = app.listen(process.env.PORT || 8000, function() {
     console.log("listening...");
 });
 
