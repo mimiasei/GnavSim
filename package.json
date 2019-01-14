@@ -5,6 +5,7 @@
   "dependencies": {
     "express": "latest",
     "p-iteration": "^1.1.7",
+    "pg": "^7.8.0",
     "socket.io": "^2.1.1",
     "tabulator-tables": "^4.1.1",
     "two.js": "^0.7.0-beta.3"
