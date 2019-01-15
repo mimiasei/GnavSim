@@ -62,8 +62,10 @@ export default class PlayerStack {
 
     hasNextPlayer(pos) {
         pos = (pos == undefined || pos == NaN) ? this._pos : pos;
+
+        console.log('input pos: ' + pos + ', dealer pos: ' + this._posDealer);
         
-        return pos !== this._posDealer;
+        return pos != this._posDealer;
     }
 
     current() {
@@ -134,7 +136,7 @@ export default class PlayerStack {
         while (!exit) {
             array.push(pos + ':' + this._players[pos].name);
             pos = this.getNextPos(pos);
-            if (!this.hasNextPlayer(pos)) {
+            if (pos < 0) {
                 exit = true;
             }
             counter++;
