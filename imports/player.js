@@ -94,7 +94,8 @@ export default class Player {
 				const returnedCard = nextPlayer.answerSwap(this);
 				
 				if (returnedCard.isFool) {
-					this._game.speaker.say (`Everyone starts laughing and says 'Men ${nextPlayer.name} har jo narren!'`);
+					this._game.speaker.say ('Everyone starts laughing.');
+					this._game.gui.groupSpeech(`Haha! ${nextPlayer.name} har jo narren!`, this._pid);
 				}
 
 				if (returnedCard.isMatador) {

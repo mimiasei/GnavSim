@@ -166,9 +166,13 @@ export default class Gui {
         }
     }
 
-    groupSpeech(message) {
+    groupSpeech(message, skipPlayerId) {
+        skipPlayerId = (skipPlayerId == undefined || skipPlayerId == NaN) ? false : skipPlayerId;
+
         this._group.forEach(player => {
-            this.doSpeech(player, message);
+            if (!skipPlayerId || player.pid !== skipPlayerId) {
+                this.doSpeech(player, message);
+            }
         });
     }
 
