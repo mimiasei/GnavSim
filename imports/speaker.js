@@ -164,7 +164,7 @@ export default class Speaker {
 		this.say('', 'div', 'margin-top-' + n * 10);
 	}
 	
-	async ask(question, answers, callbackFn) {
+	ask(question, answers, callbackFn) {
 		//if answers === 0 : default yes/no answers
 		if (answers === 0) {
 			answers = [

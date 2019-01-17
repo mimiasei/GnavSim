@@ -32,7 +32,8 @@ export default class Human extends Player {
 	}
 
 	requestSwap(toPlayer) {
-		this._game.speaker.say (this.sayTo(toPlayer, 0) + tools.quote(tools.TXT_WANT_TO_SWAP));
+		// this._game.speaker.say (this.sayTo(toPlayer, 0) + tools.quote(tools.TXT_WANT_TO_SWAP));
+		this._game.speaker.speech(this._name, tools.quote(tools.TXT_WANT_TO_SWAP));
 	}
 
 	printGotCard(cardName) {
@@ -41,19 +42,16 @@ export default class Human extends Player {
 		this._game.speaker.say (`Player ${this.name}, you got the card ${card}.`);
 	}
 
-	async testForSwap(obj) {
+	testForSwap(obj) {
 		if (obj) {
-			let text = "Do you want to ";
-			if (obj.name == "deck") {
-				text += "draw from the deck";
+			let text = 'Do you want to ';
+			if (obj.name == 'deck') {
+				text += 'draw from the deck';
 			} else {
 				text += `swap cards with ${obj.name}`;
 			}
 
 			let callbackFn = (result) => {
-				tools.log("human ask result: " + result ? 'yes' : 'no');
-				this._game.speaker.hideButton('turn', true);
-
 				this._game.state = result ? //Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP; 
 				this._game.startEvent('decidedSwap') : 
 				this._game.startEvent('skippedSwap');

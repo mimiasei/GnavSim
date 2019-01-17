@@ -94,7 +94,7 @@ export default class Player {
 				const returnedCard = nextPlayer.answerSwap(this);
 				
 				if (returnedCard.isFool) {
-					this._game.speaker.say (`Everyone starts laughing and says 'Men " + ${nextPlayer.name} + " har jo narren!'`);
+					this._game.speaker.say (`Everyone starts laughing and says 'Men ${nextPlayer.name} har jo narren!'`);
 				}
 
 				if (returnedCard.isMatador) {
@@ -111,7 +111,6 @@ export default class Player {
 					if (returnedCard.causeAllLosePointAndStopGame) {
 						this._game.subractFromAllPlayers(nextPlayer);
 
-						// this._game.state = Game.STATE_END_TURN;
 						this._game.startEvent('endTurn');
 					}
 
@@ -177,8 +176,8 @@ export default class Player {
 
 	addToScore(value) {
 		this.score += value;
-		let verb = value > 0 ? "added" : "subtracted";
-		let prepos = value > 0 ? "to" : "from";
+		let verb = value > 0 ? 'added' : 'subtracted';
+		let prepos = value > 0 ? 'to' : 'from';
 		this._game.speaker.say (`${this.name} ${verb} ${Math.abs(value)} ${prepos} score.`);
 	}
 
