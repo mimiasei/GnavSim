@@ -20,6 +20,9 @@ export default class Game extends EventTarget {
 	 */
 
 	constructor(playType, maxValue, isHuman) {
+		//Player class:
+		Player.index = 1;
+
 		playType = playType || 0;
 		maxValue = maxValue || 1;
 		isHuman = isHuman || false;
@@ -228,6 +231,7 @@ export default class Game extends EventTarget {
 		if (this._isHuman && this._speaker.humanName) {
 			let human = new Human(this._speaker.humanName, this);
 			this._players.push(human);
+			console.log('just pushed: ', human.name);
 		}
 
 		for (const name of tools.PLAYERS) {
@@ -301,8 +305,6 @@ export default class Game extends EventTarget {
 
 		const oldPlayer = this.currentPlayer.name;
 
-		tools.log(`!! nextplayer from: ${oldPlayer} to: ${this.currentPlayer.name}`, this);
-
 		//advance player stack one player 
 		if (!skipNext) {
 			this._playerStack.next();
@@ -319,9 +321,8 @@ export default class Game extends EventTarget {
 		this._playerStack.printPlayers();
 
 		const newPlayer = this._stack.next().value;
-		console.log('next player stack: ' + newPlayer.name, this, true);
+		tools.log('next player stack: ' + newPlayer.name, this, true);
 		
-		console.log('**** starting event beforeswap @nextPlayer()...');
 		this.startEvent('beforeSwap');
 	}
 	
@@ -336,16 +337,9 @@ export default class Game extends EventTarget {
 		//print round
 		this._speaker.printRound();
 		this._speaker.addSpace();
-		tools.log(`current player: ${this.currentPlayer.name}.`);
-		tools.log(`current dealer: ${this.currentDealer.name}.`);
-		tools.log(`current playerstack dealer: ${this._playerStack.dealer().name}.`);
-		this._speaker.say(`Current dealer is: ${this.currentDealer.name}`);
-		this._speaker.say(`Current Player is: ${this.currentPlayer.name}`);
 	
 		//Draw cards for each player
-		tools.log('CAAAARDS: dealing out cards...');
 		this.dealOutCards().then(() => {
-			tools.log('CAAAARDS: done with dealing out cards.');
 			this._gui.displayCard();
 		});
 	}

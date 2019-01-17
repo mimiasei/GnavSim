@@ -4,15 +4,13 @@ const HOST = "http://localhost";
 const PORT = 8000;
 	
 import Game from './imports/game.js';	
-import Player from './imports/player.js';	
 import * as tools from './imports/gnavtools.js';
 
 $(document).ready(function() {
 	/**
 	 *Declare static class variables:
 	 */
-	//Player:
-	Player.index = 1;
+
 	//Game:
 	Game.STATE_START_TURN = 'sStartTurn';
 	Game.STATE_BEFORE_SWAP = 'sBeforeSwap';
@@ -105,7 +103,9 @@ function startGame(game) {
 	if (game.speaker.multiplayer) {
 		//todo: implement multiplayer code
 	} else {
-		game.initGame();
+		game.initGame().then(() => { 
+			console.log('Game init done.'); 
+		});
 	}
 }
 

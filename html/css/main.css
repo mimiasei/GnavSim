@@ -62,27 +62,27 @@ img {
 }
 
 .btn {
-  box-shadow: -1px 1px 1px rgba(255,255,255,0.5), /*bottom external highlight*/
-    1px -1px 1px rgba(0,0,0,0.35), /*top external shadow*/ 
-    inset 1px -1px 1px rgba(0,0,0,0.25), /*bottom internal shadow*/ 
-    inset -1px 1px 2px rgba(255,255,255,0.7); /*top internal highlight*/
+  box-shadow: -2px 2px 2px rgba(255,255,255,0.4), /*bottom external highlight*/
+    2px -2px 2px rgba(0,0,0,0.35), /*top external shadow*/ 
+    inset 2px -2px 2px rgba(0,0,0,0.35), /*bottom internal shadow*/ 
+    inset -2px 2px 4px rgba(255,255,255,0.8); /*top internal highlight*/
+
+  border-color: rgba(0, 0, 0, 0.35);
 }
 
-/* nth-child(1) = the first td in each tr */
+/* nth-child(1) = the first td in each tr 
 td:nth-child(1) {
   width: 10%;
   }
 
-/* the second */
 td:nth-child(2) {
   width: 80%;
 }
 
-/* the third */
 td:nth-child(3) {
   width: 10%;
   text-align: center;
- }
+ }*/
 
 #headline {
   height: 80px;
