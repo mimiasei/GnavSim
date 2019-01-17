@@ -9,7 +9,6 @@ export default class Speaker {
 
 	constructor(parent) {
 		this._output = $("#outputWin");
-		this._humanName = $('#form_name').val();
 		this._multiplayer = $('#form_multiplayer').is(':checked');
 		this._outputBtns = [];
 		this._stats = $("#playerStats");
@@ -44,6 +43,7 @@ export default class Speaker {
 	get nextPlayerButton() { return this._nextPlayerButton }
 	get knockButton() { return this._knockButton }
 
+	set humanName(value) { this._humanName = value }
 	set output(value) { this._output = $.extend(true, {}, value) }
 	set stats(value) { this._stats = $.extend(true, {}, value) }
 	set info(value) { this._info = $.extend(true, {}, value) }

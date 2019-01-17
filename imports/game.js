@@ -231,7 +231,6 @@ export default class Game extends EventTarget {
 		if (this._isHuman && this._speaker.humanName) {
 			let human = new Human(this._speaker.humanName, this);
 			this._players.push(human);
-			console.log('just pushed: ', human.name);
 		}
 
 		for (const name of tools.PLAYERS) {

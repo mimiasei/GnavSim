@@ -94,7 +94,7 @@ function settingsPart(game) {
 
 	$('#btn_playGame').click(async () => {
 		$('#settingsForm').hide();
-
+		game.speaker.humanName = $('#form_name').val();
 		startGame(game);
 	});
 }
