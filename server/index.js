@@ -1,6 +1,8 @@
-var express = require('express');
-var socket = require('socket.io');
-var path = require('path');
+const express = require('express');
+const socket = require('socket.io');
+const path = require('path');
+const pg = require('pg'); 
+const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/gnavsim_dev'; 
 
 //App setup
 var app = express();
