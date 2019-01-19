@@ -288,6 +288,11 @@ export default class Speaker {
 		return type + '_' + text.split(' ')[0] + this._elemId++;
 	}
 
+	allLaughAboutFool(player, pid) {
+		this.say ('Everyone starts laughing.');
+		this._parent.gui.groupSpeech(`Haha! ${player.name} har jo narren!`, pid);
+	}
+
 	sumUpGameTurn() {
 		//find winner
 		const winner = this._parent.findWinner();

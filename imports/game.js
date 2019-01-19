@@ -4,7 +4,8 @@ import Speaker from './speaker.js';
 import Deck from './deck.js';
 import Player from './player.js';
 import Human from './human.js';
-import PlayerStack from './playerstack.js';
+// import PlayerStack from './playerstack.js';
+import Stack from './stack.js';
 import * as tools from './gnavtools.js';
 import Gui from './gui.js';
 
@@ -41,8 +42,6 @@ export default class Game extends EventTarget {
 		this._state = null;
 		this._playerStack = null;
 		this._gui = null;
-
-		this._stack = null;
 	}
 
 	//getters
@@ -60,8 +59,8 @@ export default class Game extends EventTarget {
 	get gui() { return this._gui }
 
 	//Special getters
-	get currentPlayer() { return this._playerStack.current() }
-	get currentDealer() { return this._playerStack.dealer() }
+	get currentPlayer() { return this._playerStack.current }
+	get currentDealer() { return this._playerStack.dealer }
 
 	//setters
 	set playType(value) { this._playType = value }
@@ -247,7 +246,7 @@ export default class Game extends EventTarget {
 		this._players = await playersPromise;
 
 		//create player stack for handling players in game turn.
-		this._playerStack = new PlayerStack(this._players);
+		this._playerStack = new Stack(this._players);
 		//redraw stats table
 		this._speaker.refreshStatsTable();
 
@@ -275,7 +274,7 @@ export default class Game extends EventTarget {
 		this._playerStack.nextDealer();
 
 		//reset player stack to first player after dealer
-		this._playerStack.setFirst();
+		// this._playerStack.setFirst();
 
 		//print current player in bold white 
 		this._speaker.updateCurrentPlayer();
@@ -288,11 +287,6 @@ export default class Game extends EventTarget {
 		
 		this._gui.update();
 
-		//testing stack
-		this._stack = tools.stack(this._players, this._playerStack.posDealer);
-		const newPlayer = this._stack.next().value;
-		console.log('next turn stack: ' + newPlayer.name, this, true);		
-		
 		this.startEvent('startTurn');
 		
 		return true;
@@ -306,7 +300,7 @@ export default class Game extends EventTarget {
 
 		//advance player stack one player 
 		if (!skipNext) {
-			this._playerStack.next();
+			this._playerStack.nextPlayer();
 		}
 
 		this._speaker.refreshStatsTable();
@@ -318,9 +312,6 @@ export default class Game extends EventTarget {
 		this._gui.update();
 
 		this._playerStack.printPlayers();
-
-		const newPlayer = this._stack.next().value;
-		tools.log('next player stack: ' + newPlayer.name, this, true);
 		
 		this.startEvent('beforeSwap');
 	}
@@ -359,7 +350,7 @@ export default class Game extends EventTarget {
 
 	getPlayerNextTo(usePos) {
 		tools.log('usePos: ' + usePos, this, true);
-		return this._playerStack.nextTo(usePos);
+		return this._playerStack.getNextTo(usePos);
 	}
 
 	isGameOver() {

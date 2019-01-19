@@ -82,7 +82,11 @@ export default class PlayerStack {
             this._posAdder++
             add = this._posAdder;
 
-            const nextToPlayer = this._stack.next().value;
+            let nextToPlayer = this._stack.next().value;
+            if (!nextToPlayer) {
+                this._stack = tools.stack(this._players, this._posDealer, 0);
+                nextToPlayer = this._stack.next().value;
+            }
             console.log('next to player: ' + nextToPlayer.name);
         };
 

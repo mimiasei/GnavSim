@@ -94,8 +94,7 @@ export default class Player {
 				const returnedCard = nextPlayer.answerSwap(this);
 				
 				if (returnedCard.isFool) {
-					this._game.speaker.say ('Everyone starts laughing.');
-					this._game.gui.groupSpeech(`Haha! ${nextPlayer.name} har jo narren!`, this._pid);
+					this._game.speaker.allLaughAboutFool(nextPlayer, this._pid);
 				}
 
 				if (returnedCard.isMatador) {
@@ -111,27 +110,29 @@ export default class Player {
 					//cuckoo?
 					if (returnedCard.causeAllLosePointAndStopGame) {
 						this._game.subractFromAllPlayers(nextPlayer);
-
 						this._game.startEvent('endTurn');
 					}
 
 				} else {
 					//if card is not a matador, swap normally
 					this.cardSwap(nextPlayer);
-
 					hasSwapped = true;
 				}
 				
 			} else {
 				//next player is the deck, so draw from it
 				if (this._neverSwapsWithDeck) {
-					this._game.speaker.say(this._name + " never swaps!");
+					this._game.speaker.say(this._name + " never swaps with the deck!");
 				} else {
 					this._game.speaker.say(this._name + " draws from the deck.");
 					this.drawFromDeck();
 				}
 
 				hasSwapped = true;
+			}
+
+			if (abortSwap || hasSwapped) {
+				this._game.playerStack.resetNextTo();
 			}
 
 			nextPlayer = this._game.getPlayerNextTo(true);

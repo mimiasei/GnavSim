@@ -1,6 +1,6 @@
 'use strict';
 
-export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Emil", "Øivind", "Ask", "Pappa", "Mamma"]; //, "Øivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"
+export const PLAYERS = ["Kristoffer", "Matias", "Johannes", "Miriam", "Emil"]; //, "Øivind", "Ask", "Pappa", "Mamma", "Lars Erik", "Morten", "Ola", "Åsa"
 export const MAX_ROUNDS = 1;
 export const SWAP_THRESHOLDNUMBER = 4;
 export const SWAP_FUZZINESS = 0.08; //Simulates human error. 0.1 = 10% chance of making a mistake.
@@ -108,20 +108,26 @@ export async function asyncForEach(array, callback) {
 }
 
 export function* stack(players, dealerPos, start) {
-	start = (start === undefined || start === NaN) ? 0 : start;
-	
 	let begin = dealerPos + 1;
+
+	if (start !== undefined && start !== NaN) {
+		begin = start;
+	} else {
+		start = 0;
+	}
+	
 	const end = players.length;
 
-	while (begin !== dealerPos) {
+	do {
+		console.log('stack dealerpos: ' + dealerPos + ', begin is now: ' + begin);
 		yield players[begin];
 
 		begin++;
 
 		if (begin === end) {
-			begin = start;
+			return null;
 		}
-	}
+	} while (begin !== (dealerPos + 1))
 
-	return players[dealerPos]; //generator ends here
+	return { name: 'deck', isDeck: true }; //generator ends here
 }
