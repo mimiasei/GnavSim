@@ -28,7 +28,7 @@ export default class Stack {
     }
 
     getNextTo() {
-        const index = this._currentIndex + this._addIndex++;
+        let index = this._currentIndex + this._addIndex++;
         index = this.verifyIndex(index);
 
         if (index === this._dealerIndex + 1) {

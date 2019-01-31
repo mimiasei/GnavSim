@@ -254,11 +254,11 @@ export default class Game extends EventTarget {
 		this._gui = new Gui(this);
 
 		//draw gui stuff
-		this._gui.drawGroup();
+		// this._gui.drawGroup();
 		// this.nextPlayer(true);
 		// this._gui.selectPlayer(this.currentPlayer.name);
 		// this._gui.play();
-		this._gui.update();
+		// this._gui.update();
 		
 		//set first turn
 		this.nextTurn();

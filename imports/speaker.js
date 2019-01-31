@@ -103,8 +103,8 @@ export default class Speaker {
 
 	updateCurrentPlayer() {
 		tools.log('', this._parent, true);
-		this._currentPlayerText.text(this._parent.playerStack.current().name);
-		this._currentDealerText.text(this._parent.playerStack.dealer().name);
+		this._currentPlayerText.text(this._parent.playerStack.current.name);
+		this._currentDealerText.text(this._parent.playerStack.dealer.name);
 	}
 
 	hideButton(type, show) {

@@ -54,7 +54,7 @@ export function log(message, game, use) {
 	if (use) {
 		let stack = new Error().stack,
 			caller = stack.split('\n')[2].trim().replace('http://localhost:8000/imports/', '');
-		console.log(caller + (game && game.playerStack && game.playerStack.current() ? '|' + game.playerStack.current().name : '') + ":" + message);
+		console.log(caller + (game && game.playerStack && game.playerStack.current ? '|' + game.playerStack.current.name : '') + ":" + message);
 	}
 }
 
