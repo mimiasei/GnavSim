@@ -14,8 +14,8 @@ export default class Stack {
     }
 
     get players() { return this._players }
-    get current() { return this._players[this._currentIndex] }
-    get dealer() { return this._players[this._dealerIndex] }
+    get current() { return this._players[this._currentIndex] || { name: 'Undefined!' } }
+    get dealer() { return this._players[this._dealerIndex] || { name: 'Undefined!' } }
 
     hasNextPlayer() {
         const index = this.verifyIndex(this._currentIndex + 1);
@@ -62,5 +62,13 @@ export default class Stack {
     
     deck() {
         return { name: 'deck', isDeck: true };
+    }
+
+    printStack() {
+        console.log('dealer: ' + this.dealer.name + ', is current: ' + this.dealer.isCurrent);
+
+        this._players.forEach((player, index) => {
+            console.log(index + ': ' + player.name + ', is current: ' + player.isCurrent);
+        });
     }
 }

@@ -97,7 +97,9 @@ export default class Game extends EventTarget {
 	stateChanged() {		
 		switch (this._state) {
 			case (Game.STATE_START_TURN):
+			console.log('starting new turn, before startturn()...');
 				this.startTurn().then(() => {
+					console.log('.......after startturn()');
 					// this.checkCards();
 					this.startEvent('beforeSwap');	
 				});
@@ -133,7 +135,7 @@ export default class Game extends EventTarget {
 				this._speaker.addSpace();
 				//Calculate scores and stats
 				this._speaker.sumUpGameTurn();
-				tools.log('turn ended successfully.', this);
+				tools.log('game turn ended successfully.', this);
 				break;
 			default:
 				tools.log('state to change to not recognized: ' + this._state);
@@ -157,8 +159,10 @@ export default class Game extends EventTarget {
 		tools.log('', this, true);
 		//function for when next turn button is clicked
 		const nextTurnCallback = (result) => {			
-			this.startEvent('startTurn');	
+			// this.startEvent('startTurn');
 			this._speaker.hideButton('turn');
+
+			this.nextTurn();
 		};
 
 		//function for when next player button is clicked
@@ -273,6 +277,8 @@ export default class Game extends EventTarget {
 		//set next dealer
 		this._playerStack.nextDealer();
 
+		this._playerStack.printStack();
+
 		//reset player stack to first player after dealer
 		// this._playerStack.setFirst();
 
@@ -311,7 +317,7 @@ export default class Game extends EventTarget {
 		// this._gui.play();
 		this._gui.update();
 
-		this._playerStack.printPlayers();
+		this._playerStack.printStack();
 		
 		this.startEvent('beforeSwap');
 	}
