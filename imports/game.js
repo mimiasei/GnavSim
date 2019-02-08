@@ -117,7 +117,7 @@ export default class Game extends EventTarget {
 				this.currentPlayer.finalizeSwap(false);
 				break;
 			case (Game.STATE_AFTER_SWAP):
-				this.checkCards();
+				// this.checkCards();
 				// this.nextPlayer();
 				this.startEvent('endPlayer');
 				break;
@@ -170,6 +170,7 @@ export default class Game extends EventTarget {
 			this._speaker.hideButton('player');
 			
 			if (!this._playerStack.hasNextPlayer()) {
+				console.log('hasnextplayer returned false, so endturn event is called!');
 				this.startEvent('endTurn');
 			} else {
 				this.nextPlayer();
@@ -374,7 +375,6 @@ export default class Game extends EventTarget {
 	 * Returns player with highest score
 	 */
 	findWinner() {
-		// const maxVal = await tools.extreme(this._players, 'heldCard.value'); //maxval is default when not passing 3rd param
 		const winner = tools.getExtreme(this._players, 'heldCard.value', true); //true means get max value
 		winner.hasHighscore = true;
 		return winner;
@@ -384,7 +384,6 @@ export default class Game extends EventTarget {
 	 * Returns player with lowest score
 	 */
 	findLoser() {
-		// const minVal = await tools.extreme(this._players, 'heldCard.value', true); //tools.FIND_MIN === true
 		const loser = tools.getExtreme(this._players, 'heldCard.value', false); //false means get min value
 		return loser;
 	}

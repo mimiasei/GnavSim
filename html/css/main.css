@@ -176,7 +176,7 @@ td:nth-child(3) {
 }
 
 .outputSection {
-  background: var(--color-bg-output);
+  /* background: var(--color-bg-output); */
 }
 
 .block {
@@ -240,7 +240,7 @@ td:nth-child(3) {
 }
 
 .text-shadow {
-  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.28);
+  text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* The Modal (background) */

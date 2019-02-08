@@ -17,7 +17,7 @@ export default class Gui {
         this._posX = 0;
         this._posY = 0;
         this._offsetX = 50;
-        this._offsetY = 20;
+        this._offsetY = 50;
 
         this._group = [];
         this._twoGroup = null;
@@ -39,7 +39,7 @@ export default class Gui {
     circleGroup(players) {
         const size = Math.min(this._width, this._height) / 12;
         //circle path to draw circles
-        const radius = Math.min(this._height, this._width) / 2 - size / 2 - 4;
+        const radius = Math.min(this._height, this._width) / 1.75; // - size / 2 - 4;
         this._posX = (this._width / 2) + size + this._offsetX;
         this._posY = (this._height / 2) + size + this._offsetY;
         this._twoGroup.translation.set(this._posX, this._posY);
@@ -52,21 +52,21 @@ export default class Gui {
             let pos = { x: 0, y: 0 };
 
             if (angle >= 0 && angle < (Math.PI / 4)) {
-                pos = { x: 50, y: 50, i: 0 };
+                pos = { x: 0, y: 50, i: 0 };
             } else if (angle >= (Math.PI / 4) && angle < (Math.PI / 2)) {
                 pos = { x: 0, y: 50, i: 1 };
             } else if (angle >= (Math.PI / 2) && angle < (3 * Math.PI / 4)) {
                 pos = { x: 0, y: 50, i: 2 };
             } else if (angle >= (3 * Math.PI / 4) && angle < Math.PI) {
-                pos = { x: -50, y: 50, i: 3 };
+                pos = { x: 0, y: 50, i: 3 };
             } else if (angle >= Math.PI && angle < (5 * Math.PI / 4)) {
-                pos = { x: -50, y: -50, i: 4 };
+                pos = { x: 0, y: -50, i: 4 };
             } else if (angle >= (5 * Math.PI / 4) && angle < (3 * Math.PI / 2)) {
                 pos = { x: 0, y: -50, i: 5 };
             } else if (angle > (3 * Math.PI / 2) && angle <= (7 * Math.PI / 4)) {
                 pos = { x: 0, y: -50, i: 6 };
             } else if (angle > (7 * Math.PI / 4) && angle <= (2 * Math.PI)) {
-                pos = { x: 50, y: -50, i: 7 };
+                pos = { x: 0, y: -50, i: 7 };
             }
 
             this._group.push({
@@ -93,7 +93,6 @@ export default class Gui {
     }
 
     displayCard() {
-        tools.log('+++++ calling displayCard()!');
         let heldCard = this._game.currentPlayer.heldCard;
         if (heldCard) {
             heldCard = heldCard.name.replace('(', '').replace(')', '');
@@ -101,7 +100,7 @@ export default class Gui {
             heldCard = 'no card';
         }
 
-        this.card(this._posX, this._posY, 90);
+        this.card(this._posX, this._posY, 140);
 
         const styles = { 
             fill: 'black', 

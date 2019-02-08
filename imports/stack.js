@@ -18,9 +18,14 @@ export default class Stack {
     get dealer() { return this._players[this._dealerIndex] || { name: 'Undefined!' } }
 
     hasNextPlayer() {
+        const oldIndex = this._currentIndex;
         const index = this.verifyIndex(this._currentIndex + 1);
 
-        return index <= this._dealerIndex + 1;
+        if (index === 0 || index < oldIndex) {
+            return index < this._dealerIndex + 1;
+        }
+
+        return index >= this._dealerIndex;
     }
 
     nextPlayer() {
