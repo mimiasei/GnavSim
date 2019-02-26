@@ -356,8 +356,8 @@ export default class Game extends EventTarget {
 	}
 
 	getPlayerNextTo(usePos) {
-		tools.log('usePos: ' + usePos, this, true);
-		return this._playerStack.getNextTo(usePos);
+		const nextPlayer = this._playerStack.getNextTo(usePos);
+		return nextPlayer;
 	}
 
 	isGameOver() {
@@ -366,6 +366,7 @@ export default class Game extends EventTarget {
 
 	setHighestScore(score) {
 		this._highscore = score;
+
 		if (this._playType > 0) {
 			this._value = score;
 		} 
@@ -409,68 +410,23 @@ export default class Game extends EventTarget {
 	}
 
 	createEventListeners() {
-		this.addEventListener(
-			'event_knock', 
-			(event) => {
-				// console.log("event_knock called by player: ", event.detail.player);
-				this.tableKnocked();
-			}
-		);
-
-		this.addEventListener(
-			'event_startTurn', 
-			(event) => {
-				// console.log("event_startTurn called by player: ", event.detail.player);
-				this.state = Game.STATE_START_TURN;
-			}
-		);
-
-		this.addEventListener(
-			'event_beforeSwap', 
-			(event) => {
-				// console.log("event_beforeSwap called by player: ", event.detail.player);
-				this.state = Game.STATE_BEFORE_SWAP;
-			}
-		);
-
-		this.addEventListener(
-			'event_decidedSwap', 
-			(event) => {
-				console.log("event_decidedSwap called by player: ", event.detail.player);
+		this.addEventListener('event_knock', (e) => { this.tableKnocked() });
+		this.addEventListener('event_startTurn', (e) => { this.state = Game.STATE_START_TURN });
+		this.addEventListener('event_beforeSwap', (e) => { this.state = Game.STATE_BEFORE_SWAP });
+		this.addEventListener('event_decidedSwap', 
+			(e) => {
+				console.log("event_decidedSwap called by player: ", e.detail.player);
 				this.state = Game.STATE_DECIDED_SWAP;
 			}
 		);
-
-		this.addEventListener(
-			'event_skippedSwap', 
-			(event) => {
-				console.log("event_skippedSwap called by player: ", event.detail.player);
+		this.addEventListener('event_skippedSwap', 
+			(e) => {
+				console.log("event_skippedSwap called by player: ", e.detail.player);
 				this.state = Game.STATE_SKIPPED_SWAP;
 			}
 		);
-		
-		this.addEventListener(
-			'event_afterSwap', 
-			(event) => {
-				// console.log("event_afterSwap called by player: ", event.detail.player);
-				this.state = Game.STATE_AFTER_SWAP;
-			}
-		);
-
-		this.addEventListener(
-			'event_endPlayer', 
-			(event) => {
-				// console.log("event_endPlayer called by player: ", event.detail.player);
-				this.state = Game.STATE_END_PLAYER;
-			}
-		);
-
-		this.addEventListener(
-			'event_endTurn', 
-			(event) => {
-				// console.log("event_endTurn called by player: ", event.detail.player);
-				this.state = Game.STATE_END_TURN;
-			}
-		);
+		this.addEventListener('event_afterSwap', (e) => { this.state = Game.STATE_AFTER_SWAP });
+		this.addEventListener('event_endPlayer', (e) => { this.state = Game.STATE_END_PLAYER });
+		this.addEventListener('event_endTurn', (e) => { this.state = Game.STATE_END_TURN });
 	}
 }

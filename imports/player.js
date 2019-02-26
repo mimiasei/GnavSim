@@ -87,8 +87,9 @@ export default class Player {
 
 		let counter = 0;
 
-		while (nextPlayer && !hasSwapped && !abortSwap && counter++ < this._game.players.length) {
+		while (nextPlayer && !hasSwapped && !abortSwap && counter < this._game.players.length) {
 			tools.log(`${this._name} tries to swap with ${nextPlayer.name}...`);
+
 			if (!nextPlayer.isDeck) {
 				this.requestSwap(nextPlayer);
 				const returnedCard = nextPlayer.answerSwap(this);
@@ -136,6 +137,8 @@ export default class Player {
 			}
 
 			nextPlayer = this._game.getPlayerNextTo(true);
+
+			counter++;
 		} 
 
 	}

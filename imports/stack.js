@@ -33,14 +33,15 @@ export default class Stack {
     }
 
     getNextTo() {
-        let index = this._currentIndex + this._addIndex++;
-        index = this.verifyIndex(index);
-
+        const index = this.verifyIndex(this._currentIndex + this._addIndex++);
+        
         if (index === this._dealerIndex + 1) {
             this.resetNextTo();
             return this.deck();
         }
-
+        
+        this.resetNextTo();
+        
         return this._players[index];
     }
 
