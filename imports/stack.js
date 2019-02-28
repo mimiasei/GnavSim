@@ -11,6 +11,7 @@ export default class Stack {
         this._currentIndex = 0;
         this._addIndex = 1;
         this._players[0].isCurrent = true;
+        this._playerIndeces = [];
     }
 
     get players() { return this._players }
@@ -18,24 +19,21 @@ export default class Stack {
     get dealer() { return this._players[this._dealerIndex] || { name: 'Undefined!' } }
 
     hasNextPlayer() {
-        const oldIndex = this._currentIndex;
-        const index = this.verifyIndex(this._currentIndex + 1);
-
-        if (index === 0 || index < oldIndex) {
-            return index < this._dealerIndex + 1;
-        }
-
-        return index >= this._dealerIndex;
+        return this._playerIndeces.length > 0;
     }
 
+    /**
+     * Sets current player index to first index of player indeces stack,
+     * removing it from stack.
+     */
     nextPlayer() {
-        this._currentIndex = this.verifyIndex(++this._currentIndex);
+        this._currentIndex = this._playerIndeces.shift(); //ex: [0, 1, 2].shift() returns 0 and leaves [1, 2]
     }
 
     getNextTo() {
-        const index = this.verifyIndex(this._currentIndex + this._addIndex++);
+        const index = this._addIndex < this._playerIndeces.length ? this._playerIndeces[this._addIndex] : -1;
         
-        if (index === this._dealerIndex + 1) {
+        if (index < 0) {
             this.resetNextTo();
             return this.deck();
         }
@@ -50,9 +48,28 @@ export default class Stack {
     }
 
     nextDealer() {
-        this._dealerIndex = this.verifyIndex(++this._dealerIndex);
-        
+        this._dealerIndex = this.verifyIndex(++this._dealerIndex);   
         this.reset();
+        this.generateStack();
+    }
+
+    /**
+     * Generates stack of player indeces,
+     * starting from dealer index + 1
+     */
+    generateStack() {
+        this._playerIndeces = [];
+
+        let i = this._dealerIndex + 1;
+
+        for (let c = 0; c < this._players.length; c++) {
+            if (i >= this._players.length) {
+                i = 0;
+            }
+
+            this._playerIndeces.push(i++);
+        }
+        console.log(this._playerIndeces);
     }
 
     reset() {
