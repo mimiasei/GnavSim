@@ -26,6 +26,12 @@ $(document).ready(function() {
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
 
+		settingsPart();
+	});
+
+	$('#btn_playGame').click(async () => {
+		$('#settingsForm').hide();
+
 		//Create default game object
 		const game = new Game( 
 			$('#form_winType').val(), 
@@ -36,7 +42,8 @@ $(document).ready(function() {
 		//set up speaker and state event listeners
 		game.init();
 
-		settingsPart(game);
+		game.speaker.humanName = $('#form_name').val();
+		startGame(game);
 	});
 
 	var active_chat = false;
@@ -57,7 +64,7 @@ function hideAll() {
 	$('#btnMenu').hide();
 }
 
-function settingsPart(game) {
+function settingsPart() {
 	$('#chat_section').hide();
 	$('#settingsForm').show();
 
@@ -91,12 +98,6 @@ function settingsPart(game) {
 		const value = $( "#form_fontSize" ).val();
 		document.querySelector('body').style.setProperty('--body-fontsize', value + 'px');
 	});
-
-	$('#btn_playGame').click(async () => {
-		$('#settingsForm').hide();
-		game.speaker.humanName = $('#form_name').val();
-		startGame(game);
-	});
 }
 
 function startGame(game) {
@@ -104,7 +105,7 @@ function startGame(game) {
 		//todo: implement multiplayer code
 	} else {
 		game.initGame().then(() => { 
-			console.log('Game init done.'); 
+			console.log('GnavSim.js => promise resolved: Game init done.'); 
 		});
 	}
 }

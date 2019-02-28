@@ -97,11 +97,7 @@ export default class Game extends EventTarget {
 	stateChanged() {		
 		switch (this._state) {
 			case (Game.STATE_START_TURN):
-			console.log('starting new turn, before startturn()...');
-				this.startTurn().then(() => {
-					console.log('.......after startturn()');
-					this.startEvent('beforeSwap');	
-				});
+				this.startTurn();
 				break;
 			case (Game.STATE_BEFORE_SWAP):
 				this.currentPlayer.prepareSwap();
@@ -117,13 +113,23 @@ export default class Game extends EventTarget {
 				break;
 			case (Game.STATE_END_PLAYER):
 				//show next player button
-				this._speaker.hideButton('player', true);
+				if (this._isHuman) {
+					this._speaker.hideButton('player', true);
+				} else {
+					console.log('end player => is not human!');
+					this.goNextPlayer();
+				}
 				this._speaker.addSpace();
 				tools.log('player turn ended successfully.', this);
 				break;
 			case (Game.STATE_END_TURN):
 				//show next turn button
-				this._speaker.hideButton('turn', true);
+				if (this._isHuman) {
+					this._speaker.hideButton('turn', true);
+				} else {
+					console.log('end turn => is not human!');
+					this.nextTurn();
+				}
 				this._speaker.addSpace();
 
 				//Calculate scores and stats
@@ -162,12 +168,7 @@ export default class Game extends EventTarget {
 		const nextPlayerCallback = (result) => {			
 			this._speaker.hideButton('player'); //hide button after clicking it
 			
-			if (!this._playerStack.hasNextPlayer()) {
-				console.log('hasnextplayer returned false, so endturn event is called!');
-				this.startEvent('endTurn');
-			} else {
-				this.nextPlayer();
-			}
+			this.goNextPlayer();
 		}
 		
 		//function for when knock button is clicked
@@ -273,7 +274,7 @@ export default class Game extends EventTarget {
 		//set next dealer
 		this._playerStack.nextDealer();
 
-		this._playerStack.printStack();
+		// this._playerStack.printStack();
 
 		//print current player in bold white 
 		this._speaker.updateCurrentPlayer();
@@ -291,18 +292,23 @@ export default class Game extends EventTarget {
 		return true;
 	}
 
+	goNextPlayer() {
+		if (!this._playerStack.hasNextPlayer()) {
+			console.log('hasnextplayer returned false, so endturn event is called!');
+			this.startEvent('endTurn');
+		} else {
+			this.nextPlayer();
+		}
+	}
+
 	nextPlayer(skipNext) {
 		tools.log('', this, true);
 		skipNext = skipNext || false;
-
-		console.log('player was: ' + this.currentPlayer.name);
 
 		//advance player stack one player 
 		if (!skipNext) {
 			this._playerStack.nextPlayer();
 		}
-
-		console.log('player is now: ' + this.currentPlayer.name);
 
 		this._speaker.refreshStatsTable();
 		this._speaker.updateCurrentPlayer();
@@ -312,7 +318,7 @@ export default class Game extends EventTarget {
 		// this._gui.play();
 		this._gui.update();
 
-		this._playerStack.printStack();
+		// this._playerStack.printStack();
 		
 		this.startEvent('beforeSwap');
 	}
@@ -332,6 +338,9 @@ export default class Game extends EventTarget {
 		//Draw cards for each player
 		this.dealOutCards().then(() => {
 			this._gui.displayCard();
+			
+			console.log('start turn finished. going to beforeSwap...');
+			this.startEvent('beforeSwap');	
 		});
 	}
 

@@ -59,7 +59,7 @@ export default class Player {
 	drawFromDeck() {
 		this.discard(); //discard currently held card
 		this.heldCard = this._game.deck.draw();
-		tools.log(`${this._name} drew from deck: ${this.heldCard.name}`, this._game)
+		tools.log(`${this._name} drew from deck: ${this.heldCard.name}`, this._game, true);
 	}
 
 	discard() {
@@ -204,8 +204,9 @@ export default class Player {
 	 */
 	testForSwap(nextPlayer) {
 		nextPlayer = nextPlayer || null;
-
+		
 		if (this._heldCard) {
+			console.log('testing for swap with: ' + nextPlayer.name);
 			let swap = tools.SWAP_THRESHOLDNUMBER + 4;
 			const chance = Math.random();
  
@@ -227,7 +228,6 @@ export default class Player {
 				}
 			}
 
-			//this._game.state = result ? Game.STATE_DECIDED_SWAP : Game.STATE_SKIPPED_SWAP; 
 			result ? this._game.startEvent('decidedSwap') : this._game.startEvent('skippedSwap');
 
 		} else {
