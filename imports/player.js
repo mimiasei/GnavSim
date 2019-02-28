@@ -89,13 +89,14 @@ export default class Player {
 			if (!nextPlayer.isDeck) {
 				this.requestSwap(nextPlayer);
 				const returnedCard = nextPlayer.answerSwap(this);
+				console.log('next player: ' + nextPlayer.name);
+				console.log(nextPlayer.name + ' returns the card: ' + returnedCard.name);
 				
 				if (returnedCard.isFool) {
 					this._game.speaker.allLaughAboutFool(nextPlayer, this._pid);
 				}
 
 				if (returnedCard.isMatador) {
-
 					//-1 score?
 					if (returnedCard.causeLosePoint) {
 						this.addToScore(-1);
@@ -109,7 +110,6 @@ export default class Player {
 						this._game.subractFromAllPlayers(nextPlayer);
 						this._game.startEvent('endTurn');
 					}
-
 				} else {
 					//if card is not a matador, swap normally
 					this.cardSwap(nextPlayer);
@@ -163,6 +163,7 @@ export default class Player {
 			this.askPlayerLoop();
 		} else { //doesn't want to swap
 			this._game.speaker.say(`${this._name} doesn't want to swap.`);
+			this._game.speaker.speech(this._name, tools.TXT_PASS);
 		}
 
 		this._hasKnocked = false; //reset hasknocked after swap is done.

@@ -30,15 +30,19 @@ export default class Stack {
         this._currentIndex = this._playerIndeces.shift(); //ex: [0, 1, 2].shift() returns 0 and leaves [1, 2]
     }
 
-    getNextTo() {
-        const index = this._addIndex < this._playerIndeces.length ? this._playerIndeces[this._addIndex] : -1;
+    getNextTo(usePos) {
+        usePos = usePos || false;
+
+        const index = this._addIndex < this._playerIndeces.length ? this._playerIndeces[this._addIndex++] : -1;
         
         if (index < 0) {
             this.resetNextTo();
             return this.deck();
         }
         
-        // this.resetNextTo();
+        if (!usePos) {
+            this.resetNextTo();
+        }
         
         return this._players[index];
     }
