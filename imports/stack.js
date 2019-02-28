@@ -38,13 +38,13 @@ export default class Stack {
             return this.deck();
         }
         
-        this.resetNextTo();
+        // this.resetNextTo();
         
         return this._players[index];
     }
 
     resetNextTo() {
-        this._addIndex = 1;
+        this._addIndex = 0;
     }
 
     nextDealer() {
@@ -69,6 +69,8 @@ export default class Stack {
 
             this._playerIndeces.push(i++);
         }
+
+        this.nextPlayer();
         console.log(this._playerIndeces);
     }
 

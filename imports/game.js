@@ -100,39 +100,32 @@ export default class Game extends EventTarget {
 			console.log('starting new turn, before startturn()...');
 				this.startTurn().then(() => {
 					console.log('.......after startturn()');
-					// this.checkCards();
 					this.startEvent('beforeSwap');	
 				});
 				break;
 			case (Game.STATE_BEFORE_SWAP):
-				// this.checkCards();
 				this.currentPlayer.prepareSwap();
 				break;
 			case (Game.STATE_DECIDED_SWAP): //after callback from deciding YES for swapping
-				// this.checkCards();
 				this.currentPlayer.finalizeSwap(true);
 				break;
 			case (Game.STATE_SKIPPED_SWAP): //after callback from deciding NO for swapping
-				// this.checkCards();
 				this.currentPlayer.finalizeSwap(false);
 				break;
 			case (Game.STATE_AFTER_SWAP):
-				// this.checkCards();
-				// this.nextPlayer();
 				this.startEvent('endPlayer');
 				break;
 			case (Game.STATE_END_PLAYER):
-				// this.checkCards();
 				//show next player button
 				this._speaker.hideButton('player', true);
 				this._speaker.addSpace();
 				tools.log('player turn ended successfully.', this);
 				break;
 			case (Game.STATE_END_TURN):
-				// this.checkCards();
 				//show next turn button
 				this._speaker.hideButton('turn', true);
 				this._speaker.addSpace();
+
 				//Calculate scores and stats
 				this._speaker.sumUpGameTurn();
 				tools.log('game turn ended successfully.', this);
@@ -157,17 +150,17 @@ export default class Game extends EventTarget {
 
 	init() {
 		tools.log('', this, true);
+
 		//function for when next turn button is clicked
 		const nextTurnCallback = (result) => {			
-			// this.startEvent('startTurn');
-			this._speaker.hideButton('turn');
+			this._speaker.hideButton('turn'); //hide button after clicking it
 
 			this.nextTurn();
 		};
 
 		//function for when next player button is clicked
 		const nextPlayerCallback = (result) => {			
-			this._speaker.hideButton('player');
+			this._speaker.hideButton('player'); //hide button after clicking it
 			
 			if (!this._playerStack.hasNextPlayer()) {
 				console.log('hasnextplayer returned false, so endturn event is called!');
@@ -193,12 +186,14 @@ export default class Game extends EventTarget {
 		
 		//create new speaker
 		this._speaker = new Speaker(this);
+
 		//initialize, assign callback functions to speaker
 		const callbacks = {
 			'nextTurnCallback': nextTurnCallback,
 			'nextPlayerCallback': nextPlayerCallback,
 			'knockCallback': knockCallback,
 		};
+
 		this._speaker.initialize(callbacks);
 
 		//create and init new deck
@@ -280,9 +275,6 @@ export default class Game extends EventTarget {
 
 		this._playerStack.printStack();
 
-		//reset player stack to first player after dealer
-		// this._playerStack.setFirst();
-
 		//print current player in bold white 
 		this._speaker.updateCurrentPlayer();
 
@@ -303,12 +295,14 @@ export default class Game extends EventTarget {
 		tools.log('', this, true);
 		skipNext = skipNext || false;
 
-		const oldPlayer = this.currentPlayer.name;
+		console.log('player was: ' + this.currentPlayer.name);
 
 		//advance player stack one player 
 		if (!skipNext) {
 			this._playerStack.nextPlayer();
 		}
+
+		console.log('player is now: ' + this.currentPlayer.name);
 
 		this._speaker.refreshStatsTable();
 		this._speaker.updateCurrentPlayer();

@@ -71,13 +71,9 @@ export default class Player {
 
 	cardSwap(nextPlayer) {
 		const card = this._heldCard;
-		// if (!nextPlayer.isDeck) {
+
 		this._heldCard = nextPlayer.heldCard;
 		nextPlayer.heldCard = card;
-		// } 
-		// else {
-		// 	this.drawFromDeck();
-		// }
 	}
 
 	askPlayerLoop() {
@@ -88,7 +84,7 @@ export default class Player {
 		let counter = 0;
 
 		while (nextPlayer && !hasSwapped && !abortSwap && counter < this._game.players.length) {
-			tools.log(`${this._name} tries to swap with ${nextPlayer.name}...`);
+			tools.log(`${this._name} tries to swap with ${nextPlayer.name}...`, true);
 
 			if (!nextPlayer.isDeck) {
 				this.requestSwap(nextPlayer);
@@ -161,21 +157,16 @@ export default class Player {
 	}
 
 	finalizeSwap(result) {
-		if (result) {
-			// const nextPlayer = this._playerStack.nextTo();
-			// this._speaker.say(`${this._name} swaps with ${nextPlayer.name}`);
-			// tools.log(`before swap has card: ${this._heldCard.name}`);
-			// this.cardSwap(nextPlayer);
-			// tools.log(`AFTER swap has card: ${this._heldCard.name}`);
+		console.log('finalizing swap. wants to swap? ' + result);
 
+		if (result) { //wants to swap
 			this.askPlayerLoop();
-
-			this._hasKnocked = false; //reset hasknocked after swap is done.
-		} else {
+		} else { //doesn't want to swap
 			this._game.speaker.say(`${this._name} doesn't want to swap.`);
 		}
 
-		// this._game.state = Game.STATE_AFTER_SWAP;
+		this._hasKnocked = false; //reset hasknocked after swap is done.
+
 		this._game.startEvent('afterSwap');
 	}
 
