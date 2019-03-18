@@ -23,6 +23,12 @@ $(document).ready(function() {
 	//hide all game UI
 	hideAll();
 
+	$('#btn_login').click(() => {
+		$('#btn_login').hide();
+		$('#loginForm').hide();
+		$('#start_buttons').show();
+	});
+
 	$('#btn_startGame').click(() => {
 		$('#start_buttons').hide();
 
@@ -55,6 +61,9 @@ $(document).ready(function() {
 });
 
 function hideAll() {
+	$('#start_buttons').hide();
+	$('#start_buttons').hide();
+
 	$('#chat_section').hide();
 	$('#stats_table').hide();
 	$('#settingsForm').hide();

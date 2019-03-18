@@ -7,8 +7,10 @@ const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/
 //App setup
 var app = express();
 
-var server = app.listen(process.env.PORT || 8000, function() {
-    console.log("listening...");
+const port = process.env.PORT || 8000;
+
+var server = app.listen(port, function() {
+    console.log(`listening on port ${port}...`);
 });
 
 app.use(express.static('html'));
@@ -20,6 +22,8 @@ var io = socket(server);
 
 io.on('connection', function(socket) {
     console.log('connection made to socket');
+
+    socket.id = parseInt(Math.random() * 10000);
 
     socket.on('chat', function(data) {
         io.sockets.emit('chat', data);
