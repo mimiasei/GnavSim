@@ -4,7 +4,7 @@
   },
   "dependencies": {
     "express": "latest",
-    "socket.io": "^2.1.1",
+    "socket.io": "^2.4.0",
     "tabulator-tables": "^4.1.1"
   },
   "name": "gnavsim_server",
